@@ -88,6 +88,13 @@ function App() {
     setEndPoint(null);
   };
 
+  const handleFloorChange = (floor: number) => {
+    setCurrentFloor(floor);
+    clearPath(); // Clear path when floor changes
+    setSelectedSection(null); // Also clear selected section
+    setIsAddingSection(false); // Exit section adding mode
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
@@ -105,7 +112,7 @@ function App() {
               {[1, 2].map(floor => (
                 <button
                   key={floor}
-                  onClick={() => setCurrentFloor(floor)}
+                  onClick={() => handleFloorChange(floor)}
                   className={`px-4 py-2 rounded-md transition-all duration-200 ${
                     currentFloor === floor
                       ? 'bg-blue-600 text-white shadow-lg'
