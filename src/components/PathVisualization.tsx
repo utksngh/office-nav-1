@@ -20,10 +20,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path }) => {
         d={pathString}
         fill="none"
         stroke="#10B981"
-        strokeWidth="4"
+        strokeWidth="6"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="drop-shadow-sm"
+        className="drop-shadow-lg"
       />
       
       {/* Animated path overlay */}
@@ -31,11 +31,11 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path }) => {
         d={pathString}
         fill="none"
         stroke="#34D399"
-        strokeWidth="2"
+        strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeDasharray="10,10"
-        className="animate-pulse"
+        strokeDasharray="15,15"
+        className="animate-pulse drop-shadow-sm"
       />
       
       {/* Path points */}
@@ -44,11 +44,11 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path }) => {
           key={index}
           cx={point.x}
           cy={point.y}
-          r="3"
+          r="4"
           fill="#10B981"
-          stroke="#065F46"
-          strokeWidth="1"
-          className="animate-pulse"
+          stroke="#FFFFFF"
+          strokeWidth="2"
+          className="animate-pulse drop-shadow-lg"
         />
       ))}
       
@@ -63,10 +63,11 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path }) => {
         return (
           <g key={`arrow-${index}`} transform={`translate(${point.x}, ${point.y}) rotate(${angle * 180 / Math.PI})`}>
             <polygon
-              points="-4,-2 4,0 -4,2"
+              points="-6,-3 6,0 -6,3"
               fill="#10B981"
-              stroke="#065F46"
-              strokeWidth="0.5"
+              stroke="#FFFFFF"
+              strokeWidth="1"
+              className="drop-shadow-sm"
             />
           </g>
         );

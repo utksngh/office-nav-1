@@ -97,6 +97,17 @@ function App() {
   const [isAddingSection, setIsAddingSection] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [showControlPanel, setShowControlPanel] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const addSection = (section: Omit<OfficeSection, 'id'>) => {
     const newSection: OfficeSection = {
@@ -169,27 +180,33 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3 md:px-6 md:py-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+      <header className="bg-gray-800/90 backdrop-blur-sm border-b border-gray-700/50 px-4 py-3 md:px-6 md:py-4 shadow-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Navigation className="w-6 h-6 md:w-8 md:h-8 text-blue-400" />
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+              <Navigation className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            </div>
             <div>
-              <h1 className="text-lg md:text-2xl font-bold">Office Navigation</h1>
-              <p className="text-gray-400 text-xs md:text-sm hidden sm:block">Intelligent pathfinding and office management</p>
+              <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Office Navigation
+              </h1>
+              <p className="text-gray-400 text-xs md:text-sm hidden sm:block">
+                Intelligent pathfinding and office management
+              </p>
             </div>
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="flex bg-gray-700 rounded-lg p-1 text-sm">
+            <div className="flex bg-gray-700/80 backdrop-blur-sm rounded-xl p-1 text-sm shadow-lg">
               {[1, 2].map(floor => (
                 <button
                   key={floor}
                   onClick={() => handleFloorChange(floor)}
-                  className={`px-2 py-1 md:px-4 md:py-2 rounded-md transition-all duration-200 ${
+                  className={`px-3 py-2 md:px-4 md:py-2 rounded-lg transition-all duration-300 font-medium ${
                     currentFloor === floor
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-600'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg transform scale-105'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
                   }`}
                 >
                   <span className="hidden sm:inline">Floor </span>{floor}
@@ -200,7 +217,7 @@ function App() {
             <div className="flex gap-1 md:gap-2">
               <button
                 onClick={() => setShowControlPanel(!showControlPanel)}
-                className="p-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 hover:text-white transition-all duration-200 md:hidden"
+                className="p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 md:hidden shadow-lg"
                 title="Toggle Panel"
               >
                 <Settings className="w-4 h-4" />
@@ -208,10 +225,10 @@ function App() {
               
               <button
                 onClick={() => setIsAddingSection(!isAddingSection)}
-                className={`p-2 rounded-lg transition-all duration-200 ${
+                className={`p-2 rounded-xl transition-all duration-300 shadow-lg ${
                   isAddingSection
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
+                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white transform scale-105'
+                    : 'bg-gray-700/80 backdrop-blur-sm text-gray-300 hover:bg-gray-600 hover:text-white'
                 }`}
                 title="Add Section"
               >
@@ -220,7 +237,7 @@ function App() {
               
               <button
                 onClick={clearPath}
-                className="p-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 hover:text-white transition-all duration-200"
+                className="p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg"
                 title="Clear Path"
               >
                 <Settings className="w-4 h-4 md:w-5 md:h-5" />
@@ -230,7 +247,7 @@ function App() {
         </div>
       </header>
 
-      <div className="flex flex-col md:flex-row h-[calc(100vh-80px)] md:h-[calc(100vh-120px)]">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] md:h-[calc(100vh-120px)]">
         <ControlPanel
           currentFloor={floorData[currentFloor]}
           startPoint={startPoint}
@@ -241,35 +258,48 @@ function App() {
           onClearPath={clearPath}
           isVisible={showControlPanel}
           onClose={() => setShowControlPanel(false)}
+          isMobile={isMobile}
         />
         
-        <main className="flex-1 p-3 md:p-6">
-          <div className="bg-gray-800 rounded-xl shadow-2xl p-3 md:p-6 h-full flex flex-col">
-            <div className="flex items-center justify-between mb-3 md:mb-6">
+        <main className="flex-1 p-3 md:p-4 lg:p-6">
+          <div className="bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 p-4 md:p-6 h-full flex flex-col">
+            <div className="flex items-center justify-between mb-4 md:mb-6">
               <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" />
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg">
+                  <MapPin className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                </div>
                 <div>
-                  <h2 className="text-lg md:text-xl font-semibold">{floorData[currentFloor].name}</h2>
-                  <p className="text-xs text-gray-400">
+                  <h2 className="text-lg md:text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    {floorData[currentFloor].name}
+                  </h2>
+                  <p className="text-xs md:text-sm text-gray-400">
                     {(floorData[currentFloor].width * floorData[currentFloor].metersPerPixel).toFixed(0)}m × {(floorData[currentFloor].height * floorData[currentFloor].metersPerPixel).toFixed(0)}m
                   </p>
                 </div>
               </div>
               
-              <div className="text-xs md:text-sm text-gray-400">
+              <div className="text-xs md:text-sm">
                 {startPoint && endPoint ? (
-                  <span className="text-emerald-400">
-                    <span className="hidden sm:inline">✓ Route ready</span><span className="sm:hidden">✓</span>
+                  <span className="flex items-center gap-2 text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full">
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <span className="hidden sm:inline font-medium">Route Ready</span>
+                    <span className="sm:hidden font-medium">✓</span>
                   </span>
                 ) : startPoint ? (
-                  <span className="text-yellow-400">Select destination</span>
+                  <span className="flex items-center gap-2 text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full">
+                    <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                    <span className="font-medium">Select destination</span>
+                  </span>
                 ) : (
-                  <span>Tap to set start</span>
+                  <span className="flex items-center gap-2 text-gray-400 bg-gray-400/10 px-3 py-1 rounded-full">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                    <span className="font-medium">Tap to set start</span>
+                  </span>
                 )}
               </div>
             </div>
 
-            <div className="flex-1 overflow-hidden rounded-lg">
+            <div className="flex-1 overflow-hidden rounded-xl border border-gray-700/50 shadow-inner">
               <FloorMap
                 floorData={floorData[currentFloor]}
                 startPoint={startPoint}
@@ -283,6 +313,7 @@ function App() {
                 selectedSection={selectedSection}
                 onSectionSelect={setSelectedSection}
                 onSectionUpdate={updateSection}
+                isMobile={isMobile}
               />
             </div>
           </div>

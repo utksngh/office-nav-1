@@ -13,6 +13,7 @@ interface ControlPanelProps {
   onClearPath: () => void;
   isVisible: boolean;
   onClose: () => void;
+  isMobile: boolean;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -25,6 +26,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onClearPath,
   isVisible,
   onClose
+  isMobile
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<OfficeSection>>({});
@@ -61,53 +63,66 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   return (
     <>
       {/* Mobile overlay */}
-      {isVisible && (
+      {isVisible && isMobile && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
           onClick={onClose}
         />
       )}
       
       <aside className={`
-        fixed md:relative top-0 left-0 h-full w-80 max-w-[90vw] bg-gray-800 border-r border-gray-700 p-4 md:p-6 overflow-y-auto z-50
-        transform transition-transform duration-300 ease-in-out md:transform-none
-        ${isVisible ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        ${isMobile ? 'fixed' : 'relative'} top-0 left-0 h-full 
+        ${isMobile ? 'w-80 max-w-[85vw]' : 'w-80 lg:w-96'} 
+        bg-gray-800/95 backdrop-blur-sm border-r border-gray-700/50 
+        ${isMobile ? 'p-4' : 'p-4 lg:p-6'} overflow-y-auto z-50 shadow-2xl
+        transform transition-all duration-300 ease-in-out
+        ${isVisible || !isMobile ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Mobile close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white md:hidden"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {isMobile && (
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white bg-gray-700/50 rounded-lg backdrop-blur-sm"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
         
-      <div className="space-y-6">
+      <div className="space-y-4 lg:space-y-6">
         {/* Navigation Status */}
-        <div className="bg-gray-700 rounded-lg p-4">
-          <h3 className="text-base md:text-lg font-semibold mb-3 flex items-center gap-2">
-            <MapPin className="w-4 h-4 md:w-5 md:h-5 text-blue-400" />
+        <div className="bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-xl p-4 border border-gray-600/30 shadow-lg">
+          <h3 className="text-base lg:text-lg font-bold mb-3 flex items-center gap-2">
+            <div className="p-1.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
+              <MapPin className="w-4 h-4 text-white" />
+            </div>
             Navigation
           </h3>
           
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between items-center p-2 bg-gray-600/30 rounded-lg">
               <span className="text-gray-400">Start Point:</span>
-              <span className={startPoint ? 'text-emerald-400' : 'text-gray-500'}>
-                {startPoint ? `${Math.round(startPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(startPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 'Not set'}
+              <span className={`font-medium ${startPoint ? 'text-emerald-400' : 'text-gray-500'}`}>
+                {startPoint ? 
+                  `${Math.round(startPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(startPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 
+                  'Not set'
+                }
               </span>
             </div>
             
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center p-2 bg-gray-600/30 rounded-lg">
               <span className="text-gray-400">End Point:</span>
-              <span className={endPoint ? 'text-red-400' : 'text-gray-500'}>
-                {endPoint ? `${Math.round(endPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(endPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 'Not set'}
+              <span className={`font-medium ${endPoint ? 'text-red-400' : 'text-gray-500'}`}>
+                {endPoint ? 
+                  `${Math.round(endPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(endPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 
+                  'Not set'
+                }
               </span>
             </div>
             
             {startPoint && endPoint && (
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                 <span className="text-gray-400">Distance:</span>
-                <span className="text-blue-400">
+                <span className="text-blue-400 font-bold">
                   {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, currentFloor.metersPerPixel))}
                 </span>
               </div>
@@ -116,7 +131,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             {(startPoint || endPoint) && (
               <button
                 onClick={onClearPath}
-                className="w-full mt-3 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 text-sm"
+                className="w-full mt-3 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 Clear Path
               </button>
@@ -125,19 +140,22 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </div>
 
         {/* Floor Sections */}
-        <div className="bg-gray-700 rounded-lg p-4">
-          <h3 className="text-base md:text-lg font-semibold mb-3">
-            Rooms & Areas ({currentFloor.sections.length})
+        <div className="bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-xl p-4 border border-gray-600/30 shadow-lg">
+          <h3 className="text-base lg:text-lg font-bold mb-3 flex items-center justify-between">
+            <span>Rooms & Areas</span>
+            <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">
+              {currentFloor.sections.length}
+            </span>
           </h3>
           
-          <div className="space-y-2 max-h-64 md:max-h-96 overflow-y-auto">
+          <div className="space-y-2 max-h-64 lg:max-h-96 overflow-y-auto custom-scrollbar">
             {currentFloor.sections.map((section) => (
               <div
                 key={section.id}
-                className={`p-3 rounded-md cursor-pointer transition-all duration-200 ${
+                className={`p-3 rounded-xl cursor-pointer transition-all duration-300 border ${
                   selectedSection === section.id
-                    ? 'bg-blue-600 border border-blue-400'
-                    : 'bg-gray-600 hover:bg-gray-500'
+                    ? 'bg-gradient-to-r from-blue-500/20 to-blue-600/20 border-blue-400/50 shadow-lg'
+                    : 'bg-gray-600/50 hover:bg-gray-600/70 border-gray-500/30 hover:border-gray-400/50'
                 }`}
                 onClick={() => {
                   // This would be handled by the parent component
@@ -145,15 +163,15 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <h4 className="font-medium truncate">{section.name}</h4>
-                    <p className="text-xs text-gray-300 capitalize">{section.type}</p>
+                    <h4 className="font-semibold truncate text-white">{section.name}</h4>
+                    <p className="text-xs text-gray-300 capitalize font-medium">{section.type}</p>
                     <p className="text-xs text-gray-400">
                       {(section.width * currentFloor.metersPerPixel).toFixed(1)}m × {(section.height * currentFloor.metersPerPixel).toFixed(1)}m
                     </p>
                   </div>
                   
                   <div
-                    className="w-4 h-4 rounded"
+                    className="w-4 h-4 rounded-lg shadow-sm border border-white/20"
                     style={{
                       backgroundColor: getSectionTypeColor(section.type)
                     }}
@@ -166,21 +184,21 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
         {/* Section Editor */}
         {selectedSectionData && (
-          <div className="bg-gray-700 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base md:text-lg font-semibold">Room Details</h3>
+          <div className="bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-xl p-4 border border-gray-600/30 shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base lg:text-lg font-bold">Room Details</h3>
               <div className="flex gap-1">
                 {isEditing ? (
                   <>
                     <button
                       onClick={handleSave}
-                      className="p-1 text-emerald-400 hover:bg-emerald-400 hover:text-white rounded transition-colors duration-200"
+                      className="p-2 text-emerald-400 hover:bg-emerald-400 hover:text-white rounded-lg transition-all duration-300 shadow-sm"
                     >
                       <Save className="w-4 h-4" />
                     </button>
                     <button
                       onClick={handleCancel}
-                      className="p-1 text-gray-400 hover:bg-gray-600 rounded transition-colors duration-200"
+                      className="p-2 text-gray-400 hover:bg-gray-600 hover:text-white rounded-lg transition-all duration-300 shadow-sm"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -189,13 +207,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   <>
                     <button
                       onClick={handleEdit}
-                      className="p-1 text-blue-400 hover:bg-blue-400 hover:text-white rounded transition-colors duration-200"
+                      className="p-2 text-blue-400 hover:bg-blue-400 hover:text-white rounded-lg transition-all duration-300 shadow-sm"
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => onSectionDelete(selectedSection)}
-                      className="p-1 text-red-400 hover:bg-red-400 hover:text-white rounded transition-colors duration-200"
+                      className="p-2 text-red-400 hover:bg-red-400 hover:text-white rounded-lg transition-all duration-300 shadow-sm"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -207,25 +225,25 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             {isEditing ? (
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Name
                   </label>
                   <input
                     type="text"
                     value={editData.name || ''}
                     onChange={(e) => setEditData({...editData, name: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 bg-gray-600/80 border border-gray-500/50 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Type
                   </label>
                   <select
                     value={editData.type || ''}
                     onChange={(e) => setEditData({...editData, type: e.target.value as OfficeSection['type']})}
-                    className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 bg-gray-600/80 border border-gray-500/50 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   >
                     {sectionTypes.map(type => (
                       <option key={type} value={type}>
@@ -237,7 +255,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Width (m)
                     </label>
                     <input
@@ -245,11 +263,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                       step="0.1"
                       value={editData.width ? (editData.width * currentFloor.metersPerPixel).toFixed(1) : ''}
                       onChange={(e) => setEditData({...editData, width: Number(e.target.value) / currentFloor.metersPerPixel})}
-                      className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2.5 bg-gray-600/80 border border-gray-500/50 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Height (m)
                     </label>
                     <input
@@ -257,32 +275,32 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                       step="0.1"
                       value={editData.height ? (editData.height * currentFloor.metersPerPixel).toFixed(1) : ''}
                       onChange={(e) => setEditData({...editData, height: Number(e.target.value) / currentFloor.metersPerPixel})}
-                      className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2.5 bg-gray-600/80 border border-gray-500/50 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     />
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between items-center p-2 bg-gray-600/30 rounded-lg">
                   <span className="text-gray-400">Name:</span>
-                  <span>{selectedSectionData.name}</span>
+                  <span className="font-medium text-white">{selectedSectionData.name}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center p-2 bg-gray-600/30 rounded-lg">
                   <span className="text-gray-400">Type:</span>
-                  <span className="capitalize">{selectedSectionData.type}</span>
+                  <span className="capitalize font-medium text-white">{selectedSectionData.type}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center p-2 bg-gray-600/30 rounded-lg">
                   <span className="text-gray-400">Coordinates:</span>
-                  <span className="text-xs">{formatCoordinates(selectedSectionData.coordinates)}</span>
+                  <span className="text-xs font-mono text-blue-400">{formatCoordinates(selectedSectionData.coordinates)}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center p-2 bg-gray-600/30 rounded-lg">
                   <span className="text-gray-400">Size:</span>
-                  <span>{(selectedSectionData.width * currentFloor.metersPerPixel).toFixed(1)}m × {(selectedSectionData.height * currentFloor.metersPerPixel).toFixed(1)}m</span>
+                  <span className="font-medium text-white">{(selectedSectionData.width * currentFloor.metersPerPixel).toFixed(1)}m × {(selectedSectionData.height * currentFloor.metersPerPixel).toFixed(1)}m</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                   <span className="text-gray-400">Area:</span>
-                  <span>{((selectedSectionData.width * selectedSectionData.height * currentFloor.metersPerPixel * currentFloor.metersPerPixel)).toFixed(1)} m²</span>
+                  <span className="font-bold text-emerald-400">{((selectedSectionData.width * selectedSectionData.height * currentFloor.metersPerPixel * currentFloor.metersPerPixel)).toFixed(1)} m²</span>
                 </div>
               </div>
             )}
@@ -290,9 +308,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         )}
 
         {/* Instructions */}
-        <div className="bg-gray-700 rounded-lg p-4">
-          <h3 className="text-base md:text-lg font-semibold mb-3">Instructions</h3>
-          <div className="text-sm text-gray-300 space-y-2">
+        <div className="bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-xl p-4 border border-gray-600/30 shadow-lg">
+          <h3 className="text-base lg:text-lg font-bold mb-3">Instructions</h3>
+          <div className="text-sm text-gray-300 space-y-2.5">
             <p>• Tap map to set navigation points</p>
             <p>• Use + button to add new rooms</p>
             <p>• Drag rooms to reposition them</p>

@@ -66,7 +66,7 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
 
   return (
     <g
-      className={`cursor-move transition-all duration-200 ${
+      className={`cursor-move transition-all duration-300 ${
         isSelected ? 'drop-shadow-lg' : ''
       }`}
       onMouseDown={handleMouseDown}
@@ -79,24 +79,25 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
         width={section.width}
         height={section.height}
         fill={color}
-        fillOpacity={isSelected ? 0.8 : 0.6}
-        stroke={isSelected ? '#FFFFFF' : color}
-        strokeWidth={isSelected ? 3 : 1}
-        rx="4"
-        ry="4"
-        className="transition-all duration-200"
+        fillOpacity={isSelected ? 0.9 : 0.7}
+        stroke={isSelected ? '#FFFFFF' : '#FFFFFF'}
+        strokeWidth={isSelected ? 3 : 1.5}
+        strokeOpacity={isSelected ? 1 : 0.3}
+        rx="6"
+        ry="6"
+        className="transition-all duration-300"
       />
       
       <text
         x={section.x + section.width / 2}
         y={section.y + section.height / 2}
         fill="white"
-        fontSize={Math.min(12, section.width / 8, section.height / 4)}
-        fontWeight="600"
+        fontSize={Math.min(14, section.width / 7, section.height / 3.5)}
+        fontWeight="700"
         textAnchor="middle"
         dominantBaseline="middle"
         pointerEvents="none"
-        className="select-none"
+        className="select-none drop-shadow-sm"
       >
         {section.width < 80 ? section.name.split(' ')[0] : section.name}
       </text>
@@ -105,12 +106,13 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
         <text
           x={section.x + section.width / 2}
           y={section.y + section.height / 2 + 15}
-          fill="rgba(255,255,255,0.7)"
-          fontSize={Math.min(10, section.width / 10, section.height / 6)}
+          fill="rgba(255,255,255,0.8)"
+          fontSize={Math.min(11, section.width / 9, section.height / 5.5)}
+          fontWeight="500"
           textAnchor="middle"
           dominantBaseline="middle"
           pointerEvents="none"
-          className="select-none capitalize"
+          className="select-none capitalize drop-shadow-sm"
         >
           {section.width < 60 ? '' : section.type}
         </text>
@@ -122,10 +124,10 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
           <circle
             cx={section.x + section.width}
             cy={section.y + section.height}
-            r="4"
+            r="5"
             fill="#FFFFFF"
             stroke={color}
-            strokeWidth="2"
+            strokeWidth="3"
             className="cursor-se-resize"
             onMouseDown={(e) => {
               e.stopPropagation();

@@ -15,6 +15,7 @@ interface FloorMapProps {
   selectedSection: string | null;
   onSectionSelect: (sectionId: string | null) => void;
   onSectionUpdate: (sectionId: string, updates: Partial<OfficeSection>) => void;
+  isMobile: boolean;
 }
 
 const FloorMap: React.FC<FloorMapProps> = ({
@@ -27,6 +28,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
   selectedSection,
   onSectionSelect,
   onSectionUpdate
+  isMobile
 }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawStart, setDrawStart] = useState<Point | null>(null);
@@ -132,25 +134,37 @@ const FloorMap: React.FC<FloorMapProps> = ({
   }, [startPoint, endPoint, floorData]);
 
   return (
-    <div className="relative w-full h-full bg-gray-700 rounded-lg overflow-auto">
+    <div className="relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl overflow-auto">
       <svg
         ref={svgRef}
-        width={Math.max(floorData.width, 800)}
-        height={Math.max(floorData.height, 600)}
+        width={Math.max(floorData.width, isMobile ? 600 : 800)}
+        height={Math.max(floorData.height, isMobile ? 400 : 600)}
         viewBox={`0 0 ${floorData.width} ${floorData.height}`}
-        className="cursor-crosshair min-w-full min-h-full"
+        className={`cursor-crosshair min-w-full min-h-full ${isMobile ? 'touch-manipulation' : ''}`}
         onClick={handleSVGClick}
       >
         {/* Grid */}
         <defs>
-          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#374151" strokeWidth="0.5" opacity="0.3"/>
+          <pattern id="grid" width={isMobile ? "30" : "20"} height={isMobile ? "30" : "20"} patternUnits="userSpaceOnUse">
+            <path d={`M ${isMobile ? "30" : "20"} 0 L 0 0 0 ${isMobile ? "30" : "20"}`} fill="none" stroke="#374151" strokeWidth="0.5" opacity="0.4"/>
           </pattern>
+          
+          {/* Gradient definitions */}
+          <linearGradient id="startGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#10B981" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#065F46" stopOpacity="0.8"/>
+          </linearGradient>
+          
+          <linearGradient id="endGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#EF4444" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#7F1D1D" stopOpacity="0.8"/>
+          </linearGradient>
         </defs>
+        
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         {/* Background */}
-        <rect width="100%" height="100%" fill="#1F2937" fillOpacity="0.5" />
+        <rect width="100%" height="100%" fill="#1F2937" fillOpacity="0.6" />
 
         {/* Office Sections */}
         {floorData.sections.map((section) => (
@@ -177,7 +191,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
                 key={index}
                 cx={corner.x}
                 cy={corner.y}
-                r="2"
+                r={isMobile ? "3" : "2"}
                 fill="#10B981"
                 fillOpacity="0.6"
                 className="pointer-events-none"
@@ -196,19 +210,27 @@ const FloorMap: React.FC<FloorMapProps> = ({
             <circle
               cx={startPoint.x}
               cy={startPoint.y}
-              r="8"
-              fill="#10B981"
-              stroke="#065F46"
-              strokeWidth="2"
+              r={isMobile ? "12" : "10"}
+              fill="url(#startGradient)"
+              stroke="#FFFFFF"
+              strokeWidth="3"
+              className="animate-pulse drop-shadow-lg"
+            />
+            <circle
+              cx={startPoint.x}
+              cy={startPoint.y}
+              r={isMobile ? "6" : "5"}
+              fill="#FFFFFF"
               className="animate-pulse"
             />
             <text
               x={startPoint.x}
-              y={startPoint.y - 15}
+              y={startPoint.y - (isMobile ? 20 : 18)}
               fill="#10B981"
-              fontSize="12"
+              fontSize={isMobile ? "14" : "12"}
               fontWeight="bold"
               textAnchor="middle"
+              className="drop-shadow-sm"
             >
               START
             </text>
@@ -221,19 +243,27 @@ const FloorMap: React.FC<FloorMapProps> = ({
             <circle
               cx={endPoint.x}
               cy={endPoint.y}
-              r="8"
-              fill="#EF4444"
-              stroke="#7F1D1D"
-              strokeWidth="2"
+              r={isMobile ? "12" : "10"}
+              fill="url(#endGradient)"
+              stroke="#FFFFFF"
+              strokeWidth="3"
+              className="animate-pulse drop-shadow-lg"
+            />
+            <circle
+              cx={endPoint.x}
+              cy={endPoint.y}
+              r={isMobile ? "6" : "5"}
+              fill="#FFFFFF"
               className="animate-pulse"
             />
             <text
               x={endPoint.x}
-              y={endPoint.y - 15}
+              y={endPoint.y - (isMobile ? 20 : 18)}
               fill="#EF4444"
-              fontSize="12"
+              fontSize={isMobile ? "14" : "12"}
               fontWeight="bold"
               textAnchor="middle"
+              className="drop-shadow-sm"
             >
               END
             </text>
@@ -257,37 +287,45 @@ const FloorMap: React.FC<FloorMapProps> = ({
       </svg>
 
       {/* Instructions */}
-      <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-gray-800 bg-opacity-90 rounded-lg p-2 md:p-3 text-xs md:text-sm">
+      <div className={`absolute ${isMobile ? 'top-2 left-2' : 'top-4 left-4'} bg-gray-800/95 backdrop-blur-sm rounded-xl p-3 text-xs md:text-sm shadow-xl border border-gray-700/50`}>
         {isAddingSection ? (
           <div className="text-emerald-400">
-            <p className="font-semibold">Adding Section Mode</p>
-            <p className="hidden sm:block">Click two points to create a rectangle</p>
-            <p className="sm:hidden">Click twice to create</p>
+            <p className="font-bold flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+              Adding Section Mode
+            </p>
+            <p className={isMobile ? 'text-xs mt-1' : 'mt-1'}>
+              {isMobile ? 'Tap twice to create' : 'Click two points to create a rectangle'}
+            </p>
           </div>
         ) : (
           <div className="text-blue-400">
-            <p className="font-semibold">Navigation Mode</p>
-            <p className="hidden sm:block">Click near corners for optimal paths</p>
-            <p className="sm:hidden">Click to set points</p>
+            <p className="font-bold flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+              Navigation Mode
+            </p>
+            <p className={isMobile ? 'text-xs mt-1' : 'mt-1'}>
+              {isMobile ? 'Tap to set points' : 'Click near corners for optimal paths'}
+            </p>
           </div>
         )}
       </div>
 
       {/* Path info */}
       {currentPath.length > 0 && (
-        <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-gray-800 bg-opacity-90 rounded-lg p-2 md:p-3 text-xs md:text-sm min-w-[100px]">
+        <div className={`absolute ${isMobile ? 'top-2 right-2' : 'top-4 right-4'} bg-gray-800/95 backdrop-blur-sm rounded-xl p-3 text-xs md:text-sm min-w-[120px] shadow-xl border border-gray-700/50`}>
           <div className="text-emerald-400">
-            <p className="font-semibold">Route Ready</p>
+            <p className="font-bold flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+              Route Ready
+            </p>
             {startPoint && endPoint && (
               <>
-                <p className="hidden sm:block">
-                  Distance: {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel))}
+                <p className="mt-1 font-medium">
+                  {isMobile ? '' : 'Distance: '}{formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel))}
                 </p>
-                <p className="sm:hidden">
-                  {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel))}
-                </p>
-                <p className="text-xs text-gray-300 hidden sm:block">
-                  Walking time: ~{Math.ceil(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel) / 1.4)} sec
+                <p className="text-xs text-gray-300 mt-1">
+                  {isMobile ? '~' : 'Walking time: ~'}{Math.ceil(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel) / 1.4)} sec
                 </p>
               </>
             )}
