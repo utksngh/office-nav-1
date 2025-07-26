@@ -108,7 +108,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
       }
     } else {
       // Point selection for pathfinding
-      const optimizedPoint = findNearestCorner(clickPoint);
+      const optimizedPoint = findNearestCorner(point);
       if (!startPoint) {
         onPointSelect(optimizedPoint, 'start');
       } else if (!endPoint) {
