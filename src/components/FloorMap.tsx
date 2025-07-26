@@ -46,6 +46,37 @@ const FloorMap: React.FC<FloorMapProps> = ({
     return colors[type];
   };
 
+  // Find the nearest corner of the closest section to the clicked point
+  const findNearestCorner = (clickPoint: Point): Point => {
+    let nearestCorner = clickPoint;
+    let minDistance = Infinity;
+    const cornerThreshold = 50; // Maximum distance to consider a corner
+
+    for (const section of floorData.sections) {
+      // Calculate all four corners of the section
+      const corners = [
+        { x: section.x, y: section.y }, // Top-left
+        { x: section.x + section.width, y: section.y }, // Top-right
+        { x: section.x, y: section.y + section.height }, // Bottom-left
+        { x: section.x + section.width, y: section.y + section.height } // Bottom-right
+      ];
+
+      // Find the closest corner
+      for (const corner of corners) {
+        const distance = Math.sqrt(
+          Math.pow(corner.x - clickPoint.x, 2) + 
+          Math.pow(corner.y - clickPoint.y, 2)
+        );
+
+        if (distance < minDistance && distance <= cornerThreshold) {
+          minDistance = distance;
+          nearestCorner = corner;
+        }
+      }
+    }
+
+    return nearestCorner;
+  };
   const handleSVGClick = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
     if (!svgRef.current) return;
 
@@ -77,16 +108,17 @@ const FloorMap: React.FC<FloorMapProps> = ({
       }
     } else {
       // Point selection for pathfinding
+      const optimizedPoint = findNearestCorner(clickPoint);
       if (!startPoint) {
-        onPointSelect(point, 'start');
+        onPointSelect(optimizedPoint, 'start');
       } else if (!endPoint) {
-        onPointSelect(point, 'end');
+        onPointSelect(optimizedPoint, 'end');
       } else {
         // Reset and set new start point
-        onPointSelect(point, 'start');
+        onPointSelect(optimizedPoint, 'start');
       }
     }
-  }, [isAddingSection, isDrawing, drawStart, startPoint, endPoint, onPointSelect, onAddSection]);
+  }, [isAddingSection, isDrawing, drawStart, startPoint, endPoint, onPointSelect, onAddSection, floorData.sections]);
 
   // Calculate path when both points are set
   React.useEffect(() => {
@@ -131,6 +163,27 @@ const FloorMap: React.FC<FloorMapProps> = ({
           />
         ))}
 
+        {/* Corner indicators for better UX */}
+        {floorData.sections.map((section) => (
+          <g key={`corners-${section.id}`}>
+            {[
+              { x: section.x, y: section.y },
+              { x: section.x + section.width, y: section.y },
+              { x: section.x, y: section.y + section.height },
+              { x: section.x + section.width, y: section.y + section.height }
+            ].map((corner, index) => (
+              <circle
+                key={index}
+                cx={corner.x}
+                cy={corner.y}
+                r="2"
+                fill="#10B981"
+                fillOpacity="0.6"
+                className="pointer-events-none"
+              />
+            ))}
+          </g>
+        ))}
         {/* Path Visualization */}
         {currentPath.length > 0 && (
           <PathVisualization path={currentPath} />
@@ -213,7 +266,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
         ) : (
           <div className="text-blue-400">
             <p className="font-semibold">Navigation Mode</p>
-            <p className="hidden sm:block">Click to set start and end points</p>
+            <p className="hidden sm:block">Click near corners for optimal paths</p>
             <p className="sm:hidden">Click to set points</p>
           </div>
         )}
