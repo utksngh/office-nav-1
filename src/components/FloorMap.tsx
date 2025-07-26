@@ -27,7 +27,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
   onAddSection,
   selectedSection,
   onSectionSelect,
-  onSectionUpdate
+  onSectionUpdate,
   isMobile
 }) => {
   const [isDrawing, setIsDrawing] = useState(false);
