@@ -7,7 +7,7 @@ export function findPath(
   end: Point,
   obstacles: OfficeSection[],
   mapWidth: number,
-  mapHeight: number
+  mapHeight: number,
   metersPerPixel: number = 0.1
 ): Point[] {
   const gridSize = Math.max(4, Math.round(0.5 / metersPerPixel)); // 0.5 meter grid resolution
