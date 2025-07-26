@@ -99,13 +99,13 @@ const FloorMap: React.FC<FloorMapProps> = ({
   }, [startPoint, endPoint, floorData]);
 
   return (
-    <div className="relative w-full h-full bg-gray-700 rounded-lg overflow-hidden">
+    <div className="relative w-full h-full bg-gray-700 rounded-lg overflow-auto">
       <svg
         ref={svgRef}
-        width="100%"
-        height="100%"
+        width={Math.max(floorData.width, 800)}
+        height={Math.max(floorData.height, 600)}
         viewBox={`0 0 ${floorData.width} ${floorData.height}`}
-        className="cursor-crosshair"
+        className="cursor-crosshair min-w-full min-h-full"
         onClick={handleSVGClick}
       >
         {/* Grid */}
@@ -203,26 +203,29 @@ const FloorMap: React.FC<FloorMapProps> = ({
       </svg>
 
       {/* Instructions */}
-      <div className="absolute top-4 left-4 bg-gray-800 bg-opacity-90 rounded-lg p-3 text-sm">
+      <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-gray-800 bg-opacity-90 rounded-lg p-2 md:p-3 text-xs md:text-sm">
         {isAddingSection ? (
           <div className="text-emerald-400">
             <p className="font-semibold">Adding Section Mode</p>
-            <p>Click two points to create a rectangle</p>
+            <p className="hidden sm:block">Click two points to create a rectangle</p>
+            <p className="sm:hidden">Click twice to create</p>
           </div>
         ) : (
           <div className="text-blue-400">
             <p className="font-semibold">Navigation Mode</p>
-            <p>Click to set start and end points</p>
+            <p className="hidden sm:block">Click to set start and end points</p>
+            <p className="sm:hidden">Click to set points</p>
           </div>
         )}
       </div>
 
       {/* Path info */}
       {currentPath.length > 0 && (
-        <div className="absolute top-4 right-4 bg-gray-800 bg-opacity-90 rounded-lg p-3 text-sm">
+        <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-gray-800 bg-opacity-90 rounded-lg p-2 md:p-3 text-xs md:text-sm">
           <div className="text-emerald-400">
             <p className="font-semibold">Path Found</p>
-            <p>Distance: {Math.round(currentPath.length * 2)} units</p>
+            <p className="hidden sm:block">Distance: {Math.round(currentPath.length * 2)} units</p>
+            <p className="sm:hidden">{Math.round(currentPath.length * 2)}u</p>
           </div>
         </div>
       )}

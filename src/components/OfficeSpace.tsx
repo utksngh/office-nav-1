@@ -91,14 +91,14 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
         x={section.x + section.width / 2}
         y={section.y + section.height / 2}
         fill="white"
-        fontSize="12"
+        fontSize={Math.min(12, section.width / 8, section.height / 4)}
         fontWeight="600"
         textAnchor="middle"
         dominantBaseline="middle"
         pointerEvents="none"
         className="select-none"
       >
-        {section.name}
+        {section.width < 80 ? section.name.split(' ')[0] : section.name}
       </text>
       
       {section.type && (
@@ -106,13 +106,13 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
           x={section.x + section.width / 2}
           y={section.y + section.height / 2 + 15}
           fill="rgba(255,255,255,0.7)"
-          fontSize="10"
+          fontSize={Math.min(10, section.width / 10, section.height / 6)}
           textAnchor="middle"
           dominantBaseline="middle"
           pointerEvents="none"
           className="select-none capitalize"
         >
-          {section.type}
+          {section.width < 60 ? '' : section.type}
         </text>
       )}
 

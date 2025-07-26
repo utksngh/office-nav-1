@@ -45,6 +45,7 @@ function App() {
   const [endPoint, setEndPoint] = useState<Point | null>(null);
   const [isAddingSection, setIsAddingSection] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [showControlPanel, setShowControlPanel] = useState(false);
 
   const addSection = (section: Omit<OfficeSection, 'id'>) => {
     const newSection: OfficeSection = {
@@ -97,34 +98,42 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3 md:px-6 md:py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Navigation className="w-8 h-8 text-blue-400" />
+            <Navigation className="w-6 h-6 md:w-8 md:h-8 text-blue-400" />
             <div>
-              <h1 className="text-2xl font-bold">Office Navigation System</h1>
-              <p className="text-gray-400">Intelligent pathfinding and office management</p>
+              <h1 className="text-lg md:text-2xl font-bold">Office Navigation</h1>
+              <p className="text-gray-400 text-xs md:text-sm hidden sm:block">Intelligent pathfinding and office management</p>
             </div>
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="flex bg-gray-700 rounded-lg p-1">
+            <div className="flex bg-gray-700 rounded-lg p-1 text-sm">
               {[1, 2].map(floor => (
                 <button
                   key={floor}
                   onClick={() => handleFloorChange(floor)}
-                  className={`px-4 py-2 rounded-md transition-all duration-200 ${
+                  className={`px-2 py-1 md:px-4 md:py-2 rounded-md transition-all duration-200 ${
                     currentFloor === floor
                       ? 'bg-blue-600 text-white shadow-lg'
                       : 'text-gray-300 hover:text-white hover:bg-gray-600'
                   }`}
                 >
-                  Floor {floor}
+                  <span className="hidden sm:inline">Floor </span>{floor}
                 </button>
               ))}
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-1 md:gap-2">
+              <button
+                onClick={() => setShowControlPanel(!showControlPanel)}
+                className="p-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 hover:text-white transition-all duration-200 md:hidden"
+                title="Toggle Panel"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+              
               <button
                 onClick={() => setIsAddingSection(!isAddingSection)}
                 className={`p-2 rounded-lg transition-all duration-200 ${
@@ -134,7 +143,7 @@ function App() {
                 }`}
                 title="Add Section"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4 md:w-5 md:h-5" />
               </button>
               
               <button
@@ -142,14 +151,14 @@ function App() {
                 className="p-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 hover:text-white transition-all duration-200"
                 title="Clear Path"
               >
-                <Settings className="w-5 h-5" />
+                <Settings className="w-4 h-4 md:w-5 md:h-5" />
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-120px)]">
+      <div className="flex flex-col md:flex-row h-[calc(100vh-80px)] md:h-[calc(100vh-120px)]">
         <ControlPanel
           currentFloor={floorData[currentFloor]}
           startPoint={startPoint}
@@ -158,19 +167,23 @@ function App() {
           onSectionUpdate={updateSection}
           onSectionDelete={deleteSection}
           onClearPath={clearPath}
+          isVisible={showControlPanel}
+          onClose={() => setShowControlPanel(false)}
         />
         
-        <main className="flex-1 p-6">
-          <div className="bg-gray-800 rounded-xl shadow-2xl p-6 h-full">
-            <div className="flex items-center justify-between mb-6">
+        <main className="flex-1 p-3 md:p-6">
+          <div className="bg-gray-800 rounded-xl shadow-2xl p-3 md:p-6 h-full flex flex-col">
+            <div className="flex items-center justify-between mb-3 md:mb-6">
               <div className="flex items-center gap-3">
-                <MapPin className="w-6 h-6 text-emerald-400" />
-                <h2 className="text-xl font-semibold">{floorData[currentFloor].name}</h2>
+                <MapPin className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" />
+                <h2 className="text-lg md:text-xl font-semibold">{floorData[currentFloor].name}</h2>
               </div>
               
-              <div className="text-sm text-gray-400">
+              <div className="text-xs md:text-sm text-gray-400">
                 {startPoint && endPoint ? (
-                  <span className="text-emerald-400">✓ Path calculated</span>
+                  <span className="text-emerald-400">
+                    <span className="hidden sm:inline">✓ Path calculated</span><span className="sm:hidden">✓</span>
+                  </span>
                 ) : startPoint ? (
                   <span className="text-yellow-400">Select destination</span>
                 ) : (
@@ -179,20 +192,22 @@ function App() {
               </div>
             </div>
 
-            <FloorMap
-              floorData={floorData[currentFloor]}
-              startPoint={startPoint}
-              endPoint={endPoint}
-              onPointSelect={(point, type) => {
-                if (type === 'start') setStartPoint(point);
-                else setEndPoint(point);
-              }}
-              isAddingSection={isAddingSection}
-              onAddSection={addSection}
-              selectedSection={selectedSection}
-              onSectionSelect={setSelectedSection}
-              onSectionUpdate={updateSection}
-            />
+            <div className="flex-1 overflow-hidden rounded-lg">
+              <FloorMap
+                floorData={floorData[currentFloor]}
+                startPoint={startPoint}
+                endPoint={endPoint}
+                onPointSelect={(point, type) => {
+                  if (type === 'start') setStartPoint(point);
+                  else setEndPoint(point);
+                }}
+                isAddingSection={isAddingSection}
+                onAddSection={addSection}
+                selectedSection={selectedSection}
+                onSectionSelect={setSelectedSection}
+                onSectionUpdate={updateSection}
+              />
+            </div>
           </div>
         </main>
       </div>

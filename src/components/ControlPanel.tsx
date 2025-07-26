@@ -10,6 +10,8 @@ interface ControlPanelProps {
   onSectionUpdate: (sectionId: string, updates: Partial<OfficeSection>) => void;
   onSectionDelete: (sectionId: string) => void;
   onClearPath: () => void;
+  isVisible: boolean;
+  onClose: () => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -19,7 +21,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   selectedSection,
   onSectionUpdate,
   onSectionDelete,
-  onClearPath
+  onClearPath,
+  isVisible,
+  onClose
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<OfficeSection>>({});
@@ -54,12 +58,33 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   ];
 
   return (
-    <aside className="w-80 bg-gray-800 border-r border-gray-700 p-6 overflow-y-auto">
+    <>
+      {/* Mobile overlay */}
+      {isVisible && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      
+      <aside className={`
+        fixed md:relative top-0 left-0 h-full w-80 max-w-[90vw] bg-gray-800 border-r border-gray-700 p-4 md:p-6 overflow-y-auto z-50
+        transform transition-transform duration-300 ease-in-out md:transform-none
+        ${isVisible ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
+        {/* Mobile close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white md:hidden"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        
       <div className="space-y-6">
         {/* Navigation Status */}
         <div className="bg-gray-700 rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-blue-400" />
+          <h3 className="text-base md:text-lg font-semibold mb-3 flex items-center gap-2">
+            <MapPin className="w-4 h-4 md:w-5 md:h-5 text-blue-400" />
             Navigation
           </h3>
           
@@ -91,11 +116,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
         {/* Floor Sections */}
         <div className="bg-gray-700 rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-3">
+          <h3 className="text-base md:text-lg font-semibold mb-3">
             Floor Sections ({currentFloor.sections.length})
           </h3>
           
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+          <div className="space-y-2 max-h-64 md:max-h-96 overflow-y-auto">
             {currentFloor.sections.map((section) => (
               <div
                 key={section.id}
@@ -133,7 +158,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         {selectedSectionData && (
           <div className="bg-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Edit Section</h3>
+              <h3 className="text-base md:text-lg font-semibold">Edit Section</h3>
               <div className="flex gap-1">
                 {isEditing ? (
                   <>
@@ -250,7 +275,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
         {/* Instructions */}
         <div className="bg-gray-700 rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-3">Instructions</h3>
+          <h3 className="text-base md:text-lg font-semibold mb-3">Instructions</h3>
           <div className="text-sm text-gray-300 space-y-2">
             <p>• Click on the map to set start and end points</p>
             <p>• Use the + button to add new sections</p>
@@ -261,6 +286,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </div>
       </div>
     </aside>
+    </>
   );
 };
 
