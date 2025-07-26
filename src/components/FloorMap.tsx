@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { FloorData, Point, OfficeSection } from '../types';
 import { findPath } from '../utils/pathfinding';
+import { calculatePixelDistanceInMeters, formatDistance } from '../utils/geoUtils';
 import OfficeSpace from './OfficeSpace';
 import PathVisualization from './PathVisualization';
 
@@ -274,11 +275,22 @@ const FloorMap: React.FC<FloorMapProps> = ({
 
       {/* Path info */}
       {currentPath.length > 0 && (
-        <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-gray-800 bg-opacity-90 rounded-lg p-2 md:p-3 text-xs md:text-sm">
+        <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-gray-800 bg-opacity-90 rounded-lg p-2 md:p-3 text-xs md:text-sm min-w-[100px]">
           <div className="text-emerald-400">
-            <p className="font-semibold">Path Found</p>
-            <p className="hidden sm:block">Distance: {Math.round(currentPath.length * 2)} units</p>
-            <p className="sm:hidden">{Math.round(currentPath.length * 2)}u</p>
+            <p className="font-semibold">Route Ready</p>
+            {startPoint && endPoint && (
+              <>
+                <p className="hidden sm:block">
+                  Distance: {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel))}
+                </p>
+                <p className="sm:hidden">
+                  {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel))}
+                </p>
+                <p className="text-xs text-gray-300 hidden sm:block">
+                  Walking time: ~{Math.ceil(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel) / 1.4)} sec
+                </p>
+              </>
+            )}
           </div>
         </div>
       )}

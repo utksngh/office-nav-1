@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FloorData, Point, OfficeSection } from '../types';
 import { MapPin, Trash2, Edit3, Save, X } from 'lucide-react';
+import { formatDistance, formatCoordinates, calculatePixelDistanceInMeters } from '../utils/geoUtils';
 
 interface ControlPanelProps {
   currentFloor: FloorData;
@@ -92,16 +93,25 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             <div className="flex justify-between">
               <span className="text-gray-400">Start Point:</span>
               <span className={startPoint ? 'text-emerald-400' : 'text-gray-500'}>
-                {startPoint ? `(${Math.round(startPoint.x)}, ${Math.round(startPoint.y)})` : 'Not set'}
+                {startPoint ? `${Math.round(startPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(startPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 'Not set'}
               </span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-400">End Point:</span>
               <span className={endPoint ? 'text-red-400' : 'text-gray-500'}>
-                {endPoint ? `(${Math.round(endPoint.x)}, ${Math.round(endPoint.y)})` : 'Not set'}
+                {endPoint ? `${Math.round(endPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(endPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 'Not set'}
               </span>
             </div>
+            
+            {startPoint && endPoint && (
+              <div className="flex justify-between">
+                <span className="text-gray-400">Distance:</span>
+                <span className="text-blue-400">
+                  {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, currentFloor.metersPerPixel))}
+                </span>
+              </div>
+            )}
             
             {(startPoint || endPoint) && (
               <button
@@ -117,7 +127,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         {/* Floor Sections */}
         <div className="bg-gray-700 rounded-lg p-4">
           <h3 className="text-base md:text-lg font-semibold mb-3">
-            Floor Sections ({currentFloor.sections.length})
+            Rooms & Areas ({currentFloor.sections.length})
           </h3>
           
           <div className="space-y-2 max-h-64 md:max-h-96 overflow-y-auto">
@@ -138,7 +148,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                     <h4 className="font-medium truncate">{section.name}</h4>
                     <p className="text-xs text-gray-300 capitalize">{section.type}</p>
                     <p className="text-xs text-gray-400">
-                      {section.width} × {section.height} px
+                      {(section.width * currentFloor.metersPerPixel).toFixed(1)}m × {(section.height * currentFloor.metersPerPixel).toFixed(1)}m
                     </p>
                   </div>
                   
@@ -158,7 +168,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         {selectedSectionData && (
           <div className="bg-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base md:text-lg font-semibold">Edit Section</h3>
+              <h3 className="text-base md:text-lg font-semibold">Room Details</h3>
               <div className="flex gap-1">
                 {isEditing ? (
                   <>
@@ -228,23 +238,25 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Width
+                      Width (m)
                     </label>
                     <input
                       type="number"
-                      value={editData.width || ''}
-                      onChange={(e) => setEditData({...editData, width: Number(e.target.value)})}
+                      step="0.1"
+                      value={editData.width ? (editData.width * currentFloor.metersPerPixel).toFixed(1) : ''}
+                      onChange={(e) => setEditData({...editData, width: Number(e.target.value) / currentFloor.metersPerPixel})}
                       className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Height
+                      Height (m)
                     </label>
                     <input
                       type="number"
-                      value={editData.height || ''}
-                      onChange={(e) => setEditData({...editData, height: Number(e.target.value)})}
+                      step="0.1"
+                      value={editData.height ? (editData.height * currentFloor.metersPerPixel).toFixed(1) : ''}
+                      onChange={(e) => setEditData({...editData, height: Number(e.target.value) / currentFloor.metersPerPixel})}
                       className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
@@ -261,12 +273,16 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   <span className="capitalize">{selectedSectionData.type}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Position:</span>
-                  <span>({Math.round(selectedSectionData.x)}, {Math.round(selectedSectionData.y)})</span>
+                  <span className="text-gray-400">Coordinates:</span>
+                  <span className="text-xs">{formatCoordinates(selectedSectionData.coordinates)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Size:</span>
-                  <span>{selectedSectionData.width} × {selectedSectionData.height}</span>
+                  <span>{(selectedSectionData.width * currentFloor.metersPerPixel).toFixed(1)}m × {(selectedSectionData.height * currentFloor.metersPerPixel).toFixed(1)}m</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Area:</span>
+                  <span>{((selectedSectionData.width * selectedSectionData.height * currentFloor.metersPerPixel * currentFloor.metersPerPixel)).toFixed(1)} m²</span>
                 </div>
               </div>
             )}
@@ -277,11 +293,12 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="bg-gray-700 rounded-lg p-4">
           <h3 className="text-base md:text-lg font-semibold mb-3">Instructions</h3>
           <div className="text-sm text-gray-300 space-y-2">
-            <p>• Click on the map to set start and end points</p>
-            <p>• Use the + button to add new sections</p>
-            <p>• Drag sections to move them around</p>
-            <p>• Click sections to select and edit them</p>
-            <p>• Paths automatically avoid office spaces</p>
+            <p>• Tap map to set navigation points</p>
+            <p>• Use + button to add new rooms</p>
+            <p>• Drag rooms to reposition them</p>
+            <p>• Tap rooms to view details</p>
+            <p>• Routes automatically avoid obstacles</p>
+            <p>• All measurements in meters</p>
           </div>
         </div>
       </div>

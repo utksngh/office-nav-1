@@ -1,4 +1,5 @@
 import { Point, OfficeSection, PathNode } from '../types';
+import { calculatePixelDistanceInMeters } from './geoUtils';
 
 // A* pathfinding algorithm with optimized path smoothing and minimal turns
 export function findPath(
@@ -7,8 +8,9 @@ export function findPath(
   obstacles: OfficeSection[],
   mapWidth: number,
   mapHeight: number
+  metersPerPixel: number = 0.1
 ): Point[] {
-  const gridSize = 6; // Smaller grid for more precise shortest paths
+  const gridSize = Math.max(4, Math.round(0.5 / metersPerPixel)); // 0.5 meter grid resolution
   const cols = Math.ceil(mapWidth / gridSize);
   const rows = Math.ceil(mapHeight / gridSize);
 
@@ -38,28 +40,30 @@ export function findPath(
   const path = findAStarPath(validStart, validEnd, obstacleMap, cols, rows);
   
   if (path.length === 0) {
-    return findSimpleAlternativePath(start, end, obstacles);
+    return findSimpleAlternativePath(start, end, obstacles, metersPerPixel);
   }
 
   // Convert back to world coordinates and smooth
   const worldPath = convertToWorldPath(path, gridSize, start, end);
-  return optimizeForShortestPath(worldPath, obstacles);
+  return optimizeForShortestPath(worldPath, obstacles, metersPerPixel);
 }
 
 function createObstacleMap(
   obstacles: OfficeSection[],
   cols: number,
   rows: number,
-  gridSize: number
+  gridSize: number,
+  metersPerPixel: number = 0.1
 ): boolean[][] {
   const map: boolean[][] = Array(rows).fill(null).map(() => Array(cols).fill(false));
-  const buffer = 0.5; // Very minimal buffer for shortest paths
+  const bufferMeters = 0.3; // 30cm buffer around obstacles
+  const buffer = bufferMeters / metersPerPixel; // Convert to pixels
 
   for (const obstacle of obstacles) {
-    const startX = Math.max(0, Math.floor((obstacle.x - buffer * gridSize) / gridSize));
-    const startY = Math.max(0, Math.floor((obstacle.y - buffer * gridSize) / gridSize));
-    const endX = Math.min(cols - 1, Math.ceil((obstacle.x + obstacle.width + buffer * gridSize) / gridSize));
-    const endY = Math.min(rows - 1, Math.ceil((obstacle.y + obstacle.height + buffer * gridSize) / gridSize));
+    const startX = Math.max(0, Math.floor((obstacle.x - buffer) / gridSize));
+    const startY = Math.max(0, Math.floor((obstacle.y - buffer) / gridSize));
+    const endX = Math.min(cols - 1, Math.ceil((obstacle.x + obstacle.width + buffer) / gridSize));
+    const endY = Math.min(rows - 1, Math.ceil((obstacle.y + obstacle.height + buffer) / gridSize));
 
     for (let y = startY; y <= endY; y++) {
       for (let x = startX; x <= endX; x++) {
@@ -269,7 +273,7 @@ function convertToWorldPath(gridPath: Point[], gridSize: number, originalStart: 
   return worldPath;
 }
 
-function optimizeForShortestPath(path: Point[], obstacles: OfficeSection[]): Point[] {
+function optimizeForShortestPath(path: Point[], obstacles: OfficeSection[], metersPerPixel: number = 0.1): Point[] {
   if (path.length <= 2) return path;
 
   const optimized: Point[] = [path[0]];
@@ -280,7 +284,7 @@ function optimizeForShortestPath(path: Point[], obstacles: OfficeSection[]): Poi
     
     // Find the farthest point we can reach directly (greedy approach for shortest path)
     for (let i = path.length - 1; i > currentIndex + 1; i--) {
-      if (isPathClearOfObstacles(path[currentIndex], path[i], obstacles)) {
+      if (isPathClearOfObstacles(path[currentIndex], path[i], obstacles, metersPerPixel)) {
         farthestIndex = i;
         break;
       }
@@ -289,7 +293,7 @@ function optimizeForShortestPath(path: Point[], obstacles: OfficeSection[]): Poi
     // If we couldn't skip ahead, try the next closest points
     if (farthestIndex === currentIndex + 1) {
       for (let i = currentIndex + 2; i < path.length; i++) {
-        if (isPathClearOfObstacles(path[currentIndex], path[i], obstacles)) {
+        if (isPathClearOfObstacles(path[currentIndex], path[i], obstacles, metersPerPixel)) {
           farthestIndex = i;
         } else {
           break;
@@ -302,10 +306,10 @@ function optimizeForShortestPath(path: Point[], obstacles: OfficeSection[]): Poi
   }
 
   // Additional optimization: try to connect non-adjacent points
-  return furtherOptimizePath(optimized, obstacles);
+  return furtherOptimizePath(optimized, obstacles, metersPerPixel);
 }
 
-function furtherOptimizePath(path: Point[], obstacles: OfficeSection[]): Point[] {
+function furtherOptimizePath(path: Point[], obstacles: OfficeSection[], metersPerPixel: number = 0.1): Point[] {
   if (path.length <= 2) return path;
   
   const result: Point[] = [path[0]];
@@ -315,7 +319,7 @@ function furtherOptimizePath(path: Point[], obstacles: OfficeSection[]): Point[]
     
     // Try to connect the last point in result directly to points further ahead
     for (let j = path.length - 1; j > i; j--) {
-      if (isPathClearOfObstacles(result[result.length - 1], path[j], obstacles)) {
+      if (isPathClearOfObstacles(result[result.length - 1], path[j], obstacles, metersPerPixel)) {
         // We can skip to this point
         if (j === path.length - 1) {
           result.push(path[j]);
@@ -340,8 +344,9 @@ function furtherOptimizePath(path: Point[], obstacles: OfficeSection[]): Point[]
   return result;
 }
 
-function isPathClearOfObstacles(start: Point, end: Point, obstacles: OfficeSection[]): boolean {
-  const buffer = 8; // Minimum clearance from obstacles
+function isPathClearOfObstacles(start: Point, end: Point, obstacles: OfficeSection[], metersPerPixel: number = 0.1): boolean {
+  const bufferMeters = 0.4; // 40cm minimum clearance
+  const buffer = bufferMeters / metersPerPixel; // Convert to pixels
   
   for (const obstacle of obstacles) {
     if (lineIntersectsRectangle(
@@ -390,7 +395,7 @@ function pointInRectangle(point: Point, rectX: number, rectY: number, rectWidth:
          point.y >= rectY && point.y <= rectY + rectHeight;
 }
 
-function findSimpleAlternativePath(start: Point, end: Point, obstacles: OfficeSection[]): Point[] {
+function findSimpleAlternativePath(start: Point, end: Point, obstacles: OfficeSection[], metersPerPixel: number = 0.1): Point[] {
   // Create a simple path that goes around obstacles
   const waypoints: Point[] = [start];
   
@@ -401,7 +406,8 @@ function findSimpleAlternativePath(start: Point, end: Point, obstacles: OfficeSe
   
   if (directObstacles.length > 0) {
     const obstacle = directObstacles[0]; // Handle the first blocking obstacle
-    const buffer = 15;
+    const bufferMeters = 1.0; // 1 meter buffer for alternative path
+    const buffer = bufferMeters / metersPerPixel;
     
     // Determine which corner to go around based on shortest path
     const corners = [

@@ -3,37 +3,88 @@ import { Navigation, MapPin, Plus, Settings } from 'lucide-react';
 import FloorMap from './components/FloorMap';
 import ControlPanel from './components/ControlPanel';
 import { FloorData, Point, OfficeSection } from './types';
+import { pixelToGeo } from './utils/geoUtils';
 
-// Sample floor data
+// Office center coordinates (Bangalore, India)
+const OFFICE_CENTER = { lat: 13.050528, lng: 77.619071 };
+const METERS_PER_PIXEL = 0.1; // 10cm per pixel for detailed indoor mapping
+
+// Sample floor data with geographic coordinates
 const initialFloorData: Record<number, FloorData> = {
   1: {
     id: 1,
     name: 'Ground Floor',
-    width: 800,
-    height: 600,
+    width: 1000, // 100 meters wide
+    height: 800, // 80 meters tall
+    centerCoordinates: OFFICE_CENTER,
+    metersPerPixel: METERS_PER_PIXEL,
     sections: [
-      { id: '1', name: 'Reception', x: 50, y: 50, width: 150, height: 100, type: 'reception' },
-      { id: '2', name: 'Conference Room A', x: 250, y: 50, width: 200, height: 120, type: 'meeting' },
-      { id: '3', name: 'Office 101', x: 500, y: 50, width: 120, height: 100, type: 'office' },
-      { id: '4', name: 'Cafeteria', x: 50, y: 200, width: 180, height: 150, type: 'cafeteria' },
-      { id: '5', name: 'IT Department', x: 280, y: 220, width: 160, height: 130, type: 'department' },
-      { id: '6', name: 'Storage', x: 500, y: 200, width: 100, height: 80, type: 'storage' },
-      { id: '7', name: 'Office 102', x: 650, y: 50, width: 120, height: 100, type: 'office' },
-      { id: '8', name: 'Meeting Room B', x: 500, y: 350, width: 150, height: 100, type: 'meeting' },
+      { 
+        id: '1', name: 'Reception', x: 100, y: 100, width: 200, height: 120, type: 'reception',
+        coordinates: pixelToGeo({ x: 200, y: 160 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
+      { 
+        id: '2', name: 'Conference Room A', x: 350, y: 100, width: 250, height: 150, type: 'meeting',
+        coordinates: pixelToGeo({ x: 475, y: 175 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
+      { 
+        id: '3', name: 'Office 101', x: 650, y: 100, width: 150, height: 120, type: 'office',
+        coordinates: pixelToGeo({ x: 725, y: 160 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
+      { 
+        id: '4', name: 'Cafeteria', x: 100, y: 300, width: 220, height: 180, type: 'cafeteria',
+        coordinates: pixelToGeo({ x: 210, y: 390 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
+      { 
+        id: '5', name: 'IT Department', x: 380, y: 320, width: 200, height: 160, type: 'department',
+        coordinates: pixelToGeo({ x: 480, y: 400 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
+      { 
+        id: '6', name: 'Storage', x: 650, y: 300, width: 120, height: 100, type: 'storage',
+        coordinates: pixelToGeo({ x: 710, y: 350 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
+      { 
+        id: '7', name: 'Office 102', x: 820, y: 100, width: 150, height: 120, type: 'office',
+        coordinates: pixelToGeo({ x: 895, y: 160 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
+      { 
+        id: '8', name: 'Meeting Room B', x: 650, y: 500, width: 180, height: 120, type: 'meeting',
+        coordinates: pixelToGeo({ x: 740, y: 560 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
     ]
   },
   2: {
     id: 2,
     name: 'First Floor',
-    width: 800,
-    height: 600,
+    width: 1000,
+    height: 800,
+    centerCoordinates: OFFICE_CENTER,
+    metersPerPixel: METERS_PER_PIXEL,
     sections: [
-      { id: '9', name: 'CEO Office', x: 50, y: 50, width: 200, height: 150, type: 'executive' },
-      { id: '10', name: 'HR Department', x: 300, y: 50, width: 180, height: 120, type: 'department' },
-      { id: '11', name: 'Finance', x: 520, y: 50, width: 160, height: 120, type: 'department' },
-      { id: '12', name: 'Board Room', x: 150, y: 250, width: 250, height: 180, type: 'meeting' },
-      { id: '13', name: 'Executive Lounge', x: 450, y: 300, width: 200, height: 100, type: 'lounge' },
-      { id: '14', name: 'Archive', x: 50, y: 350, width: 80, height: 120, type: 'storage' },
+      { 
+        id: '9', name: 'CEO Office', x: 100, y: 100, width: 250, height: 180, type: 'executive',
+        coordinates: pixelToGeo({ x: 225, y: 190 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
+      { 
+        id: '10', name: 'HR Department', x: 400, y: 100, width: 220, height: 150, type: 'department',
+        coordinates: pixelToGeo({ x: 510, y: 175 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
+      { 
+        id: '11', name: 'Finance', x: 670, y: 100, width: 200, height: 150, type: 'department',
+        coordinates: pixelToGeo({ x: 770, y: 175 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
+      { 
+        id: '12', name: 'Board Room', x: 200, y: 350, width: 300, height: 220, type: 'meeting',
+        coordinates: pixelToGeo({ x: 350, y: 460 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
+      { 
+        id: '13', name: 'Executive Lounge', x: 550, y: 400, width: 250, height: 120, type: 'lounge',
+        coordinates: pixelToGeo({ x: 675, y: 460 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
+      { 
+        id: '14', name: 'Archive', x: 100, y: 450, width: 100, height: 150, type: 'storage',
+        coordinates: pixelToGeo({ x: 150, y: 525 }, OFFICE_CENTER, METERS_PER_PIXEL)
+      },
     ]
   }
 };
@@ -50,7 +101,12 @@ function App() {
   const addSection = (section: Omit<OfficeSection, 'id'>) => {
     const newSection: OfficeSection = {
       ...section,
-      id: Date.now().toString()
+      id: Date.now().toString(),
+      coordinates: pixelToGeo(
+        { x: section.x + section.width / 2, y: section.y + section.height / 2 },
+        floorData[currentFloor].centerCoordinates,
+        floorData[currentFloor].metersPerPixel
+      )
     };
     
     setFloorData(prev => ({
@@ -63,12 +119,28 @@ function App() {
   };
 
   const updateSection = (sectionId: string, updates: Partial<OfficeSection>) => {
+    const updatedSection = { ...updates };
+    
+    // Update coordinates if position or size changed
+    if (updates.x !== undefined || updates.y !== undefined || updates.width !== undefined || updates.height !== undefined) {
+      const currentSection = floorData[currentFloor].sections.find(s => s.id === sectionId);
+      if (currentSection) {
+        const centerX = (updates.x ?? currentSection.x) + (updates.width ?? currentSection.width) / 2;
+        const centerY = (updates.y ?? currentSection.y) + (updates.height ?? currentSection.height) / 2;
+        updatedSection.coordinates = pixelToGeo(
+          { x: centerX, y: centerY },
+          floorData[currentFloor].centerCoordinates,
+          floorData[currentFloor].metersPerPixel
+        );
+      }
+    }
+    
     setFloorData(prev => ({
       ...prev,
       [currentFloor]: {
         ...prev[currentFloor],
         sections: prev[currentFloor].sections.map(section =>
-          section.id === sectionId ? { ...section, ...updates } : section
+          section.id === sectionId ? { ...section, ...updatedSection } : section
         )
       }
     }));
@@ -176,18 +248,23 @@ function App() {
             <div className="flex items-center justify-between mb-3 md:mb-6">
               <div className="flex items-center gap-3">
                 <MapPin className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" />
-                <h2 className="text-lg md:text-xl font-semibold">{floorData[currentFloor].name}</h2>
+                <div>
+                  <h2 className="text-lg md:text-xl font-semibold">{floorData[currentFloor].name}</h2>
+                  <p className="text-xs text-gray-400">
+                    {(floorData[currentFloor].width * floorData[currentFloor].metersPerPixel).toFixed(0)}m × {(floorData[currentFloor].height * floorData[currentFloor].metersPerPixel).toFixed(0)}m
+                  </p>
+                </div>
               </div>
               
               <div className="text-xs md:text-sm text-gray-400">
                 {startPoint && endPoint ? (
                   <span className="text-emerald-400">
-                    <span className="hidden sm:inline">✓ Path calculated</span><span className="sm:hidden">✓</span>
+                    <span className="hidden sm:inline">✓ Route ready</span><span className="sm:hidden">✓</span>
                   </span>
                 ) : startPoint ? (
                   <span className="text-yellow-400">Select destination</span>
                 ) : (
-                  <span>Click to set start point</span>
+                  <span>Tap to set start</span>
                 )}
               </div>
             </div>

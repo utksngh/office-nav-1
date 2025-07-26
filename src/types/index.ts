@@ -1,6 +1,8 @@
 export interface Point {
   x: number;
   y: number;
+  lat?: number;
+  lng?: number;
 }
 
 export interface OfficeSection {
@@ -11,7 +13,7 @@ export interface OfficeSection {
   width: number;
   height: number;
   type: 'office' | 'meeting' | 'reception' | 'cafeteria' | 'storage' | 'department' | 'executive' | 'lounge';
-  coordinates?: {
+  coordinates: {
     lat: number;
     lng: number;
   };
@@ -22,6 +24,11 @@ export interface FloorData {
   name: string;
   width: number;
   height: number;
+  centerCoordinates: {
+    lat: number;
+    lng: number;
+  };
+  metersPerPixel: number;
   sections: OfficeSection[];
 }
 
