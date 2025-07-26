@@ -25,7 +25,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onSectionDelete,
   onClearPath,
   isVisible,
-  onClose
+  onClose,
   isMobile
 }) => {
   const [isEditing, setIsEditing] = useState(false);
