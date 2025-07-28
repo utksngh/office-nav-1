@@ -209,7 +209,8 @@ function App() {
                       : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
                   }`}
                 >
-                  <span className="hidden sm:inline">Floor </span>{floor}
+                  <span className="hidden sm:inline">{floor === 1 ? '5th Floor' : '6th Floor'}</span>
+                  <span className="sm:hidden">{floor === 1 ? '5th' : '6th'}</span>
                 </button>
               ))}
             </div>
