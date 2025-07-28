@@ -116,25 +116,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             Navigation Control
           </h3>
           
-          {startPoint && endPoint && !isNavigating && (
-            <button
-              onClick={onStartNavigation}
-              className={`w-full ${isMobile ? 'px-5 py-4 text-lg' : 'px-4 py-3 text-base'} bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 mb-3`}
-            >
-              🧭 Start Navigation
-            </button>
-          )}
-          
-          {isNavigating && (
-            <button
-              onClick={onStopNavigation}
-              className={`w-full ${isMobile ? 'px-5 py-4 text-lg' : 'px-4 py-3 text-base'} bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 mb-3`}
-            >
-              ⏹️ Stop Navigation
-            </button>
-          )}
-          
-          {(!startPoint || !endPoint) && (
+          {startPoint && endPoint ? (
+            <div className={`${isMobile ? 'p-4' : 'p-3'} bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center`}>
+              <p className={`text-emerald-400 ${isMobile ? 'text-base' : 'text-sm'} font-medium`}>
+                ✅ Route is ready for navigation!
+              </p>
+            </div>
+          ) : (
             <div className={`${isMobile ? 'p-4' : 'p-3'} bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-center`}>
               <p className={`text-yellow-400 ${isMobile ? 'text-base' : 'text-sm'} font-medium`}>
                 {!startPoint ? 'Set start point on map' : 'Set destination on map'}
