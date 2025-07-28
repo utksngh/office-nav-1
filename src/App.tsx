@@ -196,19 +196,46 @@ function App() {
       )
     };
     
-    // Auto-scroll to the new section
+    // Auto-scroll to ensure the new section is fully visible
     if (mapContainerRef) {
-      const sectionCenterX = newSection.x + newSection.width / 2;
-      const sectionCenterY = newSection.y + newSection.height / 2;
-      
-      // Calculate scroll position to center the new section
       const containerRect = mapContainerRef.getBoundingClientRect();
-      const scrollLeft = sectionCenterX - containerRect.width / 2;
-      const scrollTop = sectionCenterY - containerRect.height / 2;
+      const currentScrollLeft = mapContainerRef.scrollLeft;
+      const currentScrollTop = mapContainerRef.scrollTop;
+      
+      // Calculate section boundaries
+      const sectionLeft = newSection.x;
+      const sectionRight = newSection.x + newSection.width;
+      const sectionTop = newSection.y;
+      const sectionBottom = newSection.y + newSection.height;
+      
+      // Calculate visible area boundaries
+      const visibleLeft = currentScrollLeft;
+      const visibleRight = currentScrollLeft + containerRect.width;
+      const visibleTop = currentScrollTop;
+      const visibleBottom = currentScrollTop + containerRect.height;
+      
+      // Add padding around the section
+      const padding = 50;
+      
+      let newScrollLeft = currentScrollLeft;
+      let newScrollTop = currentScrollTop;
+      
+      // Check if section is outside visible area and adjust scroll
+      if (sectionLeft - padding < visibleLeft) {
+        newScrollLeft = Math.max(0, sectionLeft - padding);
+      } else if (sectionRight + padding > visibleRight) {
+        newScrollLeft = sectionRight + padding - containerRect.width;
+      }
+      
+      if (sectionTop - padding < visibleTop) {
+        newScrollTop = Math.max(0, sectionTop - padding);
+      } else if (sectionBottom + padding > visibleBottom) {
+        newScrollTop = sectionBottom + padding - containerRect.height;
+      }
       
       mapContainerRef.scrollTo({
-        left: Math.max(0, scrollLeft),
-        top: Math.max(0, scrollTop),
+        left: newScrollLeft,
+        top: newScrollTop,
         behavior: 'smooth'
       });
     }
