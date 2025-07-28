@@ -35,7 +35,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onClearPath,
   isVisible,
   onClose,
-  isMobile
+  isMobile,
   saveLayout,
   saveToFile,
   loadFromFile,
