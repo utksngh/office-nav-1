@@ -4,9 +4,10 @@ import { Point } from '../types';
 interface PathVisualizationProps {
   path: Point[];
   isMobile?: boolean;
+  isNavigating?: boolean;
 }
 
-const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = false }) => {
+const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = false, isNavigating = false }) => {
   if (path.length < 2) return null;
 
   const pathString = path.reduce((acc, point, index) => {
@@ -20,24 +21,40 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
       <path
         d={pathString}
         fill="none"
-        stroke="#10B981"
+        stroke={isNavigating ? "#3B82F6" : "#10B981"}
         strokeWidth={isMobile ? "10" : "6"}
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="drop-shadow-lg"
+        className={`drop-shadow-lg ${isNavigating ? 'animate-pulse' : ''}`}
       />
       
       {/* Animated path overlay */}
       <path
         d={pathString}
         fill="none"
-        stroke="#34D399"
+        stroke={isNavigating ? "#60A5FA" : "#34D399"}
         strokeWidth={isMobile ? "5" : "3"}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeDasharray={isMobile ? "25,25" : "15,15"}
-        className="animate-pulse drop-shadow-sm"
+        className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-sm`}
+        style={isNavigating ? {
+          animation: 'dash 2s linear infinite'
+        } : {}}
       />
+      
+      {/* Add CSS animation for moving dashes when navigating */}
+      {isNavigating && (
+        <style>
+          {`
+            @keyframes dash {
+              to {
+                stroke-dashoffset: -50;
+              }
+            }
+          `}
+        </style>
+      )}
       
       {/* Path points */}
       {path.map((point, index) => (
@@ -46,10 +63,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
           cx={point.x}
           cy={point.y}
           r={isMobile ? "8" : "4"}
-          fill="#10B981"
+          fill={isNavigating ? "#3B82F6" : "#10B981"}
           stroke="#FFFFFF"
           strokeWidth={isMobile ? "4" : "2"}
-          className="animate-pulse drop-shadow-lg"
+          className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
         />
       ))}
       
@@ -65,10 +82,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
           <g key={`arrow-${index}`} transform={`translate(${point.x}, ${point.y}) rotate(${angle * 180 / Math.PI})`}>
             <polygon
               points={isMobile ? "-10,-5 10,0 -10,5" : "-6,-3 6,0 -6,3"}
-              fill="#10B981"
+              fill={isNavigating ? "#3B82F6" : "#10B981"}
               stroke="#FFFFFF"
               strokeWidth={isMobile ? "3" : "1"}
-              className="drop-shadow-sm"
+              className={`drop-shadow-sm ${isNavigating ? 'animate-pulse' : ''}`}
             />
           </g>
         );

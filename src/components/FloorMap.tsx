@@ -16,6 +16,7 @@ interface FloorMapProps {
   onSectionSelect: (sectionId: string | null) => void;
   onSectionUpdate: (sectionId: string, updates: Partial<OfficeSection>) => void;
   isMobile: boolean;
+  isNavigating: boolean;
 }
 
 const FloorMap: React.FC<FloorMapProps> = ({
@@ -28,7 +29,8 @@ const FloorMap: React.FC<FloorMapProps> = ({
   selectedSection,
   onSectionSelect,
   onSectionUpdate,
-  isMobile
+  isMobile,
+  isNavigating
 }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawStart, setDrawStart] = useState<Point | null>(null);
@@ -134,16 +136,16 @@ const FloorMap: React.FC<FloorMapProps> = ({
   }, [startPoint, endPoint, floorData]);
 
   return (
-    <div className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} overflow-auto touch-pan-x touch-pan-y`}>
+    <div className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'overflow-x-auto overflow-y-hidden' : 'overflow-auto'} ${isMobile ? 'touch-pan-x' : 'touch-pan-x touch-pan-y'}`}>
       <svg
         ref={svgRef}
-        width={Math.max(floorData.width, isMobile ? Math.max(window.innerWidth - 24, 800) : 800)}
+        width={Math.max(floorData.width, isMobile ? Math.max(window.innerWidth * 1.5, 1200) : 800)}
         height={Math.max(floorData.height, isMobile ? Math.max(window.innerHeight - 180, 600) : 600)}
         viewBox={`0 0 ${floorData.width} ${floorData.height}`}
         className={`${isMobile ? 'cursor-pointer touch-manipulation' : 'cursor-crosshair'} ${isMobile ? 'w-full h-full' : 'min-w-full min-h-full'}`}
         onClick={handleSVGClick}
         style={isMobile ? { 
-          minWidth: `${Math.max(floorData.width, Math.max(window.innerWidth - 24, 800))}px`,
+          minWidth: `${Math.max(floorData.width, Math.max(window.innerWidth * 1.5, 1200))}px`,
           minHeight: `${Math.max(floorData.height, Math.max(window.innerHeight - 180, 600))}px`
         } : {}}
       >
@@ -205,7 +207,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
         ))}
         {/* Path Visualization */}
         {currentPath.length > 0 && (
-          <PathVisualization path={currentPath} isMobile={isMobile} />
+          <PathVisualization path={currentPath} isMobile={isMobile} isNavigating={isNavigating} />
         )}
 
         {/* Start Point */}
@@ -218,14 +220,14 @@ const FloorMap: React.FC<FloorMapProps> = ({
               fill="url(#startGradient)"
               stroke="#FFFFFF"
               strokeWidth={isMobile ? "5" : "3"}
-              className="animate-pulse drop-shadow-lg"
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
             />
             <circle
               cx={startPoint.x}
               cy={startPoint.y}
               r={isMobile ? "10" : "5"}
               fill="#FFFFFF"
-              className="animate-pulse"
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
             />
             <text
               x={startPoint.x}
@@ -251,14 +253,14 @@ const FloorMap: React.FC<FloorMapProps> = ({
               fill="url(#endGradient)"
               stroke="#FFFFFF"
               strokeWidth={isMobile ? "5" : "3"}
-              className="animate-pulse drop-shadow-lg"
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
             />
             <circle
               cx={endPoint.x}
               cy={endPoint.y}
               r={isMobile ? "10" : "5"}
               fill="#FFFFFF"
-              className="animate-pulse"
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
             />
             <text
               x={endPoint.x}
@@ -292,7 +294,17 @@ const FloorMap: React.FC<FloorMapProps> = ({
 
       {/* Instructions */}
       <div className={`absolute ${isMobile ? 'top-3 left-3' : 'top-4 left-4'} bg-gray-800/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} shadow-xl border border-gray-700/50 ${isMobile ? 'max-w-[160px]' : ''}`}>
-        {isAddingSection ? (
+        {isNavigating ? (
+          <div className="text-blue-400">
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-blue-400 rounded-full animate-pulse`}></div>
+              🧭 Navigating
+            </p>
+            <p className={`${isMobile ? 'mt-2' : 'mt-1'}`}>
+              {isMobile ? 'Following route' : 'Following the optimal route'}
+            </p>
+          </div>
+        ) : isAddingSection ? (
           <div className="text-emerald-400">
             <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
               <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-emerald-400 rounded-full animate-pulse`}></div>
@@ -311,6 +323,11 @@ const FloorMap: React.FC<FloorMapProps> = ({
             <p className={`${isMobile ? 'mt-2' : 'mt-1'}`}>
               {isMobile ? 'Tap to set points' : 'Click near corners for optimal paths'}
             </p>
+            {isMobile && (
+              <p className={`${isMobile ? 'mt-1 text-xs' : 'mt-1'} text-gray-400`}>
+                Swipe to navigate
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -318,10 +335,10 @@ const FloorMap: React.FC<FloorMapProps> = ({
       {/* Path info */}
       {currentPath.length > 0 && (
         <div className={`absolute ${isMobile ? 'top-3 right-3' : 'top-4 right-4'} bg-gray-800/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[120px]' : 'min-w-[120px]'} shadow-xl border border-gray-700/50`}>
-          <div className="text-emerald-400">
+          <div className={`${isNavigating ? 'text-blue-400' : 'text-emerald-400'}`}>
             <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-emerald-400 rounded-full animate-pulse`}></div>
-              Route Ready
+              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} ${isNavigating ? 'bg-blue-400' : 'bg-emerald-400'} rounded-full animate-pulse`}></div>
+              {isNavigating ? '🧭 Active' : 'Route Ready'}
             </p>
             {startPoint && endPoint && (
               <>
