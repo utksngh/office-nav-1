@@ -268,43 +268,38 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               </div>
               
               {/* Search Results Dropdown */}
-              {showSearchResults && searchQuery && (
+              {showSearchResults && searchQuery.trim().length > 0 && filteredSections.length > 0 && (
                 <div className={`absolute top-full left-0 right-0 mt-2 bg-gray-700 border border-gray-600/50 rounded-lg shadow-2xl max-h-64 overflow-y-auto custom-scrollbar`} style={{ zIndex: 99999 }}>
-                  {filteredSections.length > 0 ? (
-                    filteredSections.map((section) => (
-                      <button
-                        key={section.id}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleSearchSelect(section);
-                        }}
-                        className={`w-full p-3 text-left hover:bg-gray-600/80 active:bg-gray-500/90 transition-all duration-200 border-b border-gray-600/30 last:border-b-0 flex items-center justify-between group cursor-pointer touch-manipulation`}
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className={`w-3 h-3 rounded-sm shadow-sm border border-white/20`}
-                              style={{ backgroundColor: getSectionTypeColor(section.type) }}
-                            />
-                            <span className={`font-medium text-white text-sm`}>
-                              {section.name}
-                            </span>
-                          </div>
-                          <p className={`text-xs text-gray-300 capitalize ml-5`}>
-                            {section.type} • {(section.width * currentFloor.metersPerPixel).toFixed(1)}m × {(section.height * currentFloor.metersPerPixel).toFixed(1)}m
-                          </p>
+                  {filteredSections.map((section) => (
+                    <div
+                      key={section.id}
+                      onClick={() => handleSearchSelect(section)}
+                      className={`w-full p-3 text-left hover:bg-gray-600 active:bg-gray-500 transition-all duration-200 border-b border-gray-600/30 last:border-b-0 flex items-center justify-between group cursor-pointer`}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-3 h-3 rounded-sm shadow-sm border border-white/20`}
+                            style={{ backgroundColor: getSectionTypeColor(section.type) }}
+                          />
+                          <span className={`font-medium text-white text-sm`}>
+                            {section.name}
+                          </span>
                         </div>
-                        <div className={`${searchType === 'start' ? 'text-emerald-400' : 'text-red-400'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
-                          <Target className={`w-4 h-4`} />
-                        </div>
-                      </button>
-                    ))
-                  ) : null}
+                        <p className={`text-xs text-gray-300 capitalize ml-5`}>
+                          {section.type} • {(section.width * currentFloor.metersPerPixel).toFixed(1)}m × {(section.height * currentFloor.metersPerPixel).toFixed(1)}m
+                        </p>
+                      </div>
+                      <div className={`${searchType === 'start' ? 'text-emerald-400' : 'text-red-400'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+                        <Target className={`w-4 h-4`} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
               
               {/* No Results Message */}
-              {showSearchResults && searchQuery.trim() && filteredSections.length === 0 && (
+              {showSearchResults && searchQuery.trim().length > 0 && filteredSections.length === 0 && (
                 <div className={`absolute top-full left-0 right-0 mt-2 bg-gray-700 border border-gray-600/50 rounded-lg shadow-2xl p-4 text-center text-gray-400 text-sm`} style={{ zIndex: 99999 }}>
                   <Search className={`w-6 h-6 mx-auto mb-2 opacity-50`} />
                   No rooms found matching "{searchQuery}"

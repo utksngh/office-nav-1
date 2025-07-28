@@ -164,8 +164,8 @@ const FloorMap: React.FC<FloorMapProps> = ({
   const adjustViewportToShowRoute = (path: Point[]) => {
     if (!containerRef.current || path.length === 0) return;
 
-    // Calculate bounding box of the route with padding
-    const padding = isMobile ? 80 : 100;
+    // Calculate bounding box of the route with generous padding
+    const padding = isMobile ? 120 : 150;
     let minX = Math.min(...path.map(p => p.x)) - padding;
     let maxX = Math.max(...path.map(p => p.x)) + padding;
     let minY = Math.min(...path.map(p => p.y)) - padding;
@@ -181,21 +181,24 @@ const FloorMap: React.FC<FloorMapProps> = ({
     const routeHeight = maxY - minY;
     const containerRect = containerRef.current.getBoundingClientRect();
 
-    // Calculate optimal zoom level to fit the route
+    // Calculate optimal zoom level to fit the route (with reasonable limits)
     const zoomX = containerRect.width / routeWidth;
     const zoomY = containerRect.height / routeHeight;
-    const optimalZoom = Math.min(zoomX, zoomY, 2); // Max zoom of 2x
+    const optimalZoom = Math.min(zoomX, zoomY, isMobile ? 1.5 : 1.8); // Reasonable max zoom
+    
+    // Don't zoom in too much - maintain minimum view area
+    const finalZoom = Math.max(optimalZoom, 0.5);
 
     // Calculate center point of the route
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
 
     // Calculate scroll position to center the route
-    const scrollLeft = centerX * optimalZoom - containerRect.width / 2;
-    const scrollTop = centerY * optimalZoom - containerRect.height / 2;
+    const scrollLeft = centerX * finalZoom - containerRect.width / 2;
+    const scrollTop = centerY * finalZoom - containerRect.height / 2;
 
     // Apply zoom and scroll
-    setZoomLevel(optimalZoom);
+    setZoomLevel(finalZoom);
     containerRef.current.scrollTo({
       left: Math.max(0, scrollLeft),
       top: Math.max(0, scrollTop),

@@ -152,6 +152,18 @@ select:focus-visible {
 
 /* Mobile-specific improvements */
 @media (max-width: 768px) {
+  /* Ensure dropdowns are always on top */
+  .search-dropdown {
+    position: absolute !important;
+    z-index: 99999 !important;
+    pointer-events: auto !important;
+  }
+  
+  .search-dropdown > div {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+  }
+  
   /* Enhanced touch targets for zoom controls */
   button[title*="Zoom"] {
     min-width: 44px !important;

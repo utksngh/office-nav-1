@@ -176,17 +176,17 @@ const MobileQuickNavigation: React.FC<MobileQuickNavigationProps> = ({
           </div>
           
           {/* Search Results Dropdown */}
-          {showSearchResults && searchQuery.trim() && filteredSections.length > 0 && (
+          {showSearchResults && searchQuery.trim().length > 0 && filteredSections.length > 0 && (
             <div 
-              className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600/50 rounded-lg shadow-2xl max-h-48 overflow-y-auto custom-scrollbar" 
-              style={{ zIndex: 99999 }}
-              onMouseDown={(e) => e.preventDefault()}
+              className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600/50 rounded-lg shadow-2xl max-h-48 overflow-y-auto custom-scrollbar z-50" 
+              style={{ zIndex: 99999, position: 'absolute' }}
             >
               {filteredSections.map((section) => (
                 <div
                   key={section.id}
                   onClick={() => handleSearchSelect(section)}
-                  className="w-full p-3 text-left hover:bg-gray-700/80 active:bg-gray-600/90 transition-all duration-200 border-b border-gray-600/30 last:border-b-0 flex items-center justify-between group cursor-pointer touch-manipulation"
+                  className="w-full p-3 text-left hover:bg-gray-700 active:bg-gray-600 transition-all duration-200 border-b border-gray-600/30 last:border-b-0 flex items-center justify-between group cursor-pointer"
+                  style={{ minHeight: '48px' }}
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
@@ -211,9 +211,9 @@ const MobileQuickNavigation: React.FC<MobileQuickNavigationProps> = ({
           )}
           
           {/* No Results Message */}
-          {showSearchResults && searchQuery.trim() && filteredSections.length === 0 && (
+          {showSearchResults && searchQuery.trim().length > 0 && filteredSections.length === 0 && (
             <div 
-              className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600/50 rounded-lg shadow-2xl p-4 text-center text-gray-400 text-sm"
+              className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600/50 rounded-lg shadow-2xl p-4 text-center text-gray-400 text-sm z-50"
               style={{ zIndex: 99999 }}
             >
               <Search className="w-6 h-6 mx-auto mb-2 opacity-50" />
