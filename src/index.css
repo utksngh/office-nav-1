@@ -41,9 +41,33 @@
 
 /* Touch-friendly mobile interactions */
 @media (max-width: 768px) {
+  /* Force vertical and horizontal scrolling on mobile */
+  .mobile-scroll-container {
+    overflow: scroll !important;
+    overflow-x: scroll !important;
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x pan-y !important;
+    overscroll-behavior: contain !important;
+    scroll-behavior: smooth !important;
+    height: 100% !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure scrolling works in all mobile containers */
+  div[style*="overflow: scroll"] {
+    overflow: scroll !important;
+    overflow-x: scroll !important;
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x pan-y !important;
+  }
+  
   /* Force proper scrolling on mobile */
   .overflow-auto, [style*="overflow: auto"] {
-    overflow: auto !important;
+    overflow: scroll !important;
+    overflow-x: scroll !important;
+    overflow-y: scroll !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior: contain !important;
     touch-action: pan-x pan-y !important;
@@ -140,8 +164,9 @@
   
   /* Force proper scrolling behavior */
   .overflow-auto {
-    overflow-x: auto !important;
-    overflow-y: auto !important;
+    overflow: scroll !important;
+    overflow-x: scroll !important;
+    overflow-y: scroll !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior: contain !important;
     touch-action: pan-x pan-y !important;
@@ -258,17 +283,19 @@ select:focus-visible {
   
   /* Better scrolling behavior */
   .overflow-auto {
+    overflow: scroll !important;
+    overflow-x: scroll !important;
+    overflow-y: scroll !important;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    overflow-x: auto;
-    overflow-y: auto;
     scroll-behavior: smooth;
   }
   
   /* Ensure map container allows both horizontal and vertical scrolling */
   .overflow-auto {
-    overflow-x: auto;
-    overflow-y: auto;
+    overflow: scroll !important;
+    overflow-x: scroll !important;
+    overflow-y: scroll !important;
     touch-action: pan-x pan-y;
   }
   

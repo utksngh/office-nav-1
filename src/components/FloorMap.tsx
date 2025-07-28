@@ -212,17 +212,27 @@ const FloorMap: React.FC<FloorMapProps> = ({
   const minHeight = isMobile ? Math.max(window.innerHeight * 0.8, 700) : 600;
 
   return (
-    <div 
-      ref={containerRef}
-      className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'}`}
-      style={{
-        overflow: 'auto',
-        overscrollBehavior: 'contain',
-        WebkitOverflowScrolling: 'touch',
-        scrollBehavior: 'smooth',
-        touchAction: isMobile ? 'pan-x pan-y' : 'auto'
-      }}
-    >
+    <div className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} overflow-hidden`}>
+      <div 
+        ref={containerRef}
+        className="w-full h-full"
+        style={isMobile ? {
+          overflow: 'scroll',
+          overflowX: 'scroll',
+          overflowY: 'scroll',
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-x pan-y',
+          scrollBehavior: 'smooth',
+          overscrollBehavior: 'contain',
+          height: '100%',
+          width: '100%'
+        } : {
+          overflow: 'auto',
+          overscrollBehavior: 'contain',
+          WebkitOverflowScrolling: 'touch',
+          scrollBehavior: 'smooth'
+        }}
+      >
       <svg
         ref={svgRef}
         width={Math.max(scaledWidth, minWidth)}
@@ -412,6 +422,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
         )}
       </svg>
 
+      </div>
     </div>
   );
 };

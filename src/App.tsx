@@ -557,15 +557,7 @@ function App() {
             </div>
 
             <div 
-              className={`flex-1 ${isMobile ? 'rounded-md' : 'rounded-xl'} border border-gray-700/50 shadow-inner relative overflow-hidden`}
-            >
-              <div 
-                ref={setMapContainerRef}
-                className="w-full h-full"
-                style={isMobile ? { 
-                  overflow: 'auto',
-                  overscrollBehavior: 'contain',
-                  WebkitOverflowScrolling: 'touch',
+              className="w-full h-full overflow-hidden"
                   touchAction: 'pan-x pan-y',
                   scrollBehavior: 'smooth'
                 } : { overflow: 'auto' }}
@@ -595,6 +587,7 @@ function App() {
                onZoomOut={handleZoomOut}
                onResetZoom={handleResetZoom}
               />
+              </div>
               </div>
             </div>
           </div>
@@ -692,6 +685,25 @@ function App() {
               onClick={dismissInstructions}
               className={`w-full ${isMobile ? 'px-5 py-3 text-base' : 'px-4 py-3'} bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105`}
             >
+              <div 
+                ref={setMapContainerRef}
+                className="w-full h-full"
+                style={isMobile ? { 
+                  overflow: 'scroll',
+                  overflowX: 'scroll',
+                  overflowY: 'scroll',
+                  WebkitOverflowScrolling: 'touch',
+                  touchAction: 'pan-x pan-y',
+                  scrollBehavior: 'smooth',
+                  overscrollBehavior: 'contain',
+                  height: '100%',
+                  width: '100%'
+                } : { 
+                  overflow: 'auto',
+                  height: '100%',
+                  width: '100%'
+                }}
+              >
               Get Started
             </button>
           </div>
