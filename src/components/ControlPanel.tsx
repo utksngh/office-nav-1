@@ -1,473 +1,428 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { FloorData, Point, OfficeSection } from '../types';
-import { MapPin, Trash2, Edit3, Save, X, Plus, Navigation, Download, Upload, Route } from 'lucide-react';
-import { formatDistance, formatCoordinates, calculatePixelDistanceInMeters } from '../utils/geoUtils';
+import { findPath } from '../utils/pathfinding';
+import { calculatePixelDistanceInMeters, formatDistance } from '../utils/geoUtils';
+import { X } from 'lucide-react';
+import OfficeSpace from './OfficeSpace';
+import PathVisualization from './PathVisualization';
 
-interface ControlPanelProps {
-  currentFloor: FloorData;
+interface FloorMapProps {
+  floorData: FloorData;
   startPoint: Point | null;
   endPoint: Point | null;
-  selectedSection: string | null;
-  onSectionUpdate: (sectionId: string, updates: Partial<OfficeSection>) => void;
-  onSectionDelete: (sectionId: string) => void;
+  onPointSelect: (point: Point, type: 'start' | 'end') => void;
   onClearPath: () => void;
-  isVisible: boolean;
-  onClose: () => void;
-  isMobile: boolean;
-  saveLayout: () => void;
-  saveToFile: () => void;
-  loadFromFile: () => void;
-  resetToDefault: () => void;
   isAddingSection: boolean;
-  onToggleAddingSection: () => void;
-  isNavigating: boolean;
-  onStartNavigation: () => void;
-  onStopNavigation: () => void;
-  onShowDirections: () => void;
-  currentPath: Point[];
+  onAddSection: (section: Omit<OfficeSection, 'id'>) => void;
+  selectedSection: string | null;
   onSectionSelect: (sectionId: string | null) => void;
+  onSectionUpdate: (sectionId: string, updates: Partial<OfficeSection>) => void;
+  isMobile: boolean;
+  isNavigating: boolean;
+  zoomLevel: number;
+  mapTransform: { x: number; y: number };
+  onMapTransform: (transform: { x: number; y: number }) => void;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onResetZoom: () => void;
+  onPathUpdate: (path: Point[]) => void;
 }
 
-const ControlPanel: React.FC<ControlPanelProps> = ({
-  currentFloor,
+const FloorMap: React.FC<FloorMapProps> = ({
+  floorData,
   startPoint,
   endPoint,
-  selectedSection,
-  onSectionUpdate,
-  onSectionDelete,
+  onPointSelect,
   onClearPath,
-  isVisible,
-  onClose,
-  isMobile,
-  saveLayout,
-  saveToFile,
-  loadFromFile,
-  resetToDefault,
   isAddingSection,
-  onToggleAddingSection,
-  isNavigating,
-  onStartNavigation,
-  onStopNavigation,
-  onShowDirections,
-  currentPath,
+  onAddSection,
+  selectedSection,
   onSectionSelect,
+  onSectionUpdate,
+  isMobile,
+  isNavigating,
+  zoomLevel,
+  mapTransform,
+  onMapTransform,
+  onZoomIn,
+  onZoomOut,
+  onResetZoom,
+  onPathUpdate
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<Partial<OfficeSection>>({});
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [drawStart, setDrawStart] = useState<Point | null>(null);
+  const [currentPath, setCurrentPath] = useState<Point[]>([]);
+  const svgRef = useRef<SVGSVGElement>(null);
 
-  const selectedSectionData = selectedSection 
-    ? currentFloor.sections.find(s => s.id === selectedSection)
-    : null;
+  const getSectionTypeColor = (type: OfficeSection['type']) => {
+    const colors = {
+      office: '#3B82F6',
+      meeting: '#8B5CF6',
+      reception: '#10B981',
+      cafeteria: '#F59E0B',
+      storage: '#6B7280',
+      department: '#EF4444',
+      executive: '#F97316',
+      lounge: '#06B6D4'
+    };
+    return colors[type];
+  };
 
-  const handleEdit = () => {
-    if (selectedSectionData) {
-      setEditData(selectedSectionData);
-      setIsEditing(true);
+  // Find the nearest corner of the closest section to the clicked point
+  const handleSVGClick = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
+    if (!svgRef.current) return;
+
+    const rect = svgRef.current.getBoundingClientRect();
+    // Adjust for zoom and transform
+    const x = (event.clientX - rect.left) / zoomLevel - mapTransform.x;
+    const y = (event.clientY - rect.top) / zoomLevel - mapTransform.y;
+    const point: Point = { x, y };
+
+    if (isAddingSection) {
+      if (!isDrawing) {
+        setIsDrawing(true);
+        setDrawStart(point);
+      } else {
+        if (drawStart) {
+          const width = Math.abs(x - drawStart.x);
+          const height = Math.abs(y - drawStart.y);
+          const newSection: Omit<OfficeSection, 'id'> = {
+            name: `Section ${Date.now()}`,
+            x: Math.min(drawStart.x, x),
+            y: Math.min(drawStart.y, y),
+            width,
+            height,
+            type: 'office'
+          };
+          onAddSection(newSection);
+        }
+        setIsDrawing(false);
+        setDrawStart(null);
+      }
+    } else {
+      // Point selection for pathfinding
+      // Use exact clicked point - no snapping or optimization
+      if (!startPoint) {
+        onPointSelect(point, 'start');
+      } else if (!endPoint) {
+        onPointSelect(point, 'end');
+      } else {
+        // Reset and set new start point
+        onPointSelect(point, 'start');
+      }
     }
-  };
+  }, [isAddingSection, isDrawing, drawStart, startPoint, endPoint, onPointSelect, onAddSection, zoomLevel, mapTransform]);
 
-  const handleSave = () => {
-    if (selectedSection && editData) {
-      onSectionUpdate(selectedSection, editData);
-      setIsEditing(false);
-      setEditData({});
+  // Calculate path when both points are set
+  React.useEffect(() => {
+    if (startPoint && endPoint) {
+      const path = findPath(startPoint, endPoint, floorData.sections, floorData.width, floorData.height);
+      setCurrentPath(path);
+      onPathUpdate(path);
+    } else {
+      setCurrentPath([]);
+      onPathUpdate([]);
     }
-  };
+  }, [startPoint, endPoint, floorData, onPathUpdate]);
 
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditData({});
-  };
-
-  const sectionTypes: OfficeSection['type'][] = [
-    'office', 'meeting', 'reception', 'cafeteria', 
-    'storage', 'department', 'executive', 'lounge'
-  ];
+  // Calculate the scaled dimensions
+  const scaledWidth = floorData.width * zoomLevel;
+  const scaledHeight = floorData.height * zoomLevel;
+  const minWidth = isMobile ? Math.max(window.innerWidth * 1.2, 1000) : 800;
+  const minHeight = isMobile ? Math.max(window.innerHeight * 0.8, 700) : 600;
 
   return (
-    <>
-      {/* Mobile overlay */}
-      {isVisible && isMobile && (
-        <div 
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
-          onClick={onClose}
+    <div className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} overflow-auto`}>
+      <svg
+        ref={svgRef}
+        width={Math.max(scaledWidth, minWidth)}
+        height={Math.max(scaledHeight, minHeight)}
+        viewBox={`0 0 ${floorData.width} ${floorData.height}`}
+        className={`${isMobile ? 'cursor-pointer touch-manipulation' : 'cursor-crosshair'} ${isMobile ? 'w-full h-full' : 'min-w-full min-h-full'}`}
+        onClick={handleSVGClick}
+        style={{
+          minWidth: `${Math.max(scaledWidth, minWidth)}px`,
+          minHeight: `${Math.max(scaledHeight, minHeight)}px`,
+          transform: `scale(${zoomLevel}) translate(${mapTransform.x}px, ${mapTransform.y}px)`,
+          transformOrigin: '0 0'
+        }}
+      >
+        {/* Grid */}
+        <defs>
+          {/* Fine grid pattern */}
+          <pattern id="fineGrid" width={10 / zoomLevel} height={10 / zoomLevel} patternUnits="userSpaceOnUse">
+            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#4B5563" strokeWidth="0.3" opacity="0.3"/>
+          </pattern>
+          
+          {/* Major grid pattern */}
+          <pattern id="majorGrid" width={50 / zoomLevel} height={50 / zoomLevel} patternUnits="userSpaceOnUse">
+            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#6B7280" strokeWidth="0.8" opacity="0.6"/>
+            <rect width="50" height="50" fill="url(#fineGrid)"/>
+          </pattern>
+          
+          {/* Professional floor texture */}
+          <pattern id="floorTexture" width={100 / zoomLevel} height={100 / zoomLevel} patternUnits="userSpaceOnUse">
+            <rect width="100" height="100" fill="#F3F4F6" opacity="0.05"/>
+            <circle cx="25" cy="25" r="1" fill="#E5E7EB" opacity="0.1"/>
+            <circle cx="75" cy="75" r="1" fill="#E5E7EB" opacity="0.1"/>
+          </pattern>
+          
+          {/* Gradient definitions */}
+          <linearGradient id="startGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#10B981" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#065F46" stopOpacity="0.8"/>
+          </linearGradient>
+          
+          <linearGradient id="endGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#EF4444" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#7F1D1D" stopOpacity="0.8"/>
+          </linearGradient>
+        </defs>
+        
+        {/* Professional floor background */}
+        <rect width="100%" height="100%" fill="#1F2937" />
+        <rect width="100%" height="100%" fill="url(#majorGrid)" />
+        <rect width="100%" height="100%" fill="url(#floorTexture)" />
+
+        {/* Floor plan border */}
+        <rect 
+          x="2" 
+          y="2" 
+          width={floorData.width - 4} 
+          height={floorData.height - 4} 
+          fill="none" 
+          stroke="#9CA3AF" 
+          strokeWidth="3" 
+          strokeDasharray="10,5"
+          opacity="0.8"
         />
+
+        {/* Office Sections */}
+        {floorData.sections.map((section) => (
+          <OfficeSpace
+            key={section.id}
+            section={section}
+            isSelected={selectedSection === section.id}
+            onSelect={() => onSectionSelect(section.id)}
+            onUpdate={(updates) => onSectionUpdate(section.id, updates)}
+            color={getSectionTypeColor(section.type)}
+            zoomLevel={zoomLevel}
+          />
+        ))}
+
+        {/* Corner indicators for better UX */}
+        {/* Corner indicators - only show when adding sections */}
+        {isAddingSection && floorData.sections.map((section) => (
+          <g key={`corners-${section.id}`}>
+            {[
+              { x: section.x, y: section.y },
+              { x: section.x + section.width, y: section.y },
+              { x: section.x, y: section.y + section.height },
+              { x: section.x + section.width, y: section.y + section.height }
+            ].map((corner, index) => (
+              <circle
+                key={index}
+                cx={corner.x}
+                cy={corner.y}
+                r={(isMobile ? 3 : 1) / zoomLevel}
+                fill="#3B82F6"
+                fillOpacity="0.6"
+                className="pointer-events-none"
+                stroke="#FFFFFF"
+                strokeWidth={0.5 / zoomLevel}
+              />
+            ))}
+          </g>
+        ))}
+        {/* Path Visualization */}
+        {currentPath.length > 0 && (
+          <PathVisualization path={currentPath} isMobile={isMobile} isNavigating={isNavigating} zoomLevel={zoomLevel} />
+        )}
+
+        {/* Start Point */}
+        {startPoint && (
+          <g>
+            <circle
+              cx={startPoint.x}
+              cy={startPoint.y}
+              r={(isMobile ? 20 : 10) / zoomLevel}
+              fill="url(#startGradient)"
+              stroke="#FFFFFF"
+              strokeWidth={(isMobile ? 5 : 3) / zoomLevel}
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
+            />
+            <circle
+              cx={startPoint.x}
+              cy={startPoint.y}
+              r={(isMobile ? 10 : 5) / zoomLevel}
+              fill="#FFFFFF"
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
+            />
+            <text
+              x={startPoint.x}
+              y={startPoint.y - (isMobile ? 32 : 18) / zoomLevel}
+              fill="#10B981"
+              fontSize={(isMobile ? 18 : 12) / zoomLevel}
+              fontWeight="bold"
+              textAnchor="middle"
+              className="drop-shadow-sm"
+            >
+              START
+            </text>
+          </g>
+        )}
+
+        {/* End Point */}
+        {endPoint && (
+          <g>
+            <circle
+              cx={endPoint.x}
+              cy={endPoint.y}
+              r={(isMobile ? 20 : 10) / zoomLevel}
+              fill="url(#endGradient)"
+              stroke="#FFFFFF"
+              strokeWidth={(isMobile ? 5 : 3) / zoomLevel}
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
+            />
+            <circle
+              cx={endPoint.x}
+              cy={endPoint.y}
+              r={(isMobile ? 10 : 5) / zoomLevel}
+              fill="#FFFFFF"
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
+            />
+            <text
+              x={endPoint.x}
+              y={endPoint.y - (isMobile ? 32 : 18) / zoomLevel}
+              fill="#EF4444"
+              fontSize={(isMobile ? 18 : 12) / zoomLevel}
+              fontWeight="bold"
+              textAnchor="middle"
+              className="drop-shadow-sm"
+            >
+              END
+            </text>
+          </g>
+        )}
+
+        {/* Drawing preview */}
+        {isDrawing && drawStart && (
+          <rect
+            x={drawStart.x}
+            y={drawStart.y}
+            width="0"
+            height="0"
+            fill="#10B981"
+            fillOpacity="0.3"
+            stroke="#10B981"
+            strokeWidth={2 / zoomLevel}
+            strokeDasharray="5,5"
+          />
+        )}
+      </svg>
+
+      {/* Instructions */}
+      <div className={`absolute ${isMobile ? 'top-2 left-2' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[160px]' : ''}`}>
+        {isNavigating ? (
+          <div className="text-blue-600">
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
+              🧭 Navigating
+            </p>
+            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
+              Following route
+            </p>
+          </div>
+        ) : isAddingSection ? (
+          <div className="text-emerald-600">
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-emerald-600 rounded-full animate-pulse`}></div>
+              {isMobile ? 'Adding Room' : 'Adding Section Mode'}
+            </p>
+            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
+              {isMobile ? 'Tap twice' : 'Click two points to create a rectangle'}
+            </p>
+          </div>
+        ) : (
+          <div className="text-blue-600">
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
+              {isMobile ? 'Navigation' : 'Navigation Mode'}
+            </p>
+            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
+              {isMobile ? 'Tap to set' : 'Click near corners for optimal paths'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Path info */}
+      {currentPath.length > 0 && (
+        <div className={`absolute ${isMobile ? 'top-2 right-2' : 'top-4 right-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[100px]' : 'min-w-[120px]'} shadow-xl border border-gray-300/50`}>
+          <div className={`${isNavigating ? 'text-blue-600' : 'text-emerald-600'}`}>
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} ${isNavigating ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full animate-pulse`}></div>
+              {isNavigating ? '🧭 Active' : 'Route Ready'}
+            </p>
+            {startPoint && endPoint && (
+              <>
+                <p className={`${isMobile ? 'mt-1' : 'mt-1'} font-medium`}>
+                  {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel))}
+                </p>
+                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-600 ${isMobile ? 'mt-0.5' : 'mt-1'}`}>
+                  ~{Math.ceil(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel) / 1.4)} sec
+                </p>
+              </>
+            )}
+          </div>
+        </div>
       )}
       
-      <aside className={`
-        ${isMobile ? 'fixed' : 'relative'} ${isMobile ? 'top-0 left-0' : ''} h-full
-        ${isMobile ? 'w-full max-w-[85vw]' : 'w-80 lg:w-96'} 
-        bg-gray-800/95 backdrop-blur-sm border-r border-gray-700/50 
-        ${isMobile ? 'p-4' : 'p-4 lg:p-6'} overflow-y-auto z-50 shadow-2xl
-        transform transition-all duration-300 ease-in-out
-        ${isVisible || !isMobile ? 'translate-x-0' : '-translate-x-full'}
-      `}>
-        {/* Mobile close button */}
-        {isMobile && (
+      {/* Mobile Reset Selection Button */}
+      {isMobile && selectedSection && !isAddingSection && (
+        <button
+          onClick={() => onSectionSelect(null)}
+          className="fixed bottom-4 right-4 p-3 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50 min-w-[48px] min-h-[48px] flex items-center justify-center"
+          style={{ zIndex: 1000 }}
+        >
+          <X className="w-5 h-5" />
+        </button>
+      )}
+      
+      {/* Mobile Zoom Controls - Alternative Position */}
+      {isMobile && (
+        <div className="fixed bottom-4 left-4 flex flex-col gap-2 z-40">
           <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white bg-gray-700/50 rounded-lg backdrop-blur-sm transition-all duration-200"
+            onClick={onZoomIn}
+            className="p-2.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[48px] flex items-center justify-center"
+            title="Zoom In"
           >
-            <X className="w-5 h-5" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+            </svg>
           </button>
-        )}
-        
-      <div className={`${isMobile ? 'space-y-4' : 'space-y-4 lg:space-y-6'}`}>
-        {/* Navigation Controls */}
-        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
-          <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-3' : 'mb-3'} flex items-center gap-2`}>
-            <div className={`${isMobile ? 'p-1.5' : 'p-1.5'} bg-gradient-to-br from-blue-500 to-blue-600 rounded-md`}>
-              <Navigation className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-white`} />
-            </div>
-            Navigation Control
-          </h3>
           
-          {startPoint && endPoint ? (
-            <div className={`${isMobile ? 'p-3' : 'p-3'} bg-emerald-500/10 border border-emerald-500/20 rounded-md text-center`}>
-              <p className={`text-emerald-400 ${isMobile ? 'text-sm' : 'text-sm'} font-medium`}>
-                ✅ Route is ready for navigation!
-              </p>
-            </div>
-          ) : (
-            <div className={`${isMobile ? 'p-3' : 'p-3'} bg-yellow-500/10 border border-yellow-500/20 rounded-md text-center`}>
-              <p className={`text-yellow-400 ${isMobile ? 'text-sm' : 'text-sm'} font-medium`}>
-                {!startPoint ? 'Set start point on map' : 'Set destination on map'}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
-          <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-3' : 'mb-3'}`}>
-            Quick Actions
-          </h3>
+          <button
+            onClick={onResetZoom}
+            className="px-2.5 py-1.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[36px] flex items-center justify-center font-mono text-xs font-semibold"
+            title="Reset Zoom"
+          >
+            {Math.round(zoomLevel * 100)}%
+          </button>
           
-          <div className={`grid grid-cols-2 ${isMobile ? 'gap-2' : 'gap-2'}`}>
-            <button
-              onClick={() => {
-                onToggleAddingSection();
-                if (isMobile && selectedSection) {
-                  // Reset selection when toggling add mode on mobile
-                  onSectionSelect(null);
-                }
-              }}
-              className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} rounded-lg transition-all duration-300 font-medium shadow-lg ${
-                isAddingSection
-                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white transform scale-105'
-                  : 'bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white'
-              }`}
-            >
-              <Plus className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} mx-auto mb-1`} />
-              Add Room
-            </button>
-            
-            <button
-              onClick={saveLayout}
-              className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white rounded-lg transition-all duration-300 font-medium shadow-lg`}
-            >
-              <Save className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} mx-auto mb-1`} />
-              Save
-            </button>
-            
-            <button
-              onClick={saveToFile}
-              className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white rounded-lg transition-all duration-300 font-medium shadow-lg`}
-            >
-              <Download className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} mx-auto mb-1`} />
-              Export
-            </button>
-            
-            <button
-              onClick={loadFromFile}
-              className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white rounded-lg transition-all duration-300 font-medium shadow-lg`}
-            >
-              <Upload className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} mx-auto mb-1`} />
-              Import
-            </button>
-          </div>
+          <button
+            onClick={onZoomOut}
+            className="p-2.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[48px] flex items-center justify-center"
+            title="Zoom Out"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+            </svg>
+          </button>
         </div>
-
-        {/* Navigation Status */}
-        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
-          <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-3' : 'mb-3'}`}>
-            Route Status
-          </h3>
-          
-          <div className={`${isMobile ? 'space-y-3' : 'space-y-3'} ${isMobile ? 'text-sm' : 'text-sm'}`}>
-            <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-gray-600/30 rounded-md`}>
-              <span className="text-gray-400">Start Point:</span>
-              <span className={`font-medium ${startPoint ? 'text-emerald-400' : 'text-gray-500'}`}>
-                {startPoint ? 
-                  `${Math.round(startPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(startPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 
-                  'Not set'
-                }
-              </span>
-            </div>
-            
-            <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-gray-600/30 rounded-md`}>
-              <span className="text-gray-400">End Point:</span>
-              <span className={`font-medium ${endPoint ? 'text-red-400' : 'text-gray-500'}`}>
-                {endPoint ? 
-                  `${Math.round(endPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(endPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 
-                  'Not set'
-                }
-              </span>
-            </div>
-            
-            {startPoint && endPoint && (
-              <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-blue-500/10 border border-blue-500/20 rounded-md`}>
-                <span className="text-gray-400">Distance:</span>
-                <span className="text-blue-400 font-bold">
-                  {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, currentFloor.metersPerPixel))}
-                </span>
-              </div>
-            )}
-            
-            {/* Navigation Controls */}
-            {startPoint && endPoint && (
-              <div className={`${isMobile ? 'space-y-2' : 'space-y-2'} ${isMobile ? 'mt-3' : 'mt-3'}`}>
-                <div className={`grid ${currentPath.length > 0 ? 'grid-cols-2' : 'grid-cols-1'} ${isMobile ? 'gap-2' : 'gap-2'}`}>
-                  {currentPath.length > 0 && (
-                    <button
-                      onClick={onShowDirections}
-                      className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-1.5`}
-                    >
-                      <Route className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'}`} />
-                      Directions
-                    </button>
-                  )}
-                  
-                  {isNavigating ? (
-                    <button
-                      onClick={onStopNavigation}
-                      className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-1.5`}
-                    >
-                      <X className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'}`} />
-                      Stop Nav
-                    </button>
-                  ) : (
-                    <button
-                      onClick={onStartNavigation}
-                      className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-1.5`}
-                    >
-                      <Navigation className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'}`} />
-                      Start Nav
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-            
-            {(startPoint || endPoint) && (
-              <button
-                onClick={onClearPath}
-                className={`w-full ${isMobile ? 'mt-2 px-4 py-2.5 text-sm' : 'mt-2 px-4 py-2.5 text-sm'} bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105`}
-              >
-                Clear Path
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Floor Sections */}
-        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
-          <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-3' : 'mb-3'} flex items-center justify-between`}>
-            <span>Rooms & Areas</span>
-            <span className={`${isMobile ? 'text-xs' : 'text-xs'} bg-blue-500/20 text-blue-400 ${isMobile ? 'px-2.5 py-1' : 'px-2 py-1'} rounded-full`}>
-              {currentFloor.sections.length}
-            </span>
-          </h3>
-          
-          <div className={`${isMobile ? 'space-y-2' : 'space-y-2'} ${isMobile ? 'max-h-64' : 'max-h-64 lg:max-h-96'} overflow-y-auto custom-scrollbar`}>
-            {currentFloor.sections.map((section) => (
-              <div
-                key={section.id}
-                className={`${isMobile ? 'p-3' : 'p-3'} rounded-lg cursor-pointer transition-all duration-300 border ${
-                  selectedSection === section.id
-                    ? 'bg-gradient-to-r from-blue-500/20 to-blue-600/20 border-blue-400/50 shadow-lg'
-                    : 'bg-gray-600/50 hover:bg-gray-600/70 border-gray-500/30 hover:border-gray-400/50'
-                }`}
-                onClick={() => onSectionSelect(section.id)}
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h4 className="font-semibold truncate text-white">{section.name}</h4>
-                    <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-300 capitalize font-medium`}>{section.type}</p>
-                    <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-400`}>
-                      {(section.width * currentFloor.metersPerPixel).toFixed(1)}m × {(section.height * currentFloor.metersPerPixel).toFixed(1)}m
-                    </p>
-                  </div>
-                  
-                  <div
-                    className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} rounded-md shadow-sm border border-white/20`}
-                    style={{
-                      backgroundColor: getSectionTypeColor(section.type)
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Section Editor */}
-        {selectedSectionData && (
-          <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
-            <div className={`flex items-center justify-between ${isMobile ? 'mb-3' : 'mb-4'}`}>
-              <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold`}>Room Details</h3>
-              <div className={`flex ${isMobile ? 'gap-1.5' : 'gap-1'}`}>
-                {isEditing ? (
-                  <>
-                    <button
-                      onClick={handleSave}
-                      className={`${isMobile ? 'p-2' : 'p-2'} text-emerald-400 hover:bg-emerald-400 hover:text-white rounded-md transition-all duration-300 shadow-sm`}
-                    >
-                      <Save className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} />
-                    </button>
-                    <button
-                      onClick={handleCancel}
-                      className={`${isMobile ? 'p-2' : 'p-2'} text-gray-400 hover:bg-gray-600 hover:text-white rounded-md transition-all duration-300 shadow-sm`}
-                    >
-                      <X className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={handleEdit}
-                      className={`${isMobile ? 'p-2' : 'p-2'} text-blue-400 hover:bg-blue-400 hover:text-white rounded-md transition-all duration-300 shadow-sm`}
-                    >
-                      <Edit3 className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} />
-                    </button>
-                    <button
-                      onClick={() => onSectionDelete(selectedSection)}
-                      className={`${isMobile ? 'p-2' : 'p-2'} text-red-400 hover:bg-red-400 hover:text-white rounded-md transition-all duration-300 shadow-sm`}
-                    >
-                      <Trash2 className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} />
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {isEditing ? (
-              <div className={`${isMobile ? 'space-y-3' : 'space-y-3'}`}>
-                <div>
-                  <label className={`block ${isMobile ? 'text-sm' : 'text-sm'} font-semibold text-gray-300 ${isMobile ? 'mb-2' : 'mb-2'}`}>
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    value={editData.name || ''}
-                    onChange={(e) => setEditData({...editData, name: e.target.value})}
-                    className={`w-full ${isMobile ? 'px-3 py-2.5 text-sm' : 'px-3 py-2.5'} bg-gray-600/80 border border-gray-500/50 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block ${isMobile ? 'text-sm' : 'text-sm'} font-semibold text-gray-300 ${isMobile ? 'mb-2' : 'mb-2'}`}>
-                    Type
-                  </label>
-                  <select
-                    value={editData.type || ''}
-                    onChange={(e) => setEditData({...editData, type: e.target.value as OfficeSection['type']})}
-                    className={`w-full ${isMobile ? 'px-3 py-2.5 text-sm' : 'px-3 py-2.5'} bg-gray-600/80 border border-gray-500/50 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
-                  >
-                    {sectionTypes.map(type => (
-                      <option key={type} value={type}>
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className={`grid grid-cols-2 ${isMobile ? 'gap-2' : 'gap-2'}`}>
-                  <div>
-                    <label className={`block ${isMobile ? 'text-sm' : 'text-sm'} font-semibold text-gray-300 ${isMobile ? 'mb-2' : 'mb-2'}`}>
-                      Width (m)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={editData.width ? (editData.width * currentFloor.metersPerPixel).toFixed(1) : ''}
-                      onChange={(e) => setEditData({...editData, width: Number(e.target.value) / currentFloor.metersPerPixel})}
-                      className={`w-full ${isMobile ? 'px-3 py-2.5 text-sm' : 'px-3 py-2.5'} bg-gray-600/80 border border-gray-500/50 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
-                    />
-                  </div>
-                  <div>
-                    <label className={`block ${isMobile ? 'text-sm' : 'text-sm'} font-semibold text-gray-300 ${isMobile ? 'mb-2' : 'mb-2'}`}>
-                      Height (m)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={editData.height ? (editData.height * currentFloor.metersPerPixel).toFixed(1) : ''}
-                      onChange={(e) => setEditData({...editData, height: Number(e.target.value) / currentFloor.metersPerPixel})}
-                      className={`w-full ${isMobile ? 'px-3 py-2.5 text-sm' : 'px-3 py-2.5'} bg-gray-600/80 border border-gray-500/50 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className={`${isMobile ? 'space-y-3' : 'space-y-3'} ${isMobile ? 'text-sm' : 'text-sm'}`}>
-                <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-gray-600/30 rounded-md`}>
-                  <span className="text-gray-400">Name:</span>
-                  <span className="font-medium text-white">{selectedSectionData.name}</span>
-                </div>
-                <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-gray-600/30 rounded-md`}>
-                  <span className="text-gray-400">Type:</span>
-                  <span className="capitalize font-medium text-white">{selectedSectionData.type}</span>
-                </div>
-                <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-gray-600/30 rounded-md`}>
-                  <span className="text-gray-400">Coordinates:</span>
-                  <span className={`${isMobile ? 'text-xs' : 'text-xs'} font-mono text-blue-400`}>{formatCoordinates(selectedSectionData.coordinates)}</span>
-                </div>
-                <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-gray-600/30 rounded-md`}>
-                  <span className="text-gray-400">Size:</span>
-                  <span className="font-medium text-white">{(selectedSectionData.width * currentFloor.metersPerPixel).toFixed(1)}m × {(selectedSectionData.height * currentFloor.metersPerPixel).toFixed(1)}m</span>
-                </div>
-                <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-emerald-500/10 border border-emerald-500/20 rounded-md`}>
-                  <span className="text-gray-400">Area:</span>
-                  <span className="font-bold text-emerald-400">{((selectedSectionData.width * selectedSectionData.height * currentFloor.metersPerPixel * currentFloor.metersPerPixel)).toFixed(1)} m²</span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Instructions */}
-        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
-          <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-3' : 'mb-3'}`}>Instructions</h3>
-          <div className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-300 ${isMobile ? 'space-y-2' : 'space-y-2.5'}`}>
-            <p>• Tap map to set navigation points</p>
-            <p>• {isMobile ? 'Use floating zoom buttons' : 'Use zoom controls to adjust view'}</p>
-            <p>• Use + button to add new rooms</p>
-            <p>• Drag rooms to reposition them</p>
-            <p>• Tap rooms to view details</p>
-            <p>• Routes automatically avoid obstacles</p>
-            <p>• All measurements in meters</p>
-            {isMobile && <p>• Pinch to zoom, swipe to navigate</p>}
-          </div>
-        </div>
-      </div>
-    </aside>
-    </>
+      )}
+    </div>
   );
 };
 
-const getSectionTypeColor = (type: OfficeSection['type']) => {
-  const colors = {
-    office: '#3B82F6',
-    meeting: '#8B5CF6',
-    reception: '#10B981',
-    cafeteria: '#F59E0B',
-    storage: '#6B7280',
-    department: '#EF4444',
-    executive: '#F97316',
-    lounge: '#06B6D4'
-  };
-  return colors[type];
-};
-
-export default ControlPanel;
+export default FloorMap;

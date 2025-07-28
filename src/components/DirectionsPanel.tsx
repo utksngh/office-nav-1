@@ -1,450 +1,420 @@
-import React from 'react';
-import { Point, OfficeSection } from '../types';
+import React, { useState, useRef, useCallback } from 'react';
+import { FloorData, Point, OfficeSection } from '../types';
+import { findPath } from '../utils/pathfinding';
 import { calculatePixelDistanceInMeters, formatDistance } from '../utils/geoUtils';
-import { Navigation, ArrowRight, ArrowLeft, ArrowUp, RotateCw, MapPin, Clock } from 'lucide-react';
+import { X } from 'lucide-react';
+import OfficeSpace from './OfficeSpace';
+import PathVisualization from './PathVisualization';
 
-interface DirectionsPanelProps {
-  path: Point[];
-  isVisible: boolean;
-  onClose: () => void;
+interface FloorMapProps {
+  floorData: FloorData;
+  startPoint: Point | null;
+  endPoint: Point | null;
+  onPointSelect: (point: Point, type: 'start' | 'end') => void;
+  onClearPath: () => void;
+  isAddingSection: boolean;
+  onAddSection: (section: Omit<OfficeSection, 'id'>) => void;
+  selectedSection: string | null;
+  onSectionSelect: (sectionId: string | null) => void;
+  onSectionUpdate: (sectionId: string, updates: Partial<OfficeSection>) => void;
   isMobile: boolean;
   isNavigating: boolean;
-  metersPerPixel: number;
-  currentStep?: number;
-  onStepChange?: (step: number) => void;
-  floorSections: OfficeSection[];
+  zoomLevel: number;
+  mapTransform: { x: number; y: number };
+  onMapTransform: (transform: { x: number; y: number }) => void;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onResetZoom: () => void;
+  onPathUpdate: (path: Point[]) => void;
 }
 
-interface DirectionStep {
-  instruction: string;
-  distance: number;
-  direction: 'straight' | 'left' | 'right' | 'slight_left' | 'slight_right' | 'sharp_left' | 'sharp_right';
-  point: Point;
-  icon: React.ReactNode;
-  landmarks: string[];
-  passingBy: string[];
-}
-
-const DirectionsPanel: React.FC<DirectionsPanelProps> = ({
-  path,
-  isVisible,
-  onClose,
+const FloorMap: React.FC<FloorMapProps> = ({
+  floorData,
+  startPoint,
+  endPoint,
+  onPointSelect,
+  onClearPath,
+  isAddingSection,
+  onAddSection,
+  selectedSection,
+  onSectionSelect,
+  onSectionUpdate,
   isMobile,
   isNavigating,
-  metersPerPixel,
-  currentStep = 0,
-  onStepChange,
-  floorSections
+  zoomLevel,
+  mapTransform,
+  onMapTransform,
+  onZoomIn,
+  onZoomOut,
+  onResetZoom,
+  onPathUpdate
 }) => {
-  // Find nearby sections within a certain radius of a point
-  const findNearbyLandmarks = (point: Point, radius: number = 80): string[] => {
-    const nearby: string[] = [];
-    
-    for (const section of floorSections) {
-      const sectionCenter = {
-        x: section.x + section.width / 2,
-        y: section.y + section.height / 2
-      };
-      
-      const distance = Math.sqrt(
-        Math.pow(point.x - sectionCenter.x, 2) + 
-        Math.pow(point.y - sectionCenter.y, 2)
-      );
-      
-      if (distance <= radius) {
-        nearby.push(section.name);
-      }
-    }
-    
-    return nearby;
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [drawStart, setDrawStart] = useState<Point | null>(null);
+  const [currentPath, setCurrentPath] = useState<Point[]>([]);
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  const getSectionTypeColor = (type: OfficeSection['type']) => {
+    const colors = {
+      office: '#3B82F6',
+      meeting: '#8B5CF6',
+      reception: '#10B981',
+      cafeteria: '#F59E0B',
+      storage: '#6B7280',
+      department: '#EF4444',
+      executive: '#F97316',
+      lounge: '#06B6D4'
+    };
+    return colors[type];
   };
 
-  // Find sections you'll pass by between two points
-  const findPassingLandmarks = (start: Point, end: Point): string[] => {
-    const passing: string[] = [];
-    
-    // Create a line between start and end points
-    const steps = 20; // Number of points to check along the path
-    
-    for (let i = 1; i < steps; i++) {
-      const t = i / steps;
-      const checkPoint = {
-        x: start.x + (end.x - start.x) * t,
-        y: start.y + (end.y - start.y) * t
-      };
-      
-      // Find nearby landmarks at this point
-      const nearby = findNearbyLandmarks(checkPoint, 60);
-      nearby.forEach(landmark => {
-        if (!passing.includes(landmark)) {
-          passing.push(landmark);
+  // Find the nearest corner of the closest section to the clicked point
+
+    if (isAddingSection) {
+      if (!isDrawing) {
+        setIsDrawing(true);
+        setDrawStart(point);
+      } else {
+        if (drawStart) {
+          const width = Math.abs(x - drawStart.x);
+          const height = Math.abs(y - drawStart.y);
+          const newSection: Omit<OfficeSection, 'id'> = {
+      const nearby = findNearbyLandmarks(checkPoint, 50);
+            x: Math.min(drawStart.x, x),
+            y: Math.min(drawStart.y, y),
+            width,
+            height,
+            type: 'office'
+        if (!passing.includes(landmark) && !excludeNearby.includes(landmark)) {
+          onAddSection(newSection);
         }
-      });
-    }
-    
-    return passing;
-  };
-  const generateDirections = (): DirectionStep[] => {
-    if (path.length < 2) return [];
-
-    const directions: DirectionStep[] = [];
-    
-    // Start instruction
-    directions.push({
-      instruction: "Start your journey",
-      distance: 0,
-      direction: 'straight',
-      point: path[0],
-      icon: <MapPin className="w-4 h-4 text-emerald-500" />,
-      landmarks: findNearbyLandmarks(path[0]),
-      passingBy: []
-    });
-
-    // Generate turn-by-turn directions
-    for (let i = 1; i < path.length - 1; i++) {
-      const prev = path[i - 1];
-      const current = path[i];
-      const next = path[i + 1];
-      
-      const distance = calculatePixelDistanceInMeters(prev, current, metersPerPixel);
-      const direction = calculateTurnDirection(prev, current, next);
-      const landmarks = findNearbyLandmarks(current);
-      const passingBy = findPassingLandmarks(current, next);
-      
-      let instruction = "";
-      let icon = <ArrowUp className="w-4 h-4 text-blue-500" />;
-      
-      switch (direction) {
-        case 'straight':
-          instruction = landmarks.length > 0 
-            ? `Continue straight past ${landmarks[0]} for ${formatDistance(distance)}`
-            : `Continue straight for ${formatDistance(distance)}`;
-          icon = <ArrowUp className="w-4 h-4 text-blue-500" />;
-          break;
-        case 'left':
-          instruction = landmarks.length > 0 
-            ? `Turn left at ${landmarks[0]} and continue for ${formatDistance(distance)}`
-            : `Turn left and continue for ${formatDistance(distance)}`;
-          icon = <ArrowLeft className="w-4 h-4 text-orange-500" />;
-          break;
-        case 'right':
-          instruction = landmarks.length > 0 
-            ? `Turn right at ${landmarks[0]} and continue for ${formatDistance(distance)}`
-            : `Turn right and continue for ${formatDistance(distance)}`;
-          icon = <ArrowRight className="w-4 h-4 text-orange-500" />;
-          break;
-        case 'slight_left':
-          instruction = landmarks.length > 0 
-            ? `Bear left towards ${landmarks[0]} and continue for ${formatDistance(distance)}`
-            : `Bear left and continue for ${formatDistance(distance)}`;
-          icon = <RotateCw className="w-4 h-4 text-yellow-500 transform -rotate-45" />;
-          break;
-        case 'slight_right':
-          instruction = landmarks.length > 0 
-            ? `Bear right towards ${landmarks[0]} and continue for ${formatDistance(distance)}`
-            : `Bear right and continue for ${formatDistance(distance)}`;
-          icon = <RotateCw className="w-4 h-4 text-yellow-500 transform rotate-45" />;
-          break;
-        case 'sharp_left':
-          instruction = landmarks.length > 0 
-            ? `Make a sharp left turn at ${landmarks[0]} and continue for ${formatDistance(distance)}`
-            : `Make a sharp left turn and continue for ${formatDistance(distance)}`;
-          icon = <ArrowLeft className="w-4 h-4 text-red-500" />;
-          break;
-        case 'sharp_right':
-          instruction = landmarks.length > 0 
-            ? `Make a sharp right turn at ${landmarks[0]} and continue for ${formatDistance(distance)}`
-            : `Make a sharp right turn and continue for ${formatDistance(distance)}`;
-          icon = <ArrowRight className="w-4 h-4 text-red-500" />;
-          break;
+        setIsDrawing(false);
+        setDrawStart(null);
       }
-      
-      directions.push({
-        instruction,
-        distance,
-        direction,
-        point: current,
-        icon,
-        landmarks,
-        passingBy
-      });
+    } else {
+      // Point selection for pathfinding
+      // Use exact clicked point - no snapping or optimization
+      if (!startPoint) {
+        onPointSelect(point, 'start');
+      } else if (!endPoint) {
+        onPointSelect(point, 'end');
+      } else {
+        // Reset and set new start point
+        onPointSelect(point, 'start');
+      }
     }
+  }, [isAddingSection, isDrawing, drawStart, startPoint, endPoint, onPointSelect, onAddSection, zoomLevel, mapTransform]);
 
-    // Final destination
-    const finalDistance = calculatePixelDistanceInMeters(
-      path[path.length - 2], 
-      path[path.length - 1], 
-      metersPerPixel
-    );
-    
-    directions.push({
-      instruction: `Arrive at your destination after ${formatDistance(finalDistance)}`,
-      distance: finalDistance,
-      direction: 'straight',
-      point: path[path.length - 1],
-      icon: <MapPin className="w-4 h-4 text-red-500" />,
-      landmarks: findNearbyLandmarks(path[path.length - 1]),
-      passingBy: []
-    });
+  // Calculate path when both points are set
+  React.useEffect(() => {
+    if (startPoint && endPoint) {
+      const path = findPath(startPoint, endPoint, floorData.sections, floorData.width, floorData.height);
+      setCurrentPath(path);
+      onPathUpdate(path);
+    } else {
+      setCurrentPath([]);
+      onPathUpdate([]);
+    }
+  }, [startPoint, endPoint, floorData, onPathUpdate]);
 
-    return directions;
-  };
-
-  const calculateTurnDirection = (prev: Point, current: Point, next: Point): DirectionStep['direction'] => {
-    const angle1 = Math.atan2(current.y - prev.y, current.x - prev.x);
-    const angle2 = Math.atan2(next.y - current.y, next.x - current.x);
-    
-    let angleDiff = angle2 - angle1;
-    
-    // Normalize angle to [-π, π]
-    while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-    while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-    
-    const degrees = Math.abs(angleDiff * 180 / Math.PI);
-    
-    if (degrees < 15) return 'straight';
-    if (degrees < 45) return angleDiff > 0 ? 'slight_left' : 'slight_right';
-    if (degrees < 135) return angleDiff > 0 ? 'left' : 'right';
-    return angleDiff > 0 ? 'sharp_left' : 'sharp_right';
-  };
-
-  const directions = generateDirections();
-  const totalDistance = path.length > 1 ? 
-    calculatePixelDistanceInMeters(path[0], path[path.length - 1], metersPerPixel) : 0;
-  const estimatedTime = Math.ceil(totalDistance / 1.4); // Assuming 1.4 m/s walking speed
-
-  if (!isVisible || path.length < 2) return null;
+  // Calculate the scaled dimensions
+  const scaledWidth = floorData.width * zoomLevel;
+  const scaledHeight = floorData.height * zoomLevel;
+  const minWidth = isMobile ? Math.max(window.innerWidth * 1.2, 1000) : 800;
+  const minHeight = isMobile ? Math.max(window.innerHeight * 0.8, 700) : 600;
 
   return (
-    <>
-      {/* Mobile overlay */}
-      {isMobile && (
-        <div 
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
-          onClick={onClose}
+    <div className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} overflow-auto`}>
+      <svg
+        ref={svgRef}
+        width={Math.max(scaledWidth, minWidth)}
+        height={Math.max(scaledHeight, minHeight)}
+        viewBox={`0 0 ${floorData.width} ${floorData.height}`}
+        className={`${isMobile ? 'cursor-pointer touch-manipulation' : 'cursor-crosshair'} ${isMobile ? 'w-full h-full' : 'min-w-full min-h-full'}`}
+        onClick={handleSVGClick}
+        style={{
+          minWidth: `${Math.max(scaledWidth, minWidth)}px`,
+          minHeight: `${Math.max(scaledHeight, minHeight)}px`,
+          transform: `scale(${zoomLevel}) translate(${mapTransform.x}px, ${mapTransform.y}px)`,
+          transformOrigin: '0 0'
+        }}
+      >
+        {/* Grid */}
+        <defs>
+          {/* Fine grid pattern */}
+          <pattern id="fineGrid" width={10 / zoomLevel} height={10 / zoomLevel} patternUnits="userSpaceOnUse">
+            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#4B5563" strokeWidth="0.3" opacity="0.3"/>
+          </pattern>
+          
+          {/* Major grid pattern */}
+          <pattern id="majorGrid" width={50 / zoomLevel} height={50 / zoomLevel} patternUnits="userSpaceOnUse">
+            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#6B7280" strokeWidth="0.8" opacity="0.6"/>
+            <rect width="50" height="50" fill="url(#fineGrid)"/>
+          </pattern>
+          
+          {/* Professional floor texture */}
+          <pattern id="floorTexture" width={100 / zoomLevel} height={100 / zoomLevel} patternUnits="userSpaceOnUse">
+            <rect width="100" height="100" fill="#F3F4F6" opacity="0.05"/>
+            <circle cx="25" cy="25" r="1" fill="#E5E7EB" opacity="0.1"/>
+            <circle cx="75" cy="75" r="1" fill="#E5E7EB" opacity="0.1"/>
+          </pattern>
+          
+          {/* Gradient definitions */}
+          <linearGradient id="startGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#10B981" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#065F46" stopOpacity="0.8"/>
+          </linearGradient>
+          
+          <linearGradient id="endGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#EF4444" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#7F1D1D" stopOpacity="0.8"/>
+          </linearGradient>
+        </defs>
+        
+        {/* Professional floor background */}
+        <rect width="100%" height="100%" fill="#1F2937" />
+        <rect width="100%" height="100%" fill="url(#majorGrid)" />
+        <rect width="100%" height="100%" fill="url(#floorTexture)" />
+
+        {/* Floor plan border */}
+        <rect 
+          x="2" 
+          y="2" 
+          width={floorData.width - 4} 
+          height={floorData.height - 4} 
+          fill="none" 
+          stroke="#9CA3AF" 
+          strokeWidth="3" 
+          strokeDasharray="10,5"
+          opacity="0.8"
         />
+
+        {/* Office Sections */}
+        {floorData.sections.map((section) => (
+          <OfficeSpace
+            key={section.id}
+            section={section}
+            isSelected={selectedSection === section.id}
+            onSelect={() => onSectionSelect(section.id)}
+            onUpdate={(updates) => onSectionUpdate(section.id, updates)}
+            color={getSectionTypeColor(section.type)}
+            zoomLevel={zoomLevel}
+          />
+        ))}
+
+        {/* Corner indicators for better UX */}
+        {/* Corner indicators - only show when adding sections */}
+        {isAddingSection && floorData.sections.map((section) => (
+          <g key={`corners-${section.id}`}>
+            {[
+              { x: section.x, y: section.y },
+              { x: section.x + section.width, y: section.y },
+              { x: section.x, y: section.y + section.height },
+              { x: section.x + section.width, y: section.y + section.height }
+            ].map((corner, index) => (
+              <circle
+                key={index}
+                cx={corner.x}
+                cy={corner.y}
+                r={(isMobile ? 3 : 1) / zoomLevel}
+                fill="#3B82F6"
+                fillOpacity="0.6"
+                className="pointer-events-none"
+                stroke="#FFFFFF"
+                strokeWidth={0.5 / zoomLevel}
+              />
+            ))}
+          </g>
+        ))}
+        {/* Path Visualization */}
+        {currentPath.length > 0 && (
+          <PathVisualization path={currentPath} isMobile={isMobile} isNavigating={isNavigating} zoomLevel={zoomLevel} />
+        )}
+
+        {/* Start Point */}
+        {startPoint && (
+          <g>
+            <circle
+              cx={startPoint.x}
+              cy={startPoint.y}
+              r={(isMobile ? 20 : 10) / zoomLevel}
+              fill="url(#startGradient)"
+              stroke="#FFFFFF"
+              strokeWidth={(isMobile ? 5 : 3) / zoomLevel}
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
+            />
+            <circle
+              cx={startPoint.x}
+              cy={startPoint.y}
+              r={(isMobile ? 10 : 5) / zoomLevel}
+              fill="#FFFFFF"
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
+            />
+            <text
+              x={startPoint.x}
+              y={startPoint.y - (isMobile ? 32 : 18) / zoomLevel}
+              fill="#10B981"
+              fontSize={(isMobile ? 18 : 12) / zoomLevel}
+              fontWeight="bold"
+              textAnchor="middle"
+              className="drop-shadow-sm"
+            >
+              START
+            </text>
+          </g>
+        )}
+
+        {/* End Point */}
+        {endPoint && (
+          <g>
+            <circle
+              cx={endPoint.x}
+              cy={endPoint.y}
+              r={(isMobile ? 20 : 10) / zoomLevel}
+              fill="url(#endGradient)"
+              stroke="#FFFFFF"
+              strokeWidth={(isMobile ? 5 : 3) / zoomLevel}
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
+            />
+            <circle
+              cx={endPoint.x}
+              cy={endPoint.y}
+              r={(isMobile ? 10 : 5) / zoomLevel}
+              fill="#FFFFFF"
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
+            />
+            <text
+              x={endPoint.x}
+              y={endPoint.y - (isMobile ? 32 : 18) / zoomLevel}
+              fill="#EF4444"
+              fontSize={(isMobile ? 18 : 12) / zoomLevel}
+              fontWeight="bold"
+              textAnchor="middle"
+              className="drop-shadow-sm"
+            >
+              END
+            </text>
+          </g>
+        )}
+
+        {/* Drawing preview */}
+        {isDrawing && drawStart && (
+          <rect
+            x={drawStart.x}
+            y={drawStart.y}
+            width="0"
+            height="0"
+            fill="#10B981"
+            fillOpacity="0.3"
+            stroke="#10B981"
+            strokeWidth={2 / zoomLevel}
+            strokeDasharray="5,5"
+          />
+        )}
+      </svg>
+
+      {/* Instructions */}
+      <div className={`absolute ${isMobile ? 'top-2 left-2' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[160px]' : ''}`}>
+        {isNavigating ? (
+          <div className="text-blue-600">
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
+              🧭 Navigating
+            </p>
+            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
+              Following route
+            </p>
+          </div>
+        ) : isAddingSection ? (
+          <div className="text-emerald-600">
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-emerald-600 rounded-full animate-pulse`}></div>
+              {isMobile ? 'Adding Room' : 'Adding Section Mode'}
+            </p>
+            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
+              {isMobile ? 'Tap twice' : 'Click two points to create a rectangle'}
+            </p>
+          </div>
+        ) : (
+          <div className="text-blue-600">
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
+              {isMobile ? 'Navigation' : 'Navigation Mode'}
+            </p>
+            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
+              {isMobile ? 'Tap to set' : 'Click near corners for optimal paths'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Path info */}
+      {currentPath.length > 0 && (
+        <div className={`absolute ${isMobile ? 'top-2 right-2' : 'top-4 right-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[100px]' : 'min-w-[120px]'} shadow-xl border border-gray-300/50`}>
+          <div className={`${isNavigating ? 'text-blue-600' : 'text-emerald-600'}`}>
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} ${isNavigating ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full animate-pulse`}></div>
+              {isNavigating ? '🧭 Active' : 'Route Ready'}
+            </p>
+            {startPoint && endPoint && (
+              <>
+                <p className={`${isMobile ? 'mt-1' : 'mt-1'} font-medium`}>
+                  {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel))}
+                </p>
+                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-600 ${isMobile ? 'mt-0.5' : 'mt-1'}`}>
+                  ~{Math.ceil(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel) / 1.4)} sec
+                </p>
+              </>
+            )}
+          </div>
+        </div>
       )}
       
-      <div className={`
-        ${isMobile ? 'fixed bottom-0 left-0 right-0' : 'absolute top-4 right-4 w-80 lg:w-96'}
-        ${isMobile ? 'max-h-[70vh]' : 'max-h-[calc(100vh-2rem)]'}
-        bg-white/95 backdrop-blur-sm rounded-t-2xl ${isMobile ? '' : 'rounded-2xl'} 
-        shadow-2xl border border-gray-300/50 z-50 overflow-hidden
-        transform transition-all duration-300 ease-in-out
-      `}>
-        {/* Header */}
-        <div className={`bg-gradient-to-r from-blue-500 to-blue-600 text-white ${isMobile ? 'p-4' : 'p-4'}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`${isMobile ? 'p-2' : 'p-2'} bg-white/20 rounded-lg`}>
-                <Navigation className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} />
-              </div>
-              <div>
-                <h3 className={`${isMobile ? 'text-lg' : 'text-lg'} font-bold`}>
-                  {isNavigating ? 'Navigation Active' : 'Route Directions'}
-                </h3>
-                <div className={`flex items-center gap-4 ${isMobile ? 'text-sm' : 'text-sm'} text-blue-100`}>
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {formatDistance(totalDistance)}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    ~{estimatedTime} sec
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            <button
-              onClick={onClose}
-              className={`${isMobile ? 'p-2' : 'p-2'} hover:bg-white/20 rounded-lg transition-colors duration-200`}
-            >
-              <svg className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+      {/* Mobile Reset Selection Button */}
+      {isMobile && selectedSection && !isAddingSection && (
+        <button
+          onClick={() => onSectionSelect(null)}
+          className="fixed bottom-4 right-4 p-3 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50 min-w-[48px] min-h-[48px] flex items-center justify-center"
+          style={{ zIndex: 1000 }}
+        >
+          <X className="w-5 h-5" />
+        </button>
+      )}
+      
+      {/* Mobile Zoom Controls - Alternative Position */}
+      {isMobile && (
+        <div className="fixed bottom-4 left-4 flex flex-col gap-2 z-40">
+          <button
+            onClick={onZoomIn}
+            className="p-2.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[48px] flex items-center justify-center"
+            title="Zoom In"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+            </svg>
+          </button>
+          
+          <button
+            onClick={onResetZoom}
+            className="px-2.5 py-1.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[36px] flex items-center justify-center font-mono text-xs font-semibold"
+            title="Reset Zoom"
+          >
+            {Math.round(zoomLevel * 100)}%
+          </button>
+          
+          <button
+            onClick={onZoomOut}
+            className="p-2.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[48px] flex items-center justify-center"
+            title="Zoom Out"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+            </svg>
+          </button>
         </div>
-
-        {/* Progress Bar */}
-        {isNavigating && (
-          <div className="bg-gray-200 h-1">
-            <div 
-              className="bg-gradient-to-r from-blue-500 to-blue-600 h-full transition-all duration-500"
-              style={{ width: `${((currentStep + 1) / directions.length) * 100}%` }}
-            />
-          </div>
-        )}
-
-        {/* Current Step Highlight (for navigation mode) */}
-        {isNavigating && directions[currentStep] && (
-          <div className={`bg-gradient-to-r from-emerald-50 to-blue-50 border-l-4 border-emerald-500 ${isMobile ? 'p-4' : 'p-4'}`}>
-            <div className="flex items-start gap-3">
-              <div className={`${isMobile ? 'p-2' : 'p-2'} bg-emerald-500 rounded-full flex-shrink-0 mt-1`}>
-                {directions[currentStep].icon}
-              </div>
-              <div className="flex-1">
-                <p className={`${isMobile ? 'text-base' : 'text-base'} font-semibold text-gray-800 mb-1`}>
-                  Step {currentStep + 1} of {directions.length}
-                </p>
-                <p className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-600`}>
-                  {directions[currentStep].instruction}
-                </p>
-              </div>
-            </div>
-            
-            {/* Navigation Controls */}
-            <div className={`flex justify-between items-center ${isMobile ? 'mt-3' : 'mt-3'}`}>
-              <button
-                onClick={() => onStepChange?.(Math.max(0, currentStep - 1))}
-                disabled={currentStep === 0}
-                className={`${isMobile ? 'px-3 py-2 text-sm' : 'px-3 py-2 text-sm'} bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 text-gray-700 rounded-lg transition-colors duration-200 font-medium`}
-              >
-                Previous
-              </button>
-              
-              <span className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-500 font-medium`}>
-                {currentStep + 1} / {directions.length}
-              </span>
-              
-              <button
-                onClick={() => onStepChange?.(Math.min(directions.length - 1, currentStep + 1))}
-                disabled={currentStep === directions.length - 1}
-                className={`${isMobile ? 'px-3 py-2 text-sm' : 'px-3 py-2 text-sm'} bg-blue-500 hover:bg-blue-600 disabled:bg-gray-100 disabled:text-gray-400 text-white rounded-lg transition-colors duration-200 font-medium`}
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Directions List */}
-        <div className={`${isMobile ? 'max-h-96' : 'max-h-80'} overflow-y-auto custom-scrollbar`}>
-          <div className={`${isMobile ? 'p-4' : 'p-4'} space-y-3`}>
-            {directions.map((step, index) => (
-              <div
-                key={index}
-                className={`flex items-start gap-3 ${isMobile ? 'p-3' : 'p-3'} rounded-lg transition-all duration-200 cursor-pointer ${
-                  isNavigating && index === currentStep
-                    ? 'bg-gradient-to-r from-emerald-100 to-blue-100 border-2 border-emerald-300 shadow-md'
-                    : isNavigating && index < currentStep
-                    ? 'bg-gray-100 opacity-60'
-                    : isNavigating && index > currentStep
-                    ? 'bg-gray-50'
-                    : 'hover:bg-gray-50 border border-gray-200'
-                }`}
-                onClick={() => onStepChange?.(index)}
-              >
-                <div className={`${isMobile ? 'p-2' : 'p-2'} rounded-full flex-shrink-0 ${
-                  isNavigating && index === currentStep
-                    ? 'bg-emerald-500'
-                    : isNavigating && index < currentStep
-                    ? 'bg-gray-400'
-                    : 'bg-gray-200'
-                }`}>
-                  {isNavigating && index < currentStep ? (
-                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  ) : (
-                    <span className={`${isNavigating && index === currentStep ? 'text-white' : 'text-gray-600'}`}>
-                      {step.icon}
-                    </span>
-                  )}
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className={`${isMobile ? 'text-xs' : 'text-xs'} font-semibold ${
-                      isNavigating && index === currentStep
-                        ? 'text-emerald-700'
-                        : isNavigating && index < currentStep
-                        ? 'text-gray-500'
-                        : 'text-blue-600'
-                    }`}>
-                      Step {index + 1}
-                    </span>
-                    {step.distance > 0 && (
-                      <span className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium ${
-                        isNavigating && index === currentStep
-                          ? 'text-emerald-600'
-                          : isNavigating && index < currentStep
-                          ? 'text-gray-400'
-                          : 'text-gray-500'
-                      }`}>
-                        {formatDistance(step.distance)}
-                      </span>
-                    )}
-                  </div>
-                  
-                  <p className={`${isMobile ? 'text-sm' : 'text-sm'} ${
-                    isNavigating && index === currentStep
-                      ? 'text-gray-800 font-medium'
-                      : isNavigating && index < currentStep
-                      ? 'text-gray-500'
-                      : 'text-gray-700'
-                  }`}>
-                    {step.instruction}
-                  </p>
-                  
-                  {/* Landmarks and Passing By Information */}
-                  {(step.landmarks.length > 0 || step.passingBy.length > 0) && (
-                    <div className={`${isMobile ? 'mt-2' : 'mt-2'} ${isMobile ? 'text-xs' : 'text-xs'} space-y-1`}>
-                      {step.landmarks.length > 0 && (
-                        <div className={`flex items-start gap-1.5 ${
-                          isNavigating && index === currentStep
-                            ? 'text-emerald-600'
-                            : isNavigating && index < currentStep
-                            ? 'text-gray-400'
-                            : 'text-blue-600'
-                        }`}>
-                          <span className="font-medium">📍</span>
-                          <span>Near: {step.landmarks.slice(0, 2).join(', ')}</span>
-                        </div>
-                      )}
-                      
-                      {step.passingBy.length > 0 && (
-                        <div className={`flex items-start gap-1.5 ${
-                          isNavigating && index === currentStep
-                            ? 'text-emerald-600'
-                            : isNavigating && index < currentStep
-                            ? 'text-gray-400'
-                            : 'text-blue-600'
-                        }`}>
-                          <span className="font-medium">🚶</span>
-                          <span>Passing: {step.passingBy.slice(0, 2).join(', ')}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer Summary */}
-        <div className={`bg-gray-50 border-t border-gray-200 ${isMobile ? 'p-4' : 'p-4'}`}>
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1 text-gray-600">
-                <MapPin className="w-4 h-4" />
-                <span className="font-semibold">{formatDistance(totalDistance)}</span>
-              </span>
-              <span className="flex items-center gap-1 text-gray-600">
-                <Clock className="w-4 h-4" />
-                <span className="font-semibold">~{estimatedTime} sec</span>
-              </span>
-            </div>
-            <span className="text-gray-500 font-medium">
-              {directions.length} steps
-            </span>
-          </div>
-        </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 };
 
-export default DirectionsPanel;
+export default FloorMap;
