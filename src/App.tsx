@@ -107,6 +107,8 @@ function App() {
   const [mapContainerRef, setMapContainerRef] = useState<HTMLDivElement | null>(null);
   const [showInstructions, setShowInstructions] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [mapTransform, setMapTransform] = useState({ x: 0, y: 0 });
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -218,6 +220,19 @@ function App() {
   const stopNavigation = () => {
     setIsNavigating(false);
     showSaveNotification('Navigation stopped');
+  };
+
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev * 1.2, 3)); // Max zoom 3x
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev / 1.2, 0.3)); // Min zoom 0.3x
+  };
+
+  const handleResetZoom = () => {
+    setZoomLevel(1);
+    setMapTransform({ x: 0, y: 0 });
   };
 
   const addSection = (section: Omit<OfficeSection, 'id'>) => {
@@ -475,7 +490,39 @@ function App() {
                 </div>
               </div>
               
-              <div className={`${isMobile ? 'text-sm' : 'text-xs md:text-sm'}`}>
+              <div className={`flex items-center ${isMobile ? 'gap-3' : 'gap-4'}`}>
+                {/* Zoom Controls */}
+                <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-2'} bg-gray-700/80 backdrop-blur-sm rounded-xl ${isMobile ? 'p-1' : 'p-1'} shadow-lg`}>
+                  <button
+                    onClick={handleZoomOut}
+                    className={`${isMobile ? 'p-2' : 'p-1.5'} text-gray-300 hover:text-white hover:bg-gray-600 rounded-lg transition-all duration-300`}
+                    title="Zoom Out"
+                  >
+                    <svg className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                    </svg>
+                  </button>
+                  
+                  <button
+                    onClick={handleResetZoom}
+                    className={`${isMobile ? 'px-2 py-1 text-xs' : 'px-2 py-1 text-xs'} text-gray-300 hover:text-white hover:bg-gray-600 rounded-lg transition-all duration-300 font-mono`}
+                    title="Reset Zoom"
+                  >
+                    {Math.round(zoomLevel * 100)}%
+                  </button>
+                  
+                  <button
+                    onClick={handleZoomIn}
+                    className={`${isMobile ? 'p-2' : 'p-1.5'} text-gray-300 hover:text-white hover:bg-gray-600 rounded-lg transition-all duration-300`}
+                    title="Zoom In"
+                  >
+                    <svg className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className={`${isMobile ? 'text-sm' : 'text-xs md:text-sm'}`}>
                 {isNavigating ? (
                   <span className={`flex items-center gap-2 text-blue-400 bg-blue-400/10 ${isMobile ? 'px-3 py-2' : 'px-3 py-1'} rounded-full`}>
                     <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
@@ -497,12 +544,13 @@ function App() {
                     <span className="font-medium">{isMobile ? 'Select start' : 'Tap to set start'}</span>
                   </span>
                 )}
+                </div>
               </div>
             </div>
 
             <div 
               ref={setMapContainerRef}
-              className={`flex-1 ${isMobile ? 'overflow-x-auto overflow-y-hidden' : 'overflow-auto'} ${isMobile ? 'rounded-lg' : 'rounded-xl'} border border-gray-700/50 shadow-inner`}
+              className={`flex-1 overflow-auto ${isMobile ? 'rounded-lg' : 'rounded-xl'} border border-gray-700/50 shadow-inner`}
               style={isMobile ? { 
                 overscrollBehavior: 'contain',
                 WebkitOverflowScrolling: 'touch'
@@ -524,6 +572,9 @@ function App() {
                 onSectionUpdate={updateSection}
                 isMobile={isMobile}
                 isNavigating={isNavigating}
+                zoomLevel={zoomLevel}
+                mapTransform={mapTransform}
+                onMapTransform={setMapTransform}
               />
             </div>
           </div>

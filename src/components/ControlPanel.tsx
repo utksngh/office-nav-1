@@ -402,12 +402,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <h3 className={`${isMobile ? 'text-lg' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-4' : 'mb-3'}`}>Instructions</h3>
           <div className={`${isMobile ? 'text-base' : 'text-sm'} text-gray-300 ${isMobile ? 'space-y-3' : 'space-y-2.5'}`}>
             <p>• {isMobile ? 'Tap map to set navigation points' : 'Tap map to set navigation points'}</p>
+            <p>• {isMobile ? 'Use zoom controls to adjust view' : 'Use zoom controls to adjust view'}</p>
             <p>• {isMobile ? 'Use + button to add new rooms' : 'Use + button to add new rooms'}</p>
             <p>• {isMobile ? 'Drag rooms to reposition them' : 'Drag rooms to reposition them'}</p>
             <p>• {isMobile ? 'Tap rooms to view details' : 'Tap rooms to view details'}</p>
             <p>• {isMobile ? 'Routes automatically avoid obstacles' : 'Routes automatically avoid obstacles'}</p>
             <p>• {isMobile ? 'All measurements in meters' : 'All measurements in meters'}</p>
-            {isMobile && <p>• Swipe left/right to navigate the map</p>}
+            {isMobile && <p>• Scroll to navigate the zoomed map</p>}
           </div>
         </div>
       </div>

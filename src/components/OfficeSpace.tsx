@@ -7,6 +7,7 @@ interface OfficeSpaceProps {
   onSelect: () => void;
   onUpdate: (updates: Partial<OfficeSection>) => void;
   color: string;
+  zoomLevel?: number;
 }
 
 const OfficeSpace: React.FC<OfficeSpaceProps> = ({
@@ -14,7 +15,8 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
   isSelected,
   onSelect,
   onUpdate,
-  color
+  color,
+  zoomLevel = 1
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -125,10 +127,10 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
         fill={color}
         fillOpacity={isSelected ? 0.95 : 0.85}
         stroke={isSelected ? '#FFFFFF' : '#FFFFFF'}
-        strokeWidth={isSelected ? 4 : 2}
+        strokeWidth={(isSelected ? 4 : 2) / zoomLevel}
         strokeOpacity={isSelected ? 1 : 0.6}
-        rx="8"
-        ry="8"
+        rx={8 / zoomLevel}
+        ry={8 / zoomLevel}
         className="transition-all duration-300"
         filter={isSelected ? "drop-shadow(0 8px 16px rgba(0,0,0,0.3))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.1))"}
       />
@@ -137,7 +139,7 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
         x={section.x + section.width / 2}
         y={section.y + section.height / 2}
         fill="white"
-        fontSize={Math.min(('ontouchstart' in window) ? 18 : 16, section.width / 6, section.height / 3)}
+        fontSize={Math.min(('ontouchstart' in window) ? 18 : 16, section.width / 6, section.height / 3) / zoomLevel}
         fontWeight="600"
         textAnchor="middle"
         dominantBaseline="middle"
@@ -150,9 +152,9 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
       {section.type && (
         <text
           x={section.x + section.width / 2}
-          y={section.y + section.height / 2 + 18}
+          y={section.y + section.height / 2 + 18 / zoomLevel}
           fill="rgba(255,255,255,0.8)"
-          fontSize={Math.min(('ontouchstart' in window) ? 15 : 13, section.width / 8, section.height / 5)}
+          fontSize={Math.min(('ontouchstart' in window) ? 15 : 13, section.width / 8, section.height / 5) / zoomLevel}
           fontWeight="400"
           textAnchor="middle"
           dominantBaseline="middle"
@@ -169,10 +171,10 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
           <circle
             cx={section.x + section.width}
             cy={section.y + section.height}
-            r={('ontouchstart' in window) ? "10" : "8"}
+            r={(('ontouchstart' in window) ? 10 : 8) / zoomLevel}
             fill="#FFFFFF"
             stroke={color}
-            strokeWidth={('ontouchstart' in window) ? "3" : "2"}
+            strokeWidth={(('ontouchstart' in window) ? 3 : 2) / zoomLevel}
             className="cursor-se-resize"
             onMouseDown={(e) => {
               e.stopPropagation();
