@@ -516,6 +516,7 @@ function App() {
                   if (type === 'start') setStartPoint(point);
                   else setEndPoint(point);
                 }}
+                onClearPath={clearPath}
                 isAddingSection={isAddingSection}
                 onAddSection={addSection}
                 selectedSection={selectedSection}
