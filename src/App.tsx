@@ -471,6 +471,13 @@ function App() {
           isNavigating={isNavigating}
           onStartNavigation={startNavigation}
           onStopNavigation={stopNavigation}
+          onSetNavigationPoint={(point, type) => {
+            if (type === 'start') {
+              setStartPoint(point);
+            } else {
+              setEndPoint(point);
+            }
+          }}
         />
         
         <main className={`flex-1 ${isMobile ? 'p-2' : 'p-3 md:p-4 lg:p-6'}`}>

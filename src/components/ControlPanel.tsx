@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FloorData, Point, OfficeSection } from '../types';
-import { MapPin, Trash2, Edit3, Save, X, Plus, Navigation, Download, Upload } from 'lucide-react';
+import { MapPin, Trash2, Edit3, Save, X, Plus, Navigation, Download, Upload, Search, Target } from 'lucide-react';
 import { formatDistance, formatCoordinates, calculatePixelDistanceInMeters } from '../utils/geoUtils';
 
 interface ControlPanelProps {
@@ -23,6 +23,8 @@ interface ControlPanelProps {
   isNavigating: boolean;
   onStartNavigation: () => void;
   onStopNavigation: () => void;
+  onSetNavigationPoint: (point: Point, type: 'start' | 'end') => void;
+  onSectionSelect: (sectionId: string | null) => void;
   onSectionSelect: (sectionId: string | null) => void;
 }
 
@@ -47,9 +49,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onStartNavigation,
   onStopNavigation,
   onSectionSelect,
+  onSetNavigationPoint,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<OfficeSection>>({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchType, setSearchType] = useState<'start' | 'end'>('start');
 
   const selectedSectionData = selectedSection 
     ? currentFloor.sections.find(s => s.id === selectedSection)
@@ -79,6 +85,22 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     'office', 'meeting', 'reception', 'cafeteria', 
     'storage', 'department', 'executive', 'lounge'
   ];
+
+  // Filter sections based on search query
+  const filteredSections = currentFloor.sections.filter(section =>
+    section.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    section.type.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleSearchSelect = (section: OfficeSection) => {
+    const centerPoint: Point = {
+      x: section.x + section.width / 2,
+      y: section.y + section.height / 2
+    };
+    onSetNavigationPoint(centerPoint, searchType);
+    setSearchQuery('');
+    setShowSearchResults(false);
+  };
 
   return (
     <>
@@ -182,6 +204,133 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               Import
             </button>
           </div>
+        </div>
+
+        {/* Search Navigation Points */}
+        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
+          <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-3' : 'mb-3'} flex items-center gap-2`}>
+            <div className={`${isMobile ? 'p-1.5' : 'p-1.5'} bg-gradient-to-br from-purple-500 to-purple-600 rounded-md`}>
+              <Search className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-white`} />
+            </div>
+            Quick Navigation
+          </h3>
+          
+          {/* Search Type Toggle */}
+          <div className={`flex bg-gray-600/50 rounded-lg ${isMobile ? 'p-1 mb-3' : 'p-1 mb-3'} shadow-inner`}>
+            <button
+              onClick={() => setSearchType('start')}
+              className={`flex-1 ${isMobile ? 'px-3 py-2 text-xs' : 'px-3 py-2 text-xs'} rounded-md transition-all duration-300 font-medium flex items-center justify-center gap-1.5 ${
+                searchType === 'start'
+                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg transform scale-105'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-500/30'
+              }`}
+            >
+              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-current rounded-full`}></div>
+              Set Start
+            </button>
+            <button
+              onClick={() => setSearchType('end')}
+              className={`flex-1 ${isMobile ? 'px-3 py-2 text-xs' : 'px-3 py-2 text-xs'} rounded-md transition-all duration-300 font-medium flex items-center justify-center gap-1.5 ${
+                searchType === 'end'
+                  ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg transform scale-105'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-500/30'
+              }`}
+            >
+              <Target className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'}`} />
+              Set End
+            </button>
+          </div>
+          
+          {/* Search Input */}
+          <div className="relative">
+            <div className="relative">
+              <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-gray-400`} />
+              <input
+                type="text"
+                placeholder={`Search rooms for ${searchType} point...`}
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowSearchResults(e.target.value.length > 0);
+                }}
+                onFocus={() => setShowSearchResults(searchQuery.length > 0)}
+                className={`w-full ${isMobile ? 'pl-10 pr-4 py-3 text-sm' : 'pl-10 pr-4 py-3 text-sm'} bg-gray-600/80 border border-gray-500/50 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 shadow-inner`}
+              />
+            </div>
+            
+            {/* Search Results Dropdown */}
+            {showSearchResults && searchQuery && (
+              <div className={`absolute top-full left-0 right-0 ${isMobile ? 'mt-2' : 'mt-2'} bg-gray-700/95 backdrop-blur-sm border border-gray-600/50 rounded-lg shadow-2xl z-50 ${isMobile ? 'max-h-48' : 'max-h-64'} overflow-y-auto custom-scrollbar`}>
+                {filteredSections.length > 0 ? (
+                  filteredSections.map((section) => (
+                    <button
+                      key={section.id}
+                      onClick={() => handleSearchSelect(section)}
+                      className={`w-full ${isMobile ? 'p-3' : 'p-3'} text-left hover:bg-gray-600/70 transition-all duration-200 border-b border-gray-600/30 last:border-b-0 flex items-center justify-between group`}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} rounded-sm shadow-sm border border-white/20`}
+                            style={{ backgroundColor: getSectionTypeColor(section.type) }}
+                          />
+                          <span className={`font-medium text-white ${isMobile ? 'text-sm' : 'text-sm'}`}>
+                            {section.name}
+                          </span>
+                        </div>
+                        <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-300 capitalize ml-5`}>
+                          {section.type} • {(section.width * currentFloor.metersPerPixel).toFixed(1)}m × {(section.height * currentFloor.metersPerPixel).toFixed(1)}m
+                        </p>
+                      </div>
+                      <div className={`${searchType === 'start' ? 'text-emerald-400' : 'text-red-400'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+                        <Target className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} />
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className={`${isMobile ? 'p-4' : 'p-4'} text-center text-gray-400 ${isMobile ? 'text-sm' : 'text-sm'}`}>
+                    <Search className={`${isMobile ? 'w-6 h-6' : 'w-6 h-6'} mx-auto mb-2 opacity-50`} />
+                    No rooms found matching "{searchQuery}"
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* Current Selection Display */}
+          {(startPoint || endPoint) && (
+            <div className={`${isMobile ? 'mt-3 space-y-2' : 'mt-3 space-y-2'}`}>
+              {startPoint && (
+                <div className={`flex items-center justify-between ${isMobile ? 'p-2.5' : 'p-2.5'} bg-emerald-500/10 border border-emerald-500/20 rounded-md`}>
+                  <div className="flex items-center gap-2">
+                    <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-emerald-400 rounded-full animate-pulse`}></div>
+                    <span className={`${isMobile ? 'text-sm' : 'text-sm'} text-emerald-400 font-medium`}>Start Point Set</span>
+                  </div>
+                  <button
+                    onClick={() => onSetNavigationPoint({ x: 0, y: 0 }, 'start')}
+                    className={`${isMobile ? 'p-1' : 'p-1'} text-emerald-400 hover:bg-emerald-400 hover:text-white rounded transition-all duration-200`}
+                  >
+                    <X className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'}`} />
+                  </button>
+                </div>
+              )}
+              
+              {endPoint && (
+                <div className={`flex items-center justify-between ${isMobile ? 'p-2.5' : 'p-2.5'} bg-red-500/10 border border-red-500/20 rounded-md`}>
+                  <div className="flex items-center gap-2">
+                    <Target className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} text-red-400`} />
+                    <span className={`${isMobile ? 'text-sm' : 'text-sm'} text-red-400 font-medium`}>End Point Set</span>
+                  </div>
+                  <button
+                    onClick={() => onSetNavigationPoint({ x: 0, y: 0 }, 'end')}
+                    className={`${isMobile ? 'p-1' : 'p-1'} text-red-400 hover:bg-red-400 hover:text-white rounded transition-all duration-200`}
+                  >
+                    <X className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'}`} />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Navigation Status */}
