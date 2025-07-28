@@ -136,17 +136,17 @@ const FloorMap: React.FC<FloorMapProps> = ({
   }, [startPoint, endPoint, floorData]);
 
   return (
-    <div className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'overflow-x-auto overflow-y-hidden' : 'overflow-auto'} ${isMobile ? 'touch-pan-x' : 'touch-pan-x touch-pan-y'}`}>
+    <div className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'overflow-auto' : 'overflow-auto'} ${isMobile ? 'touch-pan-x touch-pan-y' : 'touch-pan-x touch-pan-y'}`}>
       <svg
         ref={svgRef}
-        width={Math.max(floorData.width, isMobile ? Math.max(window.innerWidth * 1.5, 1200) : 800)}
-        height={Math.max(floorData.height, isMobile ? Math.max(window.innerHeight - 180, 600) : 600)}
+        width={Math.max(floorData.width, isMobile ? Math.max(window.innerWidth * 1.2, 1000) : 800)}
+        height={Math.max(floorData.height, isMobile ? Math.max(window.innerHeight * 0.8, 700) : 600)}
         viewBox={`0 0 ${floorData.width} ${floorData.height}`}
         className={`${isMobile ? 'cursor-pointer touch-manipulation' : 'cursor-crosshair'} ${isMobile ? 'w-full h-full' : 'min-w-full min-h-full'}`}
         onClick={handleSVGClick}
         style={isMobile ? { 
-          minWidth: `${Math.max(floorData.width, Math.max(window.innerWidth * 1.5, 1200))}px`,
-          minHeight: `${Math.max(floorData.height, Math.max(window.innerHeight - 180, 600))}px`
+          minWidth: `${Math.max(floorData.width, Math.max(window.innerWidth * 1.2, 1000))}px`,
+          minHeight: `${Math.max(floorData.height, Math.max(window.innerHeight * 0.8, 700))}px`
         } : {}}
       >
         {/* Grid */}

@@ -134,11 +134,18 @@ function App() {
   // Auto-save to localStorage whenever floorData changes
   React.useEffect(() => {
     localStorage.setItem('officeFloorData', JSON.stringify(floorData));
-    if (saveNotification !== 'auto') {
+    // Only show auto-save notification if user has made changes (not on initial load)
+    const hasUserMadeChanges = localStorage.getItem('hasUserMadeChanges');
+    if (hasUserMadeChanges && saveNotification !== 'auto') {
       setSaveNotification('auto');
       setTimeout(() => setSaveNotification(''), 2000);
     }
   }, [floorData]);
+
+  // Mark that user has made changes when they interact with the app
+  const markUserChanges = () => {
+    localStorage.setItem('hasUserMadeChanges', 'true');
+  };
 
   const showSaveNotification = (message: string) => {
     setSaveNotification(message);
@@ -214,6 +221,7 @@ function App() {
   };
 
   const addSection = (section: Omit<OfficeSection, 'id'>) => {
+    markUserChanges();
     const newSection: OfficeSection = {
       ...section,
       id: Date.now().toString(),
@@ -279,6 +287,7 @@ function App() {
   };
 
   const updateSection = (sectionId: string, updates: Partial<OfficeSection>) => {
+    markUserChanges();
     const updatedSection = { ...updates };
     
     // Update coordinates if position or size changed
@@ -307,6 +316,7 @@ function App() {
   };
 
   const deleteSection = (sectionId: string) => {
+    markUserChanges();
     setFloorData(prev => ({
       ...prev,
       [currentFloor]: {
@@ -323,6 +333,7 @@ function App() {
   };
 
   const handleFloorChange = (floor: number) => {
+    markUserChanges();
     setCurrentFloor(floor);
     clearPath(); // Clear path when floor changes
     setSelectedSection(null); // Also clear selected section
@@ -399,6 +410,12 @@ function App() {
                       : 'bg-gray-700/80 backdrop-blur-sm text-gray-300 hover:bg-gray-600 hover:text-white'
                   }`}
                   title="Add Section"
+                  onClick={() => {
+                    setIsAddingSection(!isAddingSection);
+                    if (isMobile) {
+                      setSelectedSection(null); // Reset selection on mobile
+                    }
+                  }}
                 >
                   <Plus className={`w-4 h-4 md:w-5 md:h-5`} />
                 </button>

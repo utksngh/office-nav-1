@@ -157,6 +157,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white transform scale-105'
                   : 'bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white'
               }`}
+              onClick={() => {
+                onToggleAddingSection();
+                if (isMobile && selectedSection) {
+                  // Reset selection when toggling add mode on mobile
+                  onSectionSelect(null);
+                }
+              }}
             >
               <Plus className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mx-auto mb-1`} />
               Add Room

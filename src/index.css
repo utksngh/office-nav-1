@@ -157,39 +157,39 @@ select:focus-visible {
   /* Improve horizontal scrolling on mobile */
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-    overscroll-behavior-y: none;
+    overscroll-behavior: contain;
   }
   
   /* Better touch scrolling for map */
-  .touch-pan-x {
-    touch-action: pan-x;
+  .touch-pan-x.touch-pan-y {
+    touch-action: pan-x pan-y;
     -webkit-overflow-scrolling: touch;
   }
   
-  /* Prevent vertical bounce on horizontal scroll */
-  .overflow-y-hidden {
-    overflow-y: hidden !important;
-    overscroll-behavior-y: none;
+  /* Better scrolling behavior */
+  .overflow-auto {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
   
-  /* Smooth horizontal scrolling */
-  .overflow-x-auto::-webkit-scrollbar {
+  /* Better scrollbars for mobile */
+  .overflow-auto::-webkit-scrollbar {
+    width: 8px;
     height: 8px;
   }
   
-  .overflow-x-auto::-webkit-scrollbar-track {
+  .overflow-auto::-webkit-scrollbar-track {
     background: #374151;
     border-radius: 4px;
   }
   
-  .overflow-x-auto::-webkit-scrollbar-thumb {
+  .overflow-auto::-webkit-scrollbar-thumb {
     background: #6B7280;
     border-radius: 4px;
     border: 1px solid #374151;
   }
   
-  .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  .overflow-auto::-webkit-scrollbar-thumb:hover {
     background: #9CA3AF;
   }
 }
