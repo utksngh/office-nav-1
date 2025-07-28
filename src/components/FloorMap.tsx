@@ -396,18 +396,6 @@ const FloorMap: React.FC<FloorMapProps> = ({
           <X className="w-6 h-6" />
         </button>
       )}
-      
-      {/* Mobile Clear Path Button */}
-      {isMobile && (startPoint || endPoint) && (
-        <button
-          onClick={onClearPath}
-          className="fixed bottom-6 right-20 p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50"
-          style={{ zIndex: 1000 }}
-          title="Clear Path"
-        >
-          <MapPin className="w-6 h-6" />
-        </button>
-      )}
     </div>
   );
 };
