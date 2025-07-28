@@ -1,427 +1,265 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { FloorData, Point, OfficeSection } from '../types';
-import { findPath } from '../utils/pathfinding';
-import { calculatePixelDistanceInMeters, formatDistance } from '../utils/geoUtils';
-import { X } from 'lucide-react';
-import OfficeSpace from './OfficeSpace';
-import PathVisualization from './PathVisualization';
+import { Point, OfficeSection } from '../types';
 
-interface FloorMapProps {
-  floorData: FloorData;
-  startPoint: Point | null;
-  endPoint: Point | null;
-  onPointSelect: (point: Point, type: 'start' | 'end') => void;
-  onClearPath: () => void;
-  isAddingSection: boolean;
-  onAddSection: (section: Omit<OfficeSection, 'id'>) => void;
-  selectedSection: string | null;
-  onSectionSelect: (sectionId: string | null) => void;
-  onSectionUpdate: (sectionId: string, updates: Partial<OfficeSection>) => void;
-  isMobile: boolean;
-  isNavigating: boolean;
-  zoomLevel: number;
-  mapTransform: { x: number; y: number };
-  onMapTransform: (transform: { x: number; y: number }) => void;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onResetZoom: () => void;
-  onPathUpdate: (path: Point[]) => void;
+// A* pathfinding algorithm implementation
+interface Node {
+  x: number;
+  y: number;
+  g: number; // Cost from start
+  h: number; // Heuristic cost to end
+  f: number; // Total cost
+  parent: Node | null;
 }
 
-const FloorMap: React.FC<FloorMapProps> = ({
-  floorData,
-  startPoint,
-  endPoint,
-  onPointSelect,
-  onClearPath,
-  isAddingSection,
-  onAddSection,
-  selectedSection,
-  onSectionSelect,
-  onSectionUpdate,
-  isMobile,
-  isNavigating,
-  zoomLevel,
-  mapTransform,
-  onMapTransform,
-  onZoomIn,
-  onZoomOut,
-  onResetZoom,
-  onPathUpdate
-}) => {
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [drawStart, setDrawStart] = useState<Point | null>(null);
-  const [currentPath, setCurrentPath] = useState<Point[]>([]);
-  const svgRef = useRef<SVGSVGElement>(null);
+// Calculate distance between two points
+function distance(a: Point, b: Point): number {
+  return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+}
 
-  const getSectionTypeColor = (type: OfficeSection['type']) => {
-    const colors = {
-      office: '#3B82F6',
-      meeting: '#8B5CF6',
-      reception: '#10B981',
-      cafeteria: '#F59E0B',
-      storage: '#6B7280',
-      department: '#EF4444',
-      executive: '#F97316',
-      lounge: '#06B6D4'
+// Check if a point is inside any obstacle (office section)
+function isPointInObstacle(point: Point, obstacles: OfficeSection[], buffer: number = 25): boolean {
+  for (const obstacle of obstacles) {
+    if (
+      point.x >= obstacle.x - buffer &&
+      point.x <= obstacle.x + obstacle.width + buffer &&
+      point.y >= obstacle.y - buffer &&
+      point.y <= obstacle.y + obstacle.height + buffer
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Check if a line segment intersects with any obstacle
+function lineIntersectsObstacle(start: Point, end: Point, obstacles: OfficeSection[], buffer: number = 25): boolean {
+  const steps = Math.max(Math.abs(end.x - start.x), Math.abs(end.y - start.y));
+  const stepSize = Math.max(1, Math.floor(steps / 10));
+  
+  for (let i = 0; i <= steps; i += stepSize) {
+    const t = i / steps;
+    const point = {
+      x: start.x + (end.x - start.x) * t,
+      y: start.y + (end.y - start.y) * t
     };
-    return colors[type];
+    
+    if (isPointInObstacle(point, obstacles, buffer)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Get neighbors for A* algorithm
+function getNeighbors(node: Node, gridSize: number, width: number, height: number, obstacles: OfficeSection[]): Node[] {
+  const neighbors: Node[] = [];
+  const directions = [
+    { x: 0, y: -gridSize }, // Up
+    { x: gridSize, y: 0 },  // Right
+    { x: 0, y: gridSize },  // Down
+    { x: -gridSize, y: 0 }, // Left
+    { x: gridSize, y: -gridSize }, // Up-Right
+    { x: gridSize, y: gridSize },  // Down-Right
+    { x: -gridSize, y: gridSize }, // Down-Left
+    { x: -gridSize, y: -gridSize } // Up-Left
+  ];
+
+  for (const dir of directions) {
+    const newX = node.x + dir.x;
+    const newY = node.y + dir.y;
+
+    // Check bounds
+    if (newX < 0 || newX >= width || newY < 0 || newY >= height) {
+      continue;
+    }
+
+    const newPoint = { x: newX, y: newY };
+    
+    // Check if point is in obstacle
+    if (isPointInObstacle(newPoint, obstacles, 25)) {
+      continue;
+    }
+
+    // Check if path to this point intersects obstacle
+    if (lineIntersectsObstacle({ x: node.x, y: node.y }, newPoint, obstacles, 25)) {
+      continue;
+    }
+
+    neighbors.push({
+      x: newX,
+      y: newY,
+      g: 0,
+      h: 0,
+      f: 0,
+      parent: null
+    });
+  }
+
+  return neighbors;
+}
+
+// A* pathfinding algorithm
+export function findPath(start: Point, end: Point, obstacles: OfficeSection[], width: number, height: number): Point[] {
+  const gridSize = 5; // 0.5m grid resolution
+  
+  // Snap start and end to grid
+  const startNode: Node = {
+    x: Math.round(start.x / gridSize) * gridSize,
+    y: Math.round(start.y / gridSize) * gridSize,
+    g: 0,
+    h: distance(start, end),
+    f: distance(start, end),
+    parent: null
   };
 
-  // Find the nearest corner of the closest section to the clicked point
-  const handleSVGClick = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
-    if (!svgRef.current) return;
-    
-    const rect = svgRef.current.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / zoomLevel - mapTransform.x;
-    const y = (event.clientY - rect.top) / zoomLevel - mapTransform.y;
-    const point: Point = { x, y };
+  const endNode: Node = {
+    x: Math.round(end.x / gridSize) * gridSize,
+    y: Math.round(end.y / gridSize) * gridSize,
+    g: 0,
+    h: 0,
+    f: 0,
+    parent: null
+  };
 
-    if (isAddingSection) {
-      if (!isDrawing) {
-        setIsDrawing(true);
-        setDrawStart(point);
-      } else {
-        if (drawStart) {
-          const width = Math.abs(x - drawStart.x);
-          const height = Math.abs(y - drawStart.y);
-          const newSection: Omit<OfficeSection, 'id'> = {
-            name: `Section ${Date.now()}`,
-            x: Math.min(drawStart.x, x),
-            y: Math.min(drawStart.y, y),
-            width,
-            height,
-            type: 'office'
-          };
-          onAddSection(newSection);
+  // If start or end is in obstacle, try to find nearest free point
+  if (isPointInObstacle(startNode, obstacles)) {
+    // Find nearest free point for start
+    let found = false;
+    for (let radius = gridSize; radius <= 100 && !found; radius += gridSize) {
+      for (let angle = 0; angle < 360; angle += 45) {
+        const rad = (angle * Math.PI) / 180;
+        const testPoint = {
+          x: startNode.x + Math.cos(rad) * radius,
+          y: startNode.y + Math.sin(rad) * radius
+        };
+        if (!isPointInObstacle(testPoint, obstacles) && testPoint.x >= 0 && testPoint.x < width && testPoint.y >= 0 && testPoint.y < height) {
+          startNode.x = testPoint.x;
+          startNode.y = testPoint.y;
+          found = true;
+          break;
         }
-        setIsDrawing(false);
-        setDrawStart(null);
-      }
-    } else {
-      // Point selection for pathfinding
-      // Use exact clicked point - no snapping or optimization
-      if (!startPoint) {
-        onPointSelect(point, 'start');
-      } else if (!endPoint) {
-        onPointSelect(point, 'end');
-      } else {
-        // Reset and set new start point
-        onPointSelect(point, 'start');
       }
     }
-  }, [isAddingSection, isDrawing, drawStart, startPoint, endPoint, onPointSelect, onAddSection, zoomLevel, mapTransform]);
+  }
 
-  // Calculate path when both points are set
-  React.useEffect(() => {
-    if (startPoint && endPoint) {
-      const path = findPath(startPoint, endPoint, floorData.sections, floorData.width, floorData.height);
-      setCurrentPath(path);
-      onPathUpdate(path);
-    } else {
-      setCurrentPath([]);
-      onPathUpdate([]);
+  if (isPointInObstacle(endNode, obstacles)) {
+    // Find nearest free point for end
+    let found = false;
+    for (let radius = gridSize; radius <= 100 && !found; radius += gridSize) {
+      for (let angle = 0; angle < 360; angle += 45) {
+        const rad = (angle * Math.PI) / 180;
+        const testPoint = {
+          x: endNode.x + Math.cos(rad) * radius,
+          y: endNode.y + Math.sin(rad) * radius
+        };
+        if (!isPointInObstacle(testPoint, obstacles) && testPoint.x >= 0 && testPoint.x < width && testPoint.y >= 0 && testPoint.y < height) {
+          endNode.x = testPoint.x;
+          endNode.y = testPoint.y;
+          found = true;
+          break;
+        }
+      }
     }
-  }, [startPoint, endPoint, floorData, onPathUpdate]);
+  }
 
-  // Calculate the scaled dimensions
-  const scaledWidth = floorData.width * zoomLevel;
-  const scaledHeight = floorData.height * zoomLevel;
-  const minWidth = isMobile ? Math.max(window.innerWidth * 1.2, 1000) : 800;
-  const minHeight = isMobile ? Math.max(window.innerHeight * 0.8, 700) : 600;
+  const openSet: Node[] = [startNode];
+  const closedSet: Set<string> = new Set();
 
-  return (
-    <div className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} overflow-auto`}>
-      <svg
-        ref={svgRef}
-        width={Math.max(scaledWidth, minWidth)}
-        height={Math.max(scaledHeight, minHeight)}
-        viewBox={`0 0 ${floorData.width} ${floorData.height}`}
-        className={`${isMobile ? 'cursor-pointer touch-manipulation' : 'cursor-crosshair'} ${isMobile ? 'w-full h-full' : 'min-w-full min-h-full'}`}
-        onClick={handleSVGClick}
-        style={{
-          minWidth: `${Math.max(scaledWidth, minWidth)}px`,
-          minHeight: `${Math.max(scaledHeight, minHeight)}px`,
-          transform: `scale(${zoomLevel}) translate(${mapTransform.x}px, ${mapTransform.y}px)`,
-          transformOrigin: '0 0'
-        }}
-      >
-        {/* Grid */}
-        <defs>
-          {/* Fine grid pattern */}
-          <pattern id="fineGrid" width={10 / zoomLevel} height={10 / zoomLevel} patternUnits="userSpaceOnUse">
-            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#4B5563" strokeWidth="0.3" opacity="0.3"/>
-          </pattern>
-          
-          {/* Major grid pattern */}
-          <pattern id="majorGrid" width={50 / zoomLevel} height={50 / zoomLevel} patternUnits="userSpaceOnUse">
-            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#6B7280" strokeWidth="0.8" opacity="0.6"/>
-            <rect width="50" height="50" fill="url(#fineGrid)"/>
-          </pattern>
-          
-          {/* Professional floor texture */}
-          <pattern id="floorTexture" width={100 / zoomLevel} height={100 / zoomLevel} patternUnits="userSpaceOnUse">
-            <rect width="100" height="100" fill="#F3F4F6" opacity="0.05"/>
-            <circle cx="25" cy="25" r="1" fill="#E5E7EB" opacity="0.1"/>
-            <circle cx="75" cy="75" r="1" fill="#E5E7EB" opacity="0.1"/>
-          </pattern>
-          
-          {/* Gradient definitions */}
-          <linearGradient id="startGradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#10B981" stopOpacity="1"/>
-            <stop offset="100%" stopColor="#065F46" stopOpacity="0.8"/>
-          </linearGradient>
-          
-          <linearGradient id="endGradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#EF4444" stopOpacity="1"/>
-            <stop offset="100%" stopColor="#7F1D1D" stopOpacity="0.8"/>
-          </linearGradient>
-        </defs>
-        
-        {/* Professional floor background */}
-        <rect width="100%" height="100%" fill="#1F2937" />
-        <rect width="100%" height="100%" fill="url(#majorGrid)" />
-        <rect width="100%" height="100%" fill="url(#floorTexture)" />
+  while (openSet.length > 0) {
+    // Find node with lowest f score
+    let currentIndex = 0;
+    for (let i = 1; i < openSet.length; i++) {
+      if (openSet[i].f < openSet[currentIndex].f) {
+        currentIndex = i;
+      }
+    }
 
-        {/* Floor plan border */}
-        <rect 
-          x="2" 
-          y="2" 
-          width={floorData.width - 4} 
-          height={floorData.height - 4} 
-          fill="none" 
-          stroke="#9CA3AF" 
-          strokeWidth="3" 
-          strokeDasharray="10,5"
-          opacity="0.8"
-        />
+    const current = openSet.splice(currentIndex, 1)[0];
+    const currentKey = `${current.x},${current.y}`;
+    closedSet.add(currentKey);
 
-        {/* Office Sections */}
-        {floorData.sections.map((section) => (
-          <OfficeSpace
-            key={section.id}
-            section={section}
-            isSelected={selectedSection === section.id}
-            onSelect={() => onSectionSelect(section.id)}
-            onUpdate={(updates) => onSectionUpdate(section.id, updates)}
-            color={getSectionTypeColor(section.type)}
-            zoomLevel={zoomLevel}
-          />
-        ))}
-
-        {/* Corner indicators for better UX */}
-        {/* Corner indicators - only show when adding sections */}
-        {isAddingSection && floorData.sections.map((section) => (
-          <g key={`corners-${section.id}`}>
-            {[
-              { x: section.x, y: section.y },
-              { x: section.x + section.width, y: section.y },
-              { x: section.x, y: section.y + section.height },
-              { x: section.x + section.width, y: section.y + section.height }
-            ].map((corner, index) => (
-              <circle
-                key={index}
-                cx={corner.x}
-                cy={corner.y}
-                r={(isMobile ? 3 : 1) / zoomLevel}
-                fill="#3B82F6"
-                fillOpacity="0.6"
-                className="pointer-events-none"
-                stroke="#FFFFFF"
-                strokeWidth={0.5 / zoomLevel}
-              />
-            ))}
-          </g>
-        ))}
-        {/* Path Visualization */}
-        {currentPath.length > 0 && (
-          <PathVisualization path={currentPath} isMobile={isMobile} isNavigating={isNavigating} zoomLevel={zoomLevel} />
-        )}
-
-        {/* Start Point */}
-        {startPoint && (
-          <g>
-            <circle
-              cx={startPoint.x}
-              cy={startPoint.y}
-              r={(isMobile ? 20 : 10) / zoomLevel}
-              fill="url(#startGradient)"
-              stroke="#FFFFFF"
-              strokeWidth={(isMobile ? 5 : 3) / zoomLevel}
-              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
-            />
-            <circle
-              cx={startPoint.x}
-              cy={startPoint.y}
-              r={(isMobile ? 10 : 5) / zoomLevel}
-              fill="#FFFFFF"
-              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
-            />
-            <text
-              x={startPoint.x}
-              y={startPoint.y - (isMobile ? 32 : 18) / zoomLevel}
-              fill="#10B981"
-              fontSize={(isMobile ? 18 : 12) / zoomLevel}
-              fontWeight="bold"
-              textAnchor="middle"
-              className="drop-shadow-sm"
-            >
-              START
-            </text>
-          </g>
-        )}
-
-        {/* End Point */}
-        {endPoint && (
-          <g>
-            <circle
-              cx={endPoint.x}
-              cy={endPoint.y}
-              r={(isMobile ? 20 : 10) / zoomLevel}
-              fill="url(#endGradient)"
-              stroke="#FFFFFF"
-              strokeWidth={(isMobile ? 5 : 3) / zoomLevel}
-              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
-            />
-            <circle
-              cx={endPoint.x}
-              cy={endPoint.y}
-              r={(isMobile ? 10 : 5) / zoomLevel}
-              fill="#FFFFFF"
-              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
-            />
-            <text
-              x={endPoint.x}
-              y={endPoint.y - (isMobile ? 32 : 18) / zoomLevel}
-              fill="#EF4444"
-              fontSize={(isMobile ? 18 : 12) / zoomLevel}
-              fontWeight="bold"
-              textAnchor="middle"
-              className="drop-shadow-sm"
-            >
-              END
-            </text>
-          </g>
-        )}
-
-        {/* Drawing preview */}
-        {isDrawing && drawStart && (
-          <rect
-            x={drawStart.x}
-            y={drawStart.y}
-            width="0"
-            height="0"
-            fill="#10B981"
-            fillOpacity="0.3"
-            stroke="#10B981"
-            strokeWidth={2 / zoomLevel}
-            strokeDasharray="5,5"
-          />
-        )}
-      </svg>
-
-      {/* Instructions */}
-      <div className={`absolute ${isMobile ? 'top-2 left-2' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[160px]' : ''}`}>
-        {isNavigating ? (
-          <div className="text-blue-600">
-            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
-              🧭 Navigating
-            </p>
-            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
-              Following route
-            </p>
-          </div>
-        ) : isAddingSection ? (
-          <div className="text-emerald-600">
-            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-emerald-600 rounded-full animate-pulse`}></div>
-              {isMobile ? 'Adding Room' : 'Adding Section Mode'}
-            </p>
-            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
-              {isMobile ? 'Tap twice' : 'Click two points to create a rectangle'}
-            </p>
-          </div>
-        ) : (
-          <div className="text-blue-600">
-            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
-              {isMobile ? 'Navigation' : 'Navigation Mode'}
-            </p>
-            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
-              {isMobile ? 'Tap to set' : 'Click near corners for optimal paths'}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Path info */}
-      {currentPath.length > 0 && (
-        <div className={`absolute ${isMobile ? 'top-2 right-2' : 'top-4 right-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[100px]' : 'min-w-[120px]'} shadow-xl border border-gray-300/50`}>
-          <div className={`${isNavigating ? 'text-blue-600' : 'text-emerald-600'}`}>
-            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} ${isNavigating ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full animate-pulse`}></div>
-              {isNavigating ? '🧭 Active' : 'Route Ready'}
-            </p>
-            {startPoint && endPoint && (
-              <>
-                <p className={`${isMobile ? 'mt-1' : 'mt-1'} font-medium`}>
-                  {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel))}
-                </p>
-                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-600 ${isMobile ? 'mt-0.5' : 'mt-1'}`}>
-                  ~{Math.ceil(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel) / 1.4)} sec
-                </p>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+    // Check if we reached the end
+    if (Math.abs(current.x - endNode.x) < gridSize && Math.abs(current.y - endNode.y) < gridSize) {
+      // Reconstruct path
+      const path: Point[] = [];
+      let node: Node | null = current;
+      while (node) {
+        path.unshift({ x: node.x, y: node.y });
+        node = node.parent;
+      }
       
-      {/* Mobile Reset Selection Button */}
-      {isMobile && selectedSection && !isAddingSection && (
-        <button
-          onClick={() => onSectionSelect(null)}
-          className="fixed bottom-4 right-4 p-3 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50 min-w-[48px] min-h-[48px] flex items-center justify-center"
-          style={{ zIndex: 1000 }}
-        >
-          <X className="w-5 h-5" />
-        </button>
-      )}
+      // Add original start and end points
+      if (path.length > 0) {
+        path[0] = start;
+        path[path.length - 1] = end;
+      }
       
-      {/* Mobile Zoom Controls - Alternative Position */}
-      {isMobile && (
-        <div className="fixed bottom-4 left-4 flex flex-col gap-2 z-40">
-          <button
-            onClick={onZoomIn}
-            className="p-2.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[48px] flex items-center justify-center"
-            title="Zoom In"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-            </svg>
-          </button>
-          
-          <button
-            onClick={onResetZoom}
-            className="px-2.5 py-1.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[36px] flex items-center justify-center font-mono text-xs font-semibold"
-            title="Reset Zoom"
-          >
-            {Math.round(zoomLevel * 100)}%
-          </button>
-          
-          <button
-            onClick={onZoomOut}
-            className="p-2.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[48px] flex items-center justify-center"
-            title="Zoom Out"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
-            </svg>
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
+      return path;
+    }
 
-export default FloorMap;
+    // Get neighbors
+    const neighbors = getNeighbors(current, gridSize, width, height, obstacles);
+
+    for (const neighbor of neighbors) {
+      const neighborKey = `${neighbor.x},${neighbor.y}`;
+      
+      if (closedSet.has(neighborKey)) {
+        continue;
+      }
+
+      const tentativeG = current.g + distance(current, neighbor);
+
+      // Check if this neighbor is already in open set
+      const existingIndex = openSet.findIndex(n => n.x === neighbor.x && n.y === neighbor.y);
+      
+      if (existingIndex === -1) {
+        // New node
+        neighbor.g = tentativeG;
+        neighbor.h = distance(neighbor, endNode);
+        neighbor.f = neighbor.g + neighbor.h;
+        neighbor.parent = current;
+        openSet.push(neighbor);
+      } else if (tentativeG < openSet[existingIndex].g) {
+        // Better path to existing node
+        openSet[existingIndex].g = tentativeG;
+        openSet[existingIndex].f = tentativeG + openSet[existingIndex].h;
+        openSet[existingIndex].parent = current;
+      }
+    }
+  }
+
+  // No path found, return direct line
+  return [start, end];
+}
+
+// Get landmarks near a point
+export function getLandmarksNear(point: Point, sections: OfficeSection[], radius: number = 60): OfficeSection[] {
+  return sections.filter(section => {
+    const centerX = section.x + section.width / 2;
+    const centerY = section.y + section.height / 2;
+    const dist = distance(point, { x: centerX, y: centerY });
+    return dist <= radius;
+  });
+}
+
+// Get landmarks along a path segment
+export function getLandmarksAlongPath(start: Point, end: Point, sections: OfficeSection[], radius: number = 40): OfficeSection[] {
+  const landmarks: OfficeSection[] = [];
+  const steps = 10;
+  
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const point = {
+      x: start.x + (end.x - start.x) * t,
+      y: start.y + (end.y - start.y) * t
+    };
+    
+    const nearbyLandmarks = getLandmarksNear(point, sections, radius);
+    for (const landmark of nearbyLandmarks) {
+      if (!landmarks.find(l => l.id === landmark.id)) {
+        landmarks.push(landmark);
+      }
+    }
+  }
+  
+  return landmarks;
+}
