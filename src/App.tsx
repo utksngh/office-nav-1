@@ -567,7 +567,7 @@ function App() {
             >
               {/* Mobile Quick Navigation - Above Map */}
               {isMobile && (
-                <div className="sticky top-0 bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 p-3 shadow-lg" style={{ zIndex: 50 }}>
+                <div className="sticky top-0 bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 p-3 shadow-lg transition-all duration-300" style={{ zIndex: 50 }}>
                   <MobileQuickNavigation
                     currentFloor={floorData[currentFloor]}
                     startPoint={startPoint}
