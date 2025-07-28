@@ -5,9 +5,10 @@ interface PathVisualizationProps {
   path: Point[];
   isMobile?: boolean;
   isNavigating?: boolean;
+  zoomLevel?: number;
 }
 
-const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = false, isNavigating = false }) => {
+const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = false, isNavigating = false, zoomLevel = 1 }) => {
   if (path.length < 2) return null;
 
   const pathString = path.reduce((acc, point, index) => {
@@ -22,7 +23,7 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
         d={pathString}
         fill="none"
         stroke={isNavigating ? "#3B82F6" : "#10B981"}
-        strokeWidth={isMobile ? "10" : "6"}
+        strokeWidth={(isMobile ? 10 : 6) / zoomLevel}
         strokeLinecap="round"
         strokeLinejoin="round"
         className={`drop-shadow-lg ${isNavigating ? 'animate-pulse' : ''}`}
@@ -33,10 +34,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
         d={pathString}
         fill="none"
         stroke={isNavigating ? "#60A5FA" : "#34D399"}
-        strokeWidth={isMobile ? "5" : "3"}
+        strokeWidth={(isMobile ? 5 : 3) / zoomLevel}
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeDasharray={isMobile ? "25,25" : "15,15"}
+        strokeDasharray={`${(isMobile ? 25 : 15) / zoomLevel},${(isMobile ? 25 : 15) / zoomLevel}`}
         className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-sm`}
         style={isNavigating ? {
           animation: 'dash 2s linear infinite'
@@ -62,10 +63,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
           key={index}
           cx={point.x}
           cy={point.y}
-          r={isMobile ? "8" : "4"}
+          r={(isMobile ? 8 : 4) / zoomLevel}
           fill={isNavigating ? "#3B82F6" : "#10B981"}
           stroke="#FFFFFF"
-          strokeWidth={isMobile ? "4" : "2"}
+          strokeWidth={(isMobile ? 4 : 2) / zoomLevel}
           className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
         />
       ))}
@@ -81,10 +82,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
         return (
           <g key={`arrow-${index}`} transform={`translate(${point.x}, ${point.y}) rotate(${angle * 180 / Math.PI})`}>
             <polygon
-              points={isMobile ? "-10,-5 10,0 -10,5" : "-6,-3 6,0 -6,3"}
+              points={isMobile ? `${-10/zoomLevel},${-5/zoomLevel} ${10/zoomLevel},0 ${-10/zoomLevel},${5/zoomLevel}` : `${-6/zoomLevel},${-3/zoomLevel} ${6/zoomLevel},0 ${-6/zoomLevel},${3/zoomLevel}`}
               fill={isNavigating ? "#3B82F6" : "#10B981"}
               stroke="#FFFFFF"
-              strokeWidth={isMobile ? "3" : "1"}
+              strokeWidth={(isMobile ? 3 : 1) / zoomLevel}
               className={`drop-shadow-sm ${isNavigating ? 'animate-pulse' : ''}`}
             />
           </g>
