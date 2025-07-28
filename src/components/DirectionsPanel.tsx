@@ -1,5 +1,5 @@
 import React from 'react';
-import { Point } from '../types';
+import { Point, OfficeSection } from '../types';
 import { calculatePixelDistanceInMeters, formatDistance } from '../utils/geoUtils';
 import { Navigation, ArrowRight, ArrowLeft, ArrowUp, RotateCw, MapPin, Clock } from 'lucide-react';
 
@@ -12,6 +12,7 @@ interface DirectionsPanelProps {
   metersPerPixel: number;
   currentStep?: number;
   onStepChange?: (step: number) => void;
+  floorSections: OfficeSection[];
 }
 
 interface DirectionStep {
@@ -20,6 +21,8 @@ interface DirectionStep {
   direction: 'straight' | 'left' | 'right' | 'slight_left' | 'slight_right' | 'sharp_left' | 'sharp_right';
   point: Point;
   icon: React.ReactNode;
+  landmarks: string[];
+  passingBy: string[];
 }
 
 const DirectionsPanel: React.FC<DirectionsPanelProps> = ({
@@ -30,8 +33,57 @@ const DirectionsPanel: React.FC<DirectionsPanelProps> = ({
   isNavigating,
   metersPerPixel,
   currentStep = 0,
-  onStepChange
+  onStepChange,
+  floorSections
 }) => {
+  // Find nearby sections within a certain radius of a point
+  const findNearbyLandmarks = (point: Point, radius: number = 80): string[] => {
+    const nearby: string[] = [];
+    
+    for (const section of floorSections) {
+      const sectionCenter = {
+        x: section.x + section.width / 2,
+        y: section.y + section.height / 2
+      };
+      
+      const distance = Math.sqrt(
+        Math.pow(point.x - sectionCenter.x, 2) + 
+        Math.pow(point.y - sectionCenter.y, 2)
+      );
+      
+      if (distance <= radius) {
+        nearby.push(section.name);
+      }
+    }
+    
+    return nearby;
+  };
+
+  // Find sections you'll pass by between two points
+  const findPassingLandmarks = (start: Point, end: Point): string[] => {
+    const passing: string[] = [];
+    
+    // Create a line between start and end points
+    const steps = 20; // Number of points to check along the path
+    
+    for (let i = 1; i < steps; i++) {
+      const t = i / steps;
+      const checkPoint = {
+        x: start.x + (end.x - start.x) * t,
+        y: start.y + (end.y - start.y) * t
+      };
+      
+      // Find nearby landmarks at this point
+      const nearby = findNearbyLandmarks(checkPoint, 60);
+      nearby.forEach(landmark => {
+        if (!passing.includes(landmark)) {
+          passing.push(landmark);
+        }
+      });
+    }
+    
+    return passing;
+  };
   const generateDirections = (): DirectionStep[] => {
     if (path.length < 2) return [];
 
@@ -43,7 +95,9 @@ const DirectionsPanel: React.FC<DirectionsPanelProps> = ({
       distance: 0,
       direction: 'straight',
       point: path[0],
-      icon: <MapPin className="w-4 h-4 text-emerald-500" />
+      icon: <MapPin className="w-4 h-4 text-emerald-500" />,
+      landmarks: findNearbyLandmarks(path[0]),
+      passingBy: []
     });
 
     // Generate turn-by-turn directions
@@ -54,37 +108,53 @@ const DirectionsPanel: React.FC<DirectionsPanelProps> = ({
       
       const distance = calculatePixelDistanceInMeters(prev, current, metersPerPixel);
       const direction = calculateTurnDirection(prev, current, next);
+      const landmarks = findNearbyLandmarks(current);
+      const passingBy = findPassingLandmarks(current, next);
       
       let instruction = "";
       let icon = <ArrowUp className="w-4 h-4 text-blue-500" />;
       
       switch (direction) {
         case 'straight':
-          instruction = `Continue straight for ${formatDistance(distance)}`;
+          instruction = landmarks.length > 0 
+            ? `Continue straight past ${landmarks[0]} for ${formatDistance(distance)}`
+            : `Continue straight for ${formatDistance(distance)}`;
           icon = <ArrowUp className="w-4 h-4 text-blue-500" />;
           break;
         case 'left':
-          instruction = `Turn left and continue for ${formatDistance(distance)}`;
+          instruction = landmarks.length > 0 
+            ? `Turn left at ${landmarks[0]} and continue for ${formatDistance(distance)}`
+            : `Turn left and continue for ${formatDistance(distance)}`;
           icon = <ArrowLeft className="w-4 h-4 text-orange-500" />;
           break;
         case 'right':
-          instruction = `Turn right and continue for ${formatDistance(distance)}`;
+          instruction = landmarks.length > 0 
+            ? `Turn right at ${landmarks[0]} and continue for ${formatDistance(distance)}`
+            : `Turn right and continue for ${formatDistance(distance)}`;
           icon = <ArrowRight className="w-4 h-4 text-orange-500" />;
           break;
         case 'slight_left':
-          instruction = `Bear left and continue for ${formatDistance(distance)}`;
+          instruction = landmarks.length > 0 
+            ? `Bear left towards ${landmarks[0]} and continue for ${formatDistance(distance)}`
+            : `Bear left and continue for ${formatDistance(distance)}`;
           icon = <RotateCw className="w-4 h-4 text-yellow-500 transform -rotate-45" />;
           break;
         case 'slight_right':
-          instruction = `Bear right and continue for ${formatDistance(distance)}`;
+          instruction = landmarks.length > 0 
+            ? `Bear right towards ${landmarks[0]} and continue for ${formatDistance(distance)}`
+            : `Bear right and continue for ${formatDistance(distance)}`;
           icon = <RotateCw className="w-4 h-4 text-yellow-500 transform rotate-45" />;
           break;
         case 'sharp_left':
-          instruction = `Make a sharp left turn and continue for ${formatDistance(distance)}`;
+          instruction = landmarks.length > 0 
+            ? `Make a sharp left turn at ${landmarks[0]} and continue for ${formatDistance(distance)}`
+            : `Make a sharp left turn and continue for ${formatDistance(distance)}`;
           icon = <ArrowLeft className="w-4 h-4 text-red-500" />;
           break;
         case 'sharp_right':
-          instruction = `Make a sharp right turn and continue for ${formatDistance(distance)}`;
+          instruction = landmarks.length > 0 
+            ? `Make a sharp right turn at ${landmarks[0]} and continue for ${formatDistance(distance)}`
+            : `Make a sharp right turn and continue for ${formatDistance(distance)}`;
           icon = <ArrowRight className="w-4 h-4 text-red-500" />;
           break;
       }
@@ -94,7 +164,9 @@ const DirectionsPanel: React.FC<DirectionsPanelProps> = ({
         distance,
         direction,
         point: current,
-        icon
+        icon,
+        landmarks,
+        passingBy
       });
     }
 
@@ -110,7 +182,9 @@ const DirectionsPanel: React.FC<DirectionsPanelProps> = ({
       distance: finalDistance,
       direction: 'straight',
       point: path[path.length - 1],
-      icon: <MapPin className="w-4 h-4 text-red-500" />
+      icon: <MapPin className="w-4 h-4 text-red-500" />,
+      landmarks: findNearbyLandmarks(path[path.length - 1]),
+      passingBy: []
     });
 
     return directions;
@@ -313,6 +387,37 @@ const DirectionsPanel: React.FC<DirectionsPanelProps> = ({
                   }`}>
                     {step.instruction}
                   </p>
+                  
+                  {/* Landmarks and Passing By Information */}
+                  {(step.landmarks.length > 0 || step.passingBy.length > 0) && (
+                    <div className={`${isMobile ? 'mt-2' : 'mt-2'} ${isMobile ? 'text-xs' : 'text-xs'} space-y-1`}>
+                      {step.landmarks.length > 0 && (
+                        <div className={`flex items-start gap-1.5 ${
+                          isNavigating && index === currentStep
+                            ? 'text-emerald-600'
+                            : isNavigating && index < currentStep
+                            ? 'text-gray-400'
+                            : 'text-blue-600'
+                        }`}>
+                          <span className="font-medium">📍</span>
+                          <span>Near: {step.landmarks.slice(0, 2).join(', ')}</span>
+                        </div>
+                      )}
+                      
+                      {step.passingBy.length > 0 && (
+                        <div className={`flex items-start gap-1.5 ${
+                          isNavigating && index === currentStep
+                            ? 'text-emerald-600'
+                            : isNavigating && index < currentStep
+                            ? 'text-gray-400'
+                            : 'text-blue-600'
+                        }`}>
+                          <span className="font-medium">🚶</span>
+                          <span>Passing: {step.passingBy.slice(0, 2).join(', ')}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

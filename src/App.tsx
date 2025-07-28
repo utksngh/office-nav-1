@@ -607,6 +607,7 @@ function App() {
           metersPerPixel={floorData[currentFloor].metersPerPixel}
           currentStep={currentNavigationStep}
           onStepChange={setCurrentNavigationStep}
+          floorSections={floorData[currentFloor].sections}
         />
       </div>
       
