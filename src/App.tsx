@@ -603,6 +603,7 @@ function App() {
                 zoomLevel={zoomLevel}
                 mapTransform={mapTransform}
                 onMapTransform={setMapTransform}
+                setZoomLevel={setZoomLevel}
                onZoomIn={handleZoomIn}
                onZoomOut={handleZoomOut}
                onResetZoom={handleResetZoom}

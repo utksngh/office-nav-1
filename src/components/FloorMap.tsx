@@ -22,6 +22,7 @@ interface FloorMapProps {
   zoomLevel: number;
   mapTransform: { x: number; y: number };
   onMapTransform: (transform: { x: number; y: number }) => void;
+  setZoomLevel: (zoom: number) => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onResetZoom: () => void;
@@ -43,6 +44,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
   zoomLevel,
   mapTransform,
   onMapTransform,
+  setZoomLevel,
   onZoomIn,
   onZoomOut,
   onResetZoom
