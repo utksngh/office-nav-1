@@ -558,15 +558,16 @@ function App() {
 
             <div 
               ref={setMapContainerRef}
-              className={`flex-1 overflow-auto ${isMobile ? 'rounded-md' : 'rounded-xl'} border border-gray-700/50 shadow-inner`}
+              className={`flex-1 overflow-auto ${isMobile ? 'rounded-md' : 'rounded-xl'} border border-gray-700/50 shadow-inner relative`}
               style={isMobile ? { 
                 overscrollBehavior: 'contain',
-                WebkitOverflowScrolling: 'touch'
+                WebkitOverflowScrolling: 'touch',
+                position: 'relative'
               } : {}}
             >
               {/* Mobile Quick Navigation - Above Map */}
               {isMobile && (
-                <div className="sticky top-0 z-30 bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 p-3 shadow-lg">
+                <div className="sticky top-0 z-50 bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 p-3 shadow-lg">
                   <MobileQuickNavigation
                     currentFloor={floorData[currentFloor]}
                     startPoint={startPoint}

@@ -10,6 +10,7 @@
 
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -24,6 +25,11 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #6B7280;
+}
+
+/* Horizontal scrollbar corner */
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background: #374151;
 }
 
 /* Smooth transitions for all interactive elements */
@@ -210,6 +216,10 @@ select:focus-visible {
   
   .overflow-auto::-webkit-scrollbar-thumb:hover {
     background: #9CA3AF;
+  }
+  
+  .overflow-auto::-webkit-scrollbar-corner {
+    background: #374151;
   }
   
   /* Compact elements for mobile */

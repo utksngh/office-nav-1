@@ -27,6 +27,9 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
         strokeLinecap="round"
         strokeLinejoin="round"
         className={`drop-shadow-lg ${isNavigating ? 'animate-pulse' : ''}`}
+        style={{
+          filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+        }}
       />
       
       {/* Animated path overlay */}
@@ -38,9 +41,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeDasharray={`${(isMobile ? 25 : 15) / zoomLevel},${(isMobile ? 25 : 15) / zoomLevel}`}
-        className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-sm`}
+        className={`drop-shadow-sm`}
         style={isNavigating ? {
-          animation: 'dash 2s linear infinite'
+          animation: 'dash 2s linear infinite',
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
         } : {}}
       />
       
@@ -50,12 +54,24 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
           {`
             @keyframes dash {
               to {
-                stroke-dashoffset: -50;
+                stroke-dashoffset: ${-(isMobile ? 50 : 30)};
               }
             }
           `}
         </style>
       )}
+      
+      {/* Route glow effect */}
+      <path
+        d={pathString}
+        fill="none"
+        stroke={isNavigating ? "#3B82F6" : "#10B981"}
+        strokeWidth={(isMobile ? 20 : 12) / zoomLevel}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.1"
+        className="animate-pulse"
+      />
       
       {/* Path points */}
       {path.map((point, index) => (
@@ -67,7 +83,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
           fill={isNavigating ? "#3B82F6" : "#10B981"}
           stroke="#FFFFFF"
           strokeWidth={(isMobile ? 4 : 2) / zoomLevel}
-          className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
+          className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
+          style={{
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+          }}
         />
       ))}
       
@@ -86,7 +105,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
               fill={isNavigating ? "#3B82F6" : "#10B981"}
               stroke="#FFFFFF"
               strokeWidth={(isMobile ? 3 : 1) / zoomLevel}
-              className={`drop-shadow-sm ${isNavigating ? 'animate-pulse' : ''}`}
+              className={`${isNavigating ? 'animate-pulse' : ''}`}
+              style={{
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+              }}
             />
           </g>
         );

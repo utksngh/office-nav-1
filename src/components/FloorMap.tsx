@@ -51,6 +51,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
   const [drawStart, setDrawStart] = useState<Point | null>(null);
   const [currentPath, setCurrentPath] = useState<Point[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const getSectionTypeColor = (type: OfficeSection['type']) => {
     const colors = {
@@ -146,11 +147,59 @@ const FloorMap: React.FC<FloorMapProps> = ({
     if (startPoint && endPoint) {
       const path = findPath(startPoint, endPoint, floorData.sections, floorData.width, floorData.height);
       setCurrentPath(path);
+      
+      // Auto-adjust viewport to show the entire route
+      if (path.length > 0 && containerRef.current) {
+        setTimeout(() => {
+          adjustViewportToShowRoute(path);
+        }, 100);
+      }
     } else {
       setCurrentPath([]);
     }
   }, [startPoint, endPoint, floorData]);
 
+  const adjustViewportToShowRoute = (path: Point[]) => {
+    if (!containerRef.current || path.length === 0) return;
+
+    // Calculate bounding box of the route with padding
+    const padding = isMobile ? 80 : 100;
+    let minX = Math.min(...path.map(p => p.x)) - padding;
+    let maxX = Math.max(...path.map(p => p.x)) + padding;
+    let minY = Math.min(...path.map(p => p.y)) - padding;
+    let maxY = Math.max(...path.map(p => p.y)) + padding;
+
+    // Ensure bounds are within map limits
+    minX = Math.max(0, minX);
+    maxX = Math.min(floorData.width, maxX);
+    minY = Math.max(0, minY);
+    maxY = Math.min(floorData.height, maxY);
+
+    const routeWidth = maxX - minX;
+    const routeHeight = maxY - minY;
+    const containerRect = containerRef.current.getBoundingClientRect();
+
+    // Calculate optimal zoom level to fit the route
+    const zoomX = containerRect.width / routeWidth;
+    const zoomY = containerRect.height / routeHeight;
+    const optimalZoom = Math.min(zoomX, zoomY, 2); // Max zoom of 2x
+
+    // Calculate center point of the route
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
+    // Calculate scroll position to center the route
+    const scrollLeft = centerX * optimalZoom - containerRect.width / 2;
+    const scrollTop = centerY * optimalZoom - containerRect.height / 2;
+
+    // Apply zoom and scroll
+    setZoomLevel(optimalZoom);
+    containerRef.current.scrollTo({
+      left: Math.max(0, scrollLeft),
+      top: Math.max(0, scrollTop),
+      behavior: 'smooth'
+    });
+  };
   // Calculate the scaled dimensions
   const scaledWidth = floorData.width * zoomLevel;
   const scaledHeight = floorData.height * zoomLevel;
@@ -158,17 +207,25 @@ const FloorMap: React.FC<FloorMapProps> = ({
   const minHeight = isMobile ? Math.max(window.innerHeight * 0.8, 700) : 600;
 
   return (
-    <div className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} overflow-auto`}>
+    <div 
+      ref={containerRef}
+      className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} overflow-auto`}
+      style={{
+        overscrollBehavior: 'contain',
+        WebkitOverflowScrolling: 'touch',
+        scrollBehavior: 'smooth'
+      }}
+    >
       <svg
         ref={svgRef}
         width={Math.max(scaledWidth, minWidth)}
         height={Math.max(scaledHeight, minHeight)}
         viewBox={`0 0 ${floorData.width} ${floorData.height}`}
-        className={`${isMobile ? 'cursor-pointer touch-manipulation' : 'cursor-crosshair'} ${isMobile ? 'w-full h-full' : 'min-w-full min-h-full'}`}
+        className={`${isMobile ? 'cursor-pointer touch-manipulation' : 'cursor-crosshair'} block`}
         onClick={handleSVGClick}
         style={{
-          minWidth: `${Math.max(scaledWidth, minWidth)}px`,
-          minHeight: `${Math.max(scaledHeight, minHeight)}px`,
+          width: `${Math.max(scaledWidth, minWidth)}px`,
+          height: `${Math.max(scaledHeight, minHeight)}px`,
           transform: `scale(${zoomLevel}) translate(${mapTransform.x}px, ${mapTransform.y}px)`,
           transformOrigin: '0 0'
         }}
@@ -347,7 +404,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
       </svg>
 
       {/* Instructions */}
-      <div className={`absolute ${isMobile ? 'top-2 left-2' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[160px]' : ''}`}>
+      <div className={`absolute ${isMobile ? 'top-2 left-2' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[160px]' : ''} z-20`}>
         {isNavigating ? (
           <div className="text-blue-600">
             <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
@@ -383,7 +440,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
 
       {/* Path info */}
       {currentPath.length > 0 && (
-        <div className={`absolute ${isMobile ? 'top-2 right-2' : 'top-4 right-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[100px]' : 'min-w-[120px]'} shadow-xl border border-gray-300/50`}>
+        <div className={`absolute ${isMobile ? 'top-2 right-2' : 'top-4 right-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[100px]' : 'min-w-[120px]'} shadow-xl border border-gray-300/50 z-20`}>
           <div className={`${isNavigating ? 'text-blue-600' : 'text-emerald-600'}`}>
             <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
               <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} ${isNavigating ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full animate-pulse`}></div>
@@ -407,8 +464,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
       {isMobile && selectedSection && !isAddingSection && (
         <button
           onClick={() => onSectionSelect(null)}
-          className="fixed bottom-4 right-4 p-3 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50 min-w-[48px] min-h-[48px] flex items-center justify-center"
-          style={{ zIndex: 1000 }}
+          className="absolute bottom-4 right-4 p-3 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-30 min-w-[48px] min-h-[48px] flex items-center justify-center"
         >
           <X className="w-5 h-5" />
         </button>
@@ -416,7 +472,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
       
       {/* Mobile Zoom Controls - Alternative Position */}
       {isMobile && (
-        <div className="fixed bottom-4 left-4 flex flex-col gap-2 z-40">
+        <div className="absolute bottom-4 left-4 flex flex-col gap-2 z-30">
           <button
             onClick={onZoomIn}
             className="p-2.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[48px] flex items-center justify-center"
