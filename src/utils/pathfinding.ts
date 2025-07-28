@@ -10,7 +10,7 @@ export function findPath(
   mapHeight: number,
   metersPerPixel: number = 0.1
 ): Point[] {
-  const gridSize = Math.max(4, Math.round(0.5 / metersPerPixel)); // 0.5 meter grid resolution
+  const gridSize = Math.max(2, Math.round(0.3 / metersPerPixel)); // 0.3 meter grid resolution for smoother paths
   const cols = Math.ceil(mapWidth / gridSize);
   const rows = Math.ceil(mapHeight / gridSize);
 
@@ -56,7 +56,7 @@ function createObstacleMap(
   metersPerPixel: number = 0.1
 ): boolean[][] {
   const map: boolean[][] = Array(rows).fill(null).map(() => Array(cols).fill(false));
-  const bufferMeters = 0.3; // 30cm buffer around obstacles
+  const bufferMeters = 0.5; // 50cm buffer around obstacles for smoother paths
   const buffer = bufferMeters / metersPerPixel; // Convert to pixels
 
   for (const obstacle of obstacles) {
@@ -345,7 +345,7 @@ function furtherOptimizePath(path: Point[], obstacles: OfficeSection[], metersPe
 }
 
 function isPathClearOfObstacles(start: Point, end: Point, obstacles: OfficeSection[], metersPerPixel: number = 0.1): boolean {
-  const bufferMeters = 0.4; // 40cm minimum clearance
+  const bufferMeters = 0.3; // 30cm minimum clearance for tighter paths
   const buffer = bufferMeters / metersPerPixel; // Convert to pixels
   
   for (const obstacle of obstacles) {

@@ -70,27 +70,27 @@ const FloorMap: React.FC<FloorMapProps> = ({
 
   // Find the nearest corner of the closest section to the clicked point
   const findNearestCorner = (clickPoint: Point): Point => {
+    // Only snap to corners if very close (within 20 pixels)
+    const cornerThreshold = 20;
     let nearestCorner = clickPoint;
-    let minDistance = Infinity;
-    const cornerThreshold = 50; // Maximum distance to consider a corner
+    let minDistance = cornerThreshold;
 
+    // Only check corners if click is very close to them
     for (const section of floorData.sections) {
-      // Calculate all four corners of the section
       const corners = [
-        { x: section.x, y: section.y }, // Top-left
-        { x: section.x + section.width, y: section.y }, // Top-right
-        { x: section.x, y: section.y + section.height }, // Bottom-left
-        { x: section.x + section.width, y: section.y + section.height } // Bottom-right
+        { x: section.x, y: section.y },
+        { x: section.x + section.width, y: section.y },
+        { x: section.x, y: section.y + section.height },
+        { x: section.x + section.width, y: section.y + section.height }
       ];
 
-      // Find the closest corner
       for (const corner of corners) {
         const distance = Math.sqrt(
           Math.pow(corner.x - clickPoint.x, 2) + 
           Math.pow(corner.y - clickPoint.y, 2)
         );
 
-        if (distance < minDistance && distance <= cornerThreshold) {
+        if (distance < minDistance) {
           minDistance = distance;
           nearestCorner = corner;
         }
@@ -131,7 +131,8 @@ const FloorMap: React.FC<FloorMapProps> = ({
       }
     } else {
       // Point selection for pathfinding
-      const optimizedPoint = findNearestCorner(point);
+      // Use the exact clicked point for more precise navigation
+      const optimizedPoint = point;
       if (!startPoint) {
         onPointSelect(optimizedPoint, 'start');
       } else if (!endPoint) {
@@ -241,7 +242,8 @@ const FloorMap: React.FC<FloorMapProps> = ({
         ))}
 
         {/* Corner indicators for better UX */}
-        {floorData.sections.map((section) => (
+        {/* Corner indicators - only show when adding sections */}
+        {isAddingSection && floorData.sections.map((section) => (
           <g key={`corners-${section.id}`}>
             {[
               { x: section.x, y: section.y },
@@ -253,9 +255,9 @@ const FloorMap: React.FC<FloorMapProps> = ({
                 key={index}
                 cx={corner.x}
                 cy={corner.y}
-                r={(isMobile ? 4 : 1.5) / zoomLevel}
+                r={(isMobile ? 3 : 1) / zoomLevel}
                 fill="#3B82F6"
-                fillOpacity={isMobile ? "0.8" : "0.5"}
+                fillOpacity="0.6"
                 className="pointer-events-none"
                 stroke="#FFFFFF"
                 strokeWidth={0.5 / zoomLevel}
