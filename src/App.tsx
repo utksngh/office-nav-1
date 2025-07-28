@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigation, MapPin, Plus, Settings } from 'lucide-react';
+import { Navigation, MapPin, Plus, Save, Download, Upload } from 'lucide-react';
 import FloorMap from './components/FloorMap';
 import ControlPanel from './components/ControlPanel';
 import { FloorData, Point, OfficeSection } from './types';
@@ -91,13 +91,18 @@ const initialFloorData: Record<number, FloorData> = {
 
 function App() {
   const [currentFloor, setCurrentFloor] = useState<number>(1);
-  const [floorData, setFloorData] = useState<Record<number, FloorData>>(initialFloorData);
+  const [floorData, setFloorData] = useState<Record<number, FloorData>>(() => {
+    // Load saved data from localStorage or use initial data
+    const savedData = localStorage.getItem('officeFloorData');
+    return savedData ? JSON.parse(savedData) : initialFloorData;
+  });
   const [startPoint, setStartPoint] = useState<Point | null>(null);
   const [endPoint, setEndPoint] = useState<Point | null>(null);
   const [isAddingSection, setIsAddingSection] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [showControlPanel, setShowControlPanel] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showSaveOptions, setShowSaveOptions] = useState(false);
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -109,6 +114,61 @@ function App() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Auto-save to localStorage whenever floorData changes
+  React.useEffect(() => {
+    localStorage.setItem('officeFloorData', JSON.stringify(floorData));
+  }, [floorData]);
+
+  const saveToFile = () => {
+    const dataStr = JSON.stringify(floorData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `office-layout-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    setShowSaveOptions(false);
+  };
+
+  const loadFromFile = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const loadedData = JSON.parse(e.target?.result as string);
+            setFloorData(loadedData);
+            clearPath();
+            setSelectedSection(null);
+            setIsAddingSection(false);
+          } catch (error) {
+            alert('Error loading file. Please make sure it\'s a valid office layout file.');
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+    setShowSaveOptions(false);
+  };
+
+  const resetToDefault = () => {
+    if (confirm('Are you sure you want to reset to the default layout? This will remove all your changes.')) {
+      setFloorData(initialFloorData);
+      localStorage.removeItem('officeFloorData');
+      clearPath();
+      setSelectedSection(null);
+      setIsAddingSection(false);
+      setShowSaveOptions(false);
+    }
+  };
   const addSection = (section: Omit<OfficeSection, 'id'>) => {
     const newSection: OfficeSection = {
       ...section,
@@ -216,6 +276,51 @@ function App() {
             </div>
             
             <div className="flex gap-1 md:gap-2">
+              <div className="relative">
+                <button
+                  onClick={() => setShowSaveOptions(!showSaveOptions)}
+                  className="p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg"
+                  title="Save/Load Layout"
+                >
+                  <Save className="w-4 h-4 md:w-5 md:h-5" />
+                </button>
+                
+                {showSaveOptions && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowSaveOptions(false)}
+                    />
+                    <div className="absolute right-0 top-12 bg-gray-800/95 backdrop-blur-sm border border-gray-700/50 rounded-xl shadow-2xl z-50 min-w-48">
+                      <div className="p-2 space-y-1">
+                        <button
+                          onClick={saveToFile}
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-all duration-200"
+                        >
+                          <Download className="w-4 h-4" />
+                          Export Layout
+                        </button>
+                        <button
+                          onClick={loadFromFile}
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-all duration-200"
+                        >
+                          <Upload className="w-4 h-4" />
+                          Import Layout
+                        </button>
+                        <hr className="border-gray-700/50 my-1" />
+                        <button
+                          onClick={resetToDefault}
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-all duration-200"
+                        >
+                          <Navigation className="w-4 h-4" />
+                          Reset to Default
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+              
               <button
                 onClick={() => setShowControlPanel(!showControlPanel)}
                 className="p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 md:hidden shadow-lg"
