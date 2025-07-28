@@ -345,7 +345,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
         ) : null}
       </div>
     </>
-    </div>
   );
 };
 
