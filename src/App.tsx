@@ -234,14 +234,6 @@ function App() {
               >
                 <Plus className="w-4 h-4 md:w-5 md:h-5" />
               </button>
-              
-              <button
-                onClick={clearPath}
-                className="p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg"
-                title="Clear Path"
-              >
-                <Settings className="w-4 h-4 md:w-5 md:h-5" />
-              </button>
             </div>
           </div>
         </div>
