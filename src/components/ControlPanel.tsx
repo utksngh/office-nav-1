@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FloorData, Point, OfficeSection } from '../types';
-import { MapPin, Trash2, Edit3, Save, X } from 'lucide-react';
+import { MapPin, Trash2, Edit3, Save, X, Plus, Navigation, Download, Upload } from 'lucide-react';
 import { formatDistance, formatCoordinates, calculatePixelDistanceInMeters } from '../utils/geoUtils';
 
 interface ControlPanelProps {
@@ -14,6 +14,16 @@ interface ControlPanelProps {
   isVisible: boolean;
   onClose: () => void;
   isMobile: boolean;
+  saveLayout: () => void;
+  saveToFile: () => void;
+  loadFromFile: () => void;
+  resetToDefault: () => void;
+  isAddingSection: boolean;
+  onToggleAddingSection: () => void;
+  isNavigating: boolean;
+  onStartNavigation: () => void;
+  onStopNavigation: () => void;
+  onSectionSelect: (sectionId: string | null) => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -26,7 +36,17 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onClearPath,
   isVisible,
   onClose,
-  isMobile
+  isMobile,
+  saveLayout,
+  saveToFile,
+  loadFromFile,
+  resetToDefault,
+  isAddingSection,
+  onToggleAddingSection,
+  isNavigating,
+  onStartNavigation,
+  onStopNavigation,
+  onSectionSelect,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<OfficeSection>>({});
@@ -89,13 +109,85 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         )}
         
       <div className={`${isMobile ? 'space-y-6' : 'space-y-4 lg:space-y-6'}`}>
-        {/* Navigation Status */}
+        {/* Navigation Controls */}
         <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-xl ${isMobile ? 'p-5' : 'p-4'} border border-gray-600/30 shadow-lg`}>
           <h3 className={`${isMobile ? 'text-lg' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-4' : 'mb-3'} flex items-center gap-2`}>
             <div className={`${isMobile ? 'p-2' : 'p-1.5'} bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg`}>
-              <MapPin className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} text-white`} />
+              <Navigation className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} text-white`} />
             </div>
-            Navigation
+            Navigation Control
+          </h3>
+          
+          {startPoint && endPoint ? (
+            <div className={`${isMobile ? 'p-4' : 'p-3'} bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center`}>
+              <p className={`text-emerald-400 ${isMobile ? 'text-base' : 'text-sm'} font-medium`}>
+                ✅ Route is ready for navigation!
+              </p>
+            </div>
+          ) : (
+            <div className={`${isMobile ? 'p-4' : 'p-3'} bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-center`}>
+              <p className={`text-yellow-400 ${isMobile ? 'text-base' : 'text-sm'} font-medium`}>
+                {!startPoint ? 'Set start point on map' : 'Set destination on map'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-xl ${isMobile ? 'p-5' : 'p-4'} border border-gray-600/30 shadow-lg`}>
+          <h3 className={`${isMobile ? 'text-lg' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-4' : 'mb-3'}`}>
+            Quick Actions
+          </h3>
+          
+          <div className={`grid grid-cols-2 ${isMobile ? 'gap-3' : 'gap-2'}`}>
+            <button
+              onClick={() => {
+                onToggleAddingSection();
+                if (isMobile && selectedSection) {
+                  // Reset selection when toggling add mode on mobile
+                  onSectionSelect(null);
+                }
+              }}
+              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-3 py-2.5 text-xs'} rounded-xl transition-all duration-300 font-medium shadow-lg ${
+                isAddingSection
+                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white transform scale-105'
+                  : 'bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white'
+              }`}
+            >
+              <Plus className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mx-auto mb-1`} />
+              Add Room
+            </button>
+            
+            <button
+              onClick={saveLayout}
+              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-3 py-2.5 text-xs'} bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white rounded-xl transition-all duration-300 font-medium shadow-lg`}
+            >
+              <Save className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mx-auto mb-1`} />
+              Save
+            </button>
+            
+            <button
+              onClick={saveToFile}
+              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-3 py-2.5 text-xs'} bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white rounded-xl transition-all duration-300 font-medium shadow-lg`}
+            >
+              <Download className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mx-auto mb-1`} />
+              Export
+            </button>
+            
+            <button
+              onClick={loadFromFile}
+              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-3 py-2.5 text-xs'} bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white rounded-xl transition-all duration-300 font-medium shadow-lg`}
+            >
+              <Upload className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mx-auto mb-1`} />
+              Import
+            </button>
+          </div>
+        </div>
+
+        {/* Navigation Status */}
+        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-xl ${isMobile ? 'p-5' : 'p-4'} border border-gray-600/30 shadow-lg`}>
+          <h3 className={`${isMobile ? 'text-lg' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-4' : 'mb-3'}`}>
+            Route Status
           </h3>
           
           <div className={`${isMobile ? 'space-y-4' : 'space-y-3'} ${isMobile ? 'text-base' : 'text-sm'}`}>
@@ -157,9 +249,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                     ? 'bg-gradient-to-r from-blue-500/20 to-blue-600/20 border-blue-400/50 shadow-lg'
                     : 'bg-gray-600/50 hover:bg-gray-600/70 border-gray-500/30 hover:border-gray-400/50'
                 }`}
-                onClick={() => {
-                  // This would be handled by the parent component
-                }}
+                onClick={() => onSectionSelect(section.id)}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -317,6 +407,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             <p>• {isMobile ? 'Tap rooms to view details' : 'Tap rooms to view details'}</p>
             <p>• {isMobile ? 'Routes automatically avoid obstacles' : 'Routes automatically avoid obstacles'}</p>
             <p>• {isMobile ? 'All measurements in meters' : 'All measurements in meters'}</p>
+            {isMobile && <p>• Swipe left/right to navigate the map</p>}
           </div>
         </div>
       </div>

@@ -123,13 +123,14 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
         width={section.width}
         height={section.height}
         fill={color}
-        fillOpacity={isSelected ? 0.9 : 0.7}
+        fillOpacity={isSelected ? 0.95 : 0.85}
         stroke={isSelected ? '#FFFFFF' : '#FFFFFF'}
-        strokeWidth={isSelected ? 3 : 1.5}
-        strokeOpacity={isSelected ? 1 : 0.3}
-        rx="6"
-        ry="6"
+        strokeWidth={isSelected ? 4 : 2}
+        strokeOpacity={isSelected ? 1 : 0.6}
+        rx="8"
+        ry="8"
         className="transition-all duration-300"
+        filter={isSelected ? "drop-shadow(0 8px 16px rgba(0,0,0,0.3))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.1))"}
       />
       
       <text
@@ -137,7 +138,7 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
         y={section.y + section.height / 2}
         fill="white"
         fontSize={Math.min(('ontouchstart' in window) ? 18 : 16, section.width / 6, section.height / 3)}
-        fontWeight="700"
+        fontWeight="600"
         textAnchor="middle"
         dominantBaseline="middle"
         pointerEvents="none"
@@ -152,7 +153,7 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
           y={section.y + section.height / 2 + 18}
           fill="rgba(255,255,255,0.8)"
           fontSize={Math.min(('ontouchstart' in window) ? 15 : 13, section.width / 8, section.height / 5)}
-          fontWeight="500"
+          fontWeight="400"
           textAnchor="middle"
           dominantBaseline="middle"
           pointerEvents="none"
@@ -168,10 +169,10 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
           <circle
             cx={section.x + section.width}
             cy={section.y + section.height}
-            r={('ontouchstart' in window) ? "8" : "6"}
+            r={('ontouchstart' in window) ? "10" : "8"}
             fill="#FFFFFF"
             stroke={color}
-            strokeWidth={('ontouchstart' in window) ? "5" : "4"}
+            strokeWidth={('ontouchstart' in window) ? "3" : "2"}
             className="cursor-se-resize"
             onMouseDown={(e) => {
               e.stopPropagation();

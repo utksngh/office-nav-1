@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { FloorData, Point, OfficeSection } from '../types';
 import { findPath } from '../utils/pathfinding';
 import { calculatePixelDistanceInMeters, formatDistance } from '../utils/geoUtils';
+import { X } from 'lucide-react';
 import OfficeSpace from './OfficeSpace';
 import PathVisualization from './PathVisualization';
 
@@ -10,12 +11,14 @@ interface FloorMapProps {
   startPoint: Point | null;
   endPoint: Point | null;
   onPointSelect: (point: Point, type: 'start' | 'end') => void;
+  onClearPath: () => void;
   isAddingSection: boolean;
   onAddSection: (section: Omit<OfficeSection, 'id'>) => void;
   selectedSection: string | null;
   onSectionSelect: (sectionId: string | null) => void;
   onSectionUpdate: (sectionId: string, updates: Partial<OfficeSection>) => void;
   isMobile: boolean;
+  isNavigating: boolean;
 }
 
 const FloorMap: React.FC<FloorMapProps> = ({
@@ -23,12 +26,14 @@ const FloorMap: React.FC<FloorMapProps> = ({
   startPoint,
   endPoint,
   onPointSelect,
+  onClearPath,
   isAddingSection,
   onAddSection,
   selectedSection,
   onSectionSelect,
   onSectionUpdate,
-  isMobile
+  isMobile,
+  isNavigating
 }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawStart, setDrawStart] = useState<Point | null>(null);
@@ -134,23 +139,37 @@ const FloorMap: React.FC<FloorMapProps> = ({
   }, [startPoint, endPoint, floorData]);
 
   return (
-    <div className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} overflow-auto touch-pan-x touch-pan-y`}>
+    <div className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'overflow-auto' : 'overflow-auto'} ${isMobile ? 'touch-pan-x touch-pan-y' : 'touch-pan-x touch-pan-y'}`}>
       <svg
         ref={svgRef}
-        width={Math.max(floorData.width, isMobile ? Math.max(window.innerWidth - 24, 800) : 800)}
-        height={Math.max(floorData.height, isMobile ? Math.max(window.innerHeight - 180, 600) : 600)}
+        width={Math.max(floorData.width, isMobile ? Math.max(window.innerWidth * 1.2, 1000) : 800)}
+        height={Math.max(floorData.height, isMobile ? Math.max(window.innerHeight * 0.8, 700) : 600)}
         viewBox={`0 0 ${floorData.width} ${floorData.height}`}
         className={`${isMobile ? 'cursor-pointer touch-manipulation' : 'cursor-crosshair'} ${isMobile ? 'w-full h-full' : 'min-w-full min-h-full'}`}
         onClick={handleSVGClick}
         style={isMobile ? { 
-          minWidth: `${Math.max(floorData.width, Math.max(window.innerWidth - 24, 800))}px`,
-          minHeight: `${Math.max(floorData.height, Math.max(window.innerHeight - 180, 600))}px`
+          minWidth: `${Math.max(floorData.width, Math.max(window.innerWidth * 1.2, 1000))}px`,
+          minHeight: `${Math.max(floorData.height, Math.max(window.innerHeight * 0.8, 700))}px`
         } : {}}
       >
         {/* Grid */}
         <defs>
-          <pattern id="grid" width={isMobile ? "50" : "20"} height={isMobile ? "50" : "20"} patternUnits="userSpaceOnUse">
-            <path d={`M ${isMobile ? "50" : "20"} 0 L 0 0 0 ${isMobile ? "50" : "20"}`} fill="none" stroke="#374151" strokeWidth={isMobile ? "1" : "0.5"} opacity={isMobile ? "0.7" : "0.4"}/>
+          {/* Fine grid pattern */}
+          <pattern id="fineGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#4B5563" strokeWidth="0.3" opacity="0.3"/>
+          </pattern>
+          
+          {/* Major grid pattern */}
+          <pattern id="majorGrid" width="50" height="50" patternUnits="userSpaceOnUse">
+            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#6B7280" strokeWidth="0.8" opacity="0.6"/>
+            <rect width="50" height="50" fill="url(#fineGrid)"/>
+          </pattern>
+          
+          {/* Professional floor texture */}
+          <pattern id="floorTexture" width="100" height="100" patternUnits="userSpaceOnUse">
+            <rect width="100" height="100" fill="#F3F4F6" opacity="0.05"/>
+            <circle cx="25" cy="25" r="1" fill="#E5E7EB" opacity="0.1"/>
+            <circle cx="75" cy="75" r="1" fill="#E5E7EB" opacity="0.1"/>
           </pattern>
           
           {/* Gradient definitions */}
@@ -165,10 +184,23 @@ const FloorMap: React.FC<FloorMapProps> = ({
           </linearGradient>
         </defs>
         
-        <rect width="100%" height="100%" fill="url(#grid)" />
+        {/* Professional floor background */}
+        <rect width="100%" height="100%" fill="#1F2937" />
+        <rect width="100%" height="100%" fill="url(#majorGrid)" />
+        <rect width="100%" height="100%" fill="url(#floorTexture)" />
 
-        {/* Background */}
-        <rect width="100%" height="100%" fill="#1F2937" fillOpacity="0.6" />
+        {/* Floor plan border */}
+        <rect 
+          x="2" 
+          y="2" 
+          width={floorData.width - 4} 
+          height={floorData.height - 4} 
+          fill="none" 
+          stroke="#9CA3AF" 
+          strokeWidth="3" 
+          strokeDasharray="10,5"
+          opacity="0.8"
+        />
 
         {/* Office Sections */}
         {floorData.sections.map((section) => (
@@ -195,17 +227,19 @@ const FloorMap: React.FC<FloorMapProps> = ({
                 key={index}
                 cx={corner.x}
                 cy={corner.y}
-                r={isMobile ? "6" : "2"}
-                fill="#10B981"
-                fillOpacity={isMobile ? "0.9" : "0.6"}
+                r={isMobile ? "4" : "1.5"}
+                fill="#3B82F6"
+                fillOpacity={isMobile ? "0.8" : "0.5"}
                 className="pointer-events-none"
+                stroke="#FFFFFF"
+                strokeWidth="0.5"
               />
             ))}
           </g>
         ))}
         {/* Path Visualization */}
         {currentPath.length > 0 && (
-          <PathVisualization path={currentPath} isMobile={isMobile} />
+          <PathVisualization path={currentPath} isMobile={isMobile} isNavigating={isNavigating} />
         )}
 
         {/* Start Point */}
@@ -218,14 +252,14 @@ const FloorMap: React.FC<FloorMapProps> = ({
               fill="url(#startGradient)"
               stroke="#FFFFFF"
               strokeWidth={isMobile ? "5" : "3"}
-              className="animate-pulse drop-shadow-lg"
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
             />
             <circle
               cx={startPoint.x}
               cy={startPoint.y}
               r={isMobile ? "10" : "5"}
               fill="#FFFFFF"
-              className="animate-pulse"
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
             />
             <text
               x={startPoint.x}
@@ -251,14 +285,14 @@ const FloorMap: React.FC<FloorMapProps> = ({
               fill="url(#endGradient)"
               stroke="#FFFFFF"
               strokeWidth={isMobile ? "5" : "3"}
-              className="animate-pulse drop-shadow-lg"
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
             />
             <circle
               cx={endPoint.x}
               cy={endPoint.y}
               r={isMobile ? "10" : "5"}
               fill="#FFFFFF"
-              className="animate-pulse"
+              className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
             />
             <text
               x={endPoint.x}
@@ -291,50 +325,76 @@ const FloorMap: React.FC<FloorMapProps> = ({
       </svg>
 
       {/* Instructions */}
-      <div className={`absolute ${isMobile ? 'top-3 left-3' : 'top-4 left-4'} bg-gray-800/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} shadow-xl border border-gray-700/50 ${isMobile ? 'max-w-[160px]' : ''}`}>
-        {isAddingSection ? (
-          <div className="text-emerald-400">
+      <div className={`absolute ${isMobile ? 'top-3 left-3' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[160px]' : ''}`}>
+        {isNavigating ? (
+          <div className="text-blue-600">
             <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-emerald-400 rounded-full animate-pulse`}></div>
+              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
+              🧭 Navigating
+            </p>
+            <p className={`${isMobile ? 'mt-2' : 'mt-1'} text-gray-700`}>
+              {isMobile ? 'Following route' : 'Following the optimal route'}
+            </p>
+          </div>
+        ) : isAddingSection ? (
+          <div className="text-emerald-600">
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-emerald-600 rounded-full animate-pulse`}></div>
               Adding Section Mode
             </p>
-            <p className={`${isMobile ? 'mt-2' : 'mt-1'}`}>
+            <p className={`${isMobile ? 'mt-2' : 'mt-1'} text-gray-700`}>
               {isMobile ? 'Tap twice to create' : 'Click two points to create a rectangle'}
             </p>
           </div>
         ) : (
-          <div className="text-blue-400">
+          <div className="text-blue-600">
             <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-blue-400 rounded-full animate-pulse`}></div>
+              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
               Navigation Mode
             </p>
-            <p className={`${isMobile ? 'mt-2' : 'mt-1'}`}>
+            <p className={`${isMobile ? 'mt-2' : 'mt-1'} text-gray-700`}>
               {isMobile ? 'Tap to set points' : 'Click near corners for optimal paths'}
             </p>
+            {isMobile && (
+              <p className={`${isMobile ? 'mt-1 text-xs' : 'mt-1'} text-gray-500`}>
+                Swipe to navigate
+              </p>
+            )}
           </div>
         )}
       </div>
 
       {/* Path info */}
       {currentPath.length > 0 && (
-        <div className={`absolute ${isMobile ? 'top-3 right-3' : 'top-4 right-4'} bg-gray-800/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[120px]' : 'min-w-[120px]'} shadow-xl border border-gray-700/50`}>
-          <div className="text-emerald-400">
+        <div className={`absolute ${isMobile ? 'top-3 right-3' : 'top-4 right-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[120px]' : 'min-w-[120px]'} shadow-xl border border-gray-300/50`}>
+          <div className={`${isNavigating ? 'text-blue-600' : 'text-emerald-600'}`}>
             <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-emerald-400 rounded-full animate-pulse`}></div>
-              Route Ready
+              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} ${isNavigating ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full animate-pulse`}></div>
+              {isNavigating ? '🧭 Active' : 'Route Ready'}
             </p>
             {startPoint && endPoint && (
               <>
                 <p className={`${isMobile ? 'mt-2' : 'mt-1'} font-medium`}>
                   {isMobile ? '' : 'Distance: '}{formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel))}
                 </p>
-                <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-300 ${isMobile ? 'mt-1' : 'mt-1'}`}>
+                <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-600 ${isMobile ? 'mt-1' : 'mt-1'}`}>
                   {isMobile ? '~' : 'Walking time: ~'}{Math.ceil(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel) / 1.4)} sec
                 </p>
               </>
             )}
           </div>
         </div>
+      )}
+      
+      {/* Mobile Reset Selection Button */}
+      {isMobile && selectedSection && (
+        <button
+          onClick={() => onSectionSelect(null)}
+          className="fixed bottom-6 right-6 p-4 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50"
+          style={{ zIndex: 1000 }}
+        >
+          <X className="w-6 h-6" />
+        </button>
       )}
     </div>
   );

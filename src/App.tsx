@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigation, MapPin, Plus, Save, Download, Upload, Settings, Check } from 'lucide-react';
+import { Navigation, Plus, Save, Download, Upload, Settings, Check, MapPin } from 'lucide-react';
 import FloorMap from './components/FloorMap';
 import ControlPanel from './components/ControlPanel';
 import { FloorData, Point, OfficeSection } from './types';
@@ -106,6 +106,7 @@ function App() {
   const [saveNotification, setSaveNotification] = useState('');
   const [mapContainerRef, setMapContainerRef] = useState<HTMLDivElement | null>(null);
   const [showInstructions, setShowInstructions] = useState(true);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -133,11 +134,18 @@ function App() {
   // Auto-save to localStorage whenever floorData changes
   React.useEffect(() => {
     localStorage.setItem('officeFloorData', JSON.stringify(floorData));
-    if (saveNotification !== 'auto') {
+    // Only show auto-save notification if user has made changes (not on initial load)
+    const hasUserMadeChanges = localStorage.getItem('hasUserMadeChanges');
+    if (hasUserMadeChanges && saveNotification !== 'auto') {
       setSaveNotification('auto');
       setTimeout(() => setSaveNotification(''), 2000);
     }
   }, [floorData]);
+
+  // Mark that user has made changes when they interact with the app
+  const markUserChanges = () => {
+    localStorage.setItem('hasUserMadeChanges', 'true');
+  };
 
   const showSaveNotification = (message: string) => {
     setSaveNotification(message);
@@ -199,7 +207,21 @@ function App() {
       showSaveNotification('Layout reset to default!');
     }
   };
+
+  const startNavigation = () => {
+    if (startPoint && endPoint) {
+      setIsNavigating(true);
+      showSaveNotification('Navigation started!');
+    }
+  };
+
+  const stopNavigation = () => {
+    setIsNavigating(false);
+    showSaveNotification('Navigation stopped');
+  };
+
   const addSection = (section: Omit<OfficeSection, 'id'>) => {
+    markUserChanges();
     const newSection: OfficeSection = {
       ...section,
       id: Date.now().toString(),
@@ -265,6 +287,7 @@ function App() {
   };
 
   const updateSection = (sectionId: string, updates: Partial<OfficeSection>) => {
+    markUserChanges();
     const updatedSection = { ...updates };
     
     // Update coordinates if position or size changed
@@ -293,6 +316,7 @@ function App() {
   };
 
   const deleteSection = (sectionId: string) => {
+    markUserChanges();
     setFloorData(prev => ({
       ...prev,
       [currentFloor]: {
@@ -305,9 +329,11 @@ function App() {
   const clearPath = () => {
     setStartPoint(null);
     setEndPoint(null);
+    setIsNavigating(false);
   };
 
   const handleFloorChange = (floor: number) => {
+    markUserChanges();
     setCurrentFloor(floor);
     clearPath(); // Clear path when floor changes
     setSelectedSection(null); // Also clear selected section
@@ -350,51 +376,61 @@ function App() {
               ))}
             </div>
             
-            <div className={`flex ${isMobile ? 'gap-2' : 'gap-1 md:gap-2'}`}>
-              <button
-                onClick={saveLayout}
-                className={`${isMobile ? 'p-2.5' : 'p-2'} bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg`}
-                title="Save Layout"
-              >
-                <Save className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4 md:w-5 md:h-5'}`} />
-              </button>
-              
-              <button
-                onClick={saveToFile}
-                className={`${isMobile ? 'p-2.5' : 'p-2'} bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg`}
-                title="Download Layout"
-              >
-                <Download className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4 md:w-5 md:h-5'}`} />
-              </button>
-              
-              <button
-                onClick={loadFromFile}
-                className={`${isMobile ? 'p-2.5' : 'p-2'} bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg`}
-                title="Upload Layout"
-              >
-                <Upload className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4 md:w-5 md:h-5'}`} />
-              </button>
-              
+            {!isMobile && (
+              <div className={`flex gap-1 md:gap-2`}>
+                <button
+                  onClick={saveLayout}
+                  className={`p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg`}
+                  title="Save Layout"
+                >
+                  <Save className={`w-4 h-4 md:w-5 md:h-5`} />
+                </button>
+                
+                <button
+                  onClick={saveToFile}
+                  className={`p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg`}
+                  title="Download Layout"
+                >
+                  <Download className={`w-4 h-4 md:w-5 md:h-5`} />
+                </button>
+                
+                <button
+                  onClick={loadFromFile}
+                  className={`p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg`}
+                  title="Upload Layout"
+                >
+                  <Upload className={`w-4 h-4 md:w-5 md:h-5`} />
+                </button>
+                
+                <button
+                  onClick={() => setIsAddingSection(!isAddingSection)}
+                  className={`p-2 rounded-xl transition-all duration-300 shadow-lg ${
+                    isAddingSection
+                      ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white transform scale-105'
+                      : 'bg-gray-700/80 backdrop-blur-sm text-gray-300 hover:bg-gray-600 hover:text-white'
+                  }`}
+                  title="Add Section"
+                  onClick={() => {
+                    setIsAddingSection(!isAddingSection);
+                    if (isMobile) {
+                      setSelectedSection(null); // Reset selection on mobile
+                    }
+                  }}
+                >
+                  <Plus className={`w-4 h-4 md:w-5 md:h-5`} />
+                </button>
+              </div>
+            )}
+            
+            {isMobile && (
               <button
                 onClick={() => setShowControlPanel(!showControlPanel)}
-                className={`${isMobile ? 'p-2.5' : 'p-2'} bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 md:hidden shadow-lg`}
+                className={`p-2.5 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg`}
                 title="Toggle Panel"
               >
-                <Settings className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} />
+                <Settings className={`w-4 h-4`} />
               </button>
-              
-              <button
-                onClick={() => setIsAddingSection(!isAddingSection)}
-                className={`${isMobile ? 'p-2.5' : 'p-2'} rounded-xl transition-all duration-300 shadow-lg ${
-                  isAddingSection
-                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white transform scale-105'
-                    : 'bg-gray-700/80 backdrop-blur-sm text-gray-300 hover:bg-gray-600 hover:text-white'
-                }`}
-                title="Add Section"
-              >
-                <Plus className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4 md:w-5 md:h-5'}`} />
-              </button>
-            </div>
+            )}
           </div>
         </div>
       </header>
@@ -411,6 +447,15 @@ function App() {
           isVisible={showControlPanel}
           onClose={() => setShowControlPanel(false)}
           isMobile={isMobile}
+          saveLayout={saveLayout}
+          saveToFile={saveToFile}
+          loadFromFile={loadFromFile}
+          resetToDefault={resetToDefault}
+          isAddingSection={isAddingSection}
+          onToggleAddingSection={() => setIsAddingSection(!isAddingSection)}
+          isNavigating={isNavigating}
+          onStartNavigation={startNavigation}
+          onStopNavigation={stopNavigation}
         />
         
         <main className={`flex-1 ${isMobile ? 'p-3' : 'p-3 md:p-4 lg:p-6'}`}>
@@ -431,10 +476,15 @@ function App() {
               </div>
               
               <div className={`${isMobile ? 'text-sm' : 'text-xs md:text-sm'}`}>
-                {startPoint && endPoint ? (
+                {isNavigating ? (
+                  <span className={`flex items-center gap-2 text-blue-400 bg-blue-400/10 ${isMobile ? 'px-3 py-2' : 'px-3 py-1'} rounded-full`}>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                    <span className="font-medium">Navigating</span>
+                  </span>
+                ) : startPoint && endPoint ? (
                   <span className={`flex items-center gap-2 text-emerald-400 bg-emerald-400/10 ${isMobile ? 'px-3 py-2' : 'px-3 py-1'} rounded-full`}>
                     <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                    <span className={`${isMobile ? '' : 'hidden sm:inline'} font-medium`}>{isMobile ? 'Route Ready' : 'Route Ready'}</span>
+                    <span className="font-medium">Route Ready</span>
                   </span>
                 ) : startPoint ? (
                   <span className={`flex items-center gap-2 text-yellow-400 bg-yellow-400/10 ${isMobile ? 'px-3 py-2' : 'px-3 py-1'} rounded-full`}>
@@ -452,7 +502,11 @@ function App() {
 
             <div 
               ref={setMapContainerRef}
-              className={`flex-1 overflow-auto ${isMobile ? 'rounded-lg' : 'rounded-xl'} border border-gray-700/50 shadow-inner`}
+              className={`flex-1 ${isMobile ? 'overflow-x-auto overflow-y-hidden' : 'overflow-auto'} ${isMobile ? 'rounded-lg' : 'rounded-xl'} border border-gray-700/50 shadow-inner`}
+              style={isMobile ? { 
+                overscrollBehavior: 'contain',
+                WebkitOverflowScrolling: 'touch'
+              } : {}}
             >
               <FloorMap
                 floorData={floorData[currentFloor]}
@@ -462,12 +516,14 @@ function App() {
                   if (type === 'start') setStartPoint(point);
                   else setEndPoint(point);
                 }}
+                onClearPath={clearPath}
                 isAddingSection={isAddingSection}
                 onAddSection={addSection}
                 selectedSection={selectedSection}
                 onSectionSelect={setSelectedSection}
                 onSectionUpdate={updateSection}
                 isMobile={isMobile}
+                isNavigating={isNavigating}
               />
             </div>
           </div>
