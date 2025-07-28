@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FloorData, Point, OfficeSection } from '../types';
-import { MapPin, Trash2, Edit3, Save, X, Plus, Navigation, Download, Upload } from 'lucide-react';
+import { MapPin, Trash2, Edit3, Save, X, Plus, Navigation, Download, Upload, Route } from 'lucide-react';
 import { formatDistance, formatCoordinates, calculatePixelDistanceInMeters } from '../utils/geoUtils';
 
 interface ControlPanelProps {
@@ -23,6 +23,8 @@ interface ControlPanelProps {
   isNavigating: boolean;
   onStartNavigation: () => void;
   onStopNavigation: () => void;
+  onShowDirections: () => void;
+  currentPath: Point[];
   onSectionSelect: (sectionId: string | null) => void;
 }
 
@@ -46,6 +48,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   isNavigating,
   onStartNavigation,
   onStopNavigation,
+  onShowDirections,
+  currentPath,
   onSectionSelect,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -220,10 +224,45 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               </div>
             )}
             
+            {/* Navigation Controls */}
+            {startPoint && endPoint && (
+              <div className={`${isMobile ? 'space-y-2' : 'space-y-2'} ${isMobile ? 'mt-3' : 'mt-3'}`}>
+                <div className={`grid ${currentPath.length > 0 ? 'grid-cols-2' : 'grid-cols-1'} ${isMobile ? 'gap-2' : 'gap-2'}`}>
+                  {currentPath.length > 0 && (
+                    <button
+                      onClick={onShowDirections}
+                      className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-1.5`}
+                    >
+                      <Route className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'}`} />
+                      Directions
+                    </button>
+                  )}
+                  
+                  {isNavigating ? (
+                    <button
+                      onClick={onStopNavigation}
+                      className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-1.5`}
+                    >
+                      <X className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'}`} />
+                      Stop Nav
+                    </button>
+                  ) : (
+                    <button
+                      onClick={onStartNavigation}
+                      className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-1.5`}
+                    >
+                      <Navigation className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'}`} />
+                      Start Nav
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+            
             {(startPoint || endPoint) && (
               <button
                 onClick={onClearPath}
-                className={`w-full ${isMobile ? 'mt-3 px-4 py-2.5 text-sm' : 'mt-3 px-4 py-2.5 text-sm'} bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105`}
+                className={`w-full ${isMobile ? 'mt-2 px-4 py-2.5 text-sm' : 'mt-2 px-4 py-2.5 text-sm'} bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105`}
               >
                 Clear Path
               </button>

@@ -25,6 +25,7 @@ interface FloorMapProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onResetZoom: () => void;
+  onPathUpdate: (path: Point[]) => void;
 }
 
 const FloorMap: React.FC<FloorMapProps> = ({
@@ -46,6 +47,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
   onZoomIn,
   onZoomOut,
   onResetZoom
+  onPathUpdate
 }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawStart, setDrawStart] = useState<Point | null>(null);
@@ -146,10 +148,12 @@ const FloorMap: React.FC<FloorMapProps> = ({
     if (startPoint && endPoint) {
       const path = findPath(startPoint, endPoint, floorData.sections, floorData.width, floorData.height);
       setCurrentPath(path);
+      onPathUpdate(path);
     } else {
       setCurrentPath([]);
+      onPathUpdate([]);
     }
-  }, [startPoint, endPoint, floorData]);
+  }, [startPoint, endPoint, floorData, onPathUpdate]);
 
   // Calculate the scaled dimensions
   const scaledWidth = floorData.width * zoomLevel;

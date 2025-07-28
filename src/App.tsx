@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Navigation, Plus, Save, Download, Upload, Settings, Check, MapPin } from 'lucide-react';
 import FloorMap from './components/FloorMap';
 import ControlPanel from './components/ControlPanel';
+import DirectionsPanel from './components/DirectionsPanel';
 import { FloorData, Point, OfficeSection } from './types';
 import { pixelToGeo } from './utils/geoUtils';
 
@@ -109,6 +110,9 @@ function App() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [mapTransform, setMapTransform] = useState({ x: 0, y: 0 });
+  const [showDirections, setShowDirections] = useState(false);
+  const [currentNavigationStep, setCurrentNavigationStep] = useState(0);
+  const [currentPath, setCurrentPath] = useState<Point[]>([]);
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -213,12 +217,16 @@ function App() {
   const startNavigation = () => {
     if (startPoint && endPoint) {
       setIsNavigating(true);
+      setShowDirections(true);
+      setCurrentNavigationStep(0);
       showSaveNotification('Navigation started!');
     }
   };
 
   const stopNavigation = () => {
     setIsNavigating(false);
+    setShowDirections(false);
+    setCurrentNavigationStep(0);
     showSaveNotification('Navigation stopped');
   };
 
@@ -345,6 +353,9 @@ function App() {
     setStartPoint(null);
     setEndPoint(null);
     setIsNavigating(false);
+    setShowDirections(false);
+    setCurrentNavigationStep(0);
+    setCurrentPath([]);
   };
 
   const handleFloorChange = (floor: number) => {
@@ -471,6 +482,8 @@ function App() {
           isNavigating={isNavigating}
           onStartNavigation={startNavigation}
           onStopNavigation={stopNavigation}
+          onShowDirections={() => setShowDirections(true)}
+          currentPath={currentPath}
         />
         
         <main className={`flex-1 ${isMobile ? 'p-2' : 'p-3 md:p-4 lg:p-6'}`}>
@@ -578,10 +591,23 @@ function App() {
                onZoomIn={handleZoomIn}
                onZoomOut={handleZoomOut}
                onResetZoom={handleResetZoom}
+               onPathUpdate={setCurrentPath}
               />
             </div>
           </div>
         </main>
+        
+        {/* Directions Panel */}
+        <DirectionsPanel
+          path={currentPath}
+          isVisible={showDirections}
+          onClose={() => setShowDirections(false)}
+          isMobile={isMobile}
+          isNavigating={isNavigating}
+          metersPerPixel={floorData[currentFloor].metersPerPixel}
+          currentStep={currentNavigationStep}
+          onStepChange={setCurrentNavigationStep}
+        />
       </div>
       
       {/* Welcome Instructions Modal */}
