@@ -123,6 +123,11 @@
   }
 }
 
+/* Ensure dropdown menus are always on top */
+.z-\[9999\] {
+  z-index: 9999 !important;
+}
+
 /* Improved focus states for accessibility */
 button:focus-visible,
 input:focus-visible,
