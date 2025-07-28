@@ -92,29 +92,29 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
         x={section.x + section.width / 2}
         y={section.y + section.height / 2}
         fill="white"
-        fontSize={Math.min(14, section.width / 7, section.height / 3.5)}
+        fontSize={Math.min(16, section.width / 6, section.height / 3)}
         fontWeight="700"
         textAnchor="middle"
         dominantBaseline="middle"
         pointerEvents="none"
         className="select-none drop-shadow-sm"
       >
-        {section.width < 80 ? section.name.split(' ')[0] : section.name}
+        {section.width < 100 ? section.name.split(' ')[0] : section.name}
       </text>
       
       {section.type && (
         <text
           x={section.x + section.width / 2}
-          y={section.y + section.height / 2 + 15}
+          y={section.y + section.height / 2 + 18}
           fill="rgba(255,255,255,0.8)"
-          fontSize={Math.min(11, section.width / 9, section.height / 5.5)}
+          fontSize={Math.min(13, section.width / 8, section.height / 5)}
           fontWeight="500"
           textAnchor="middle"
           dominantBaseline="middle"
           pointerEvents="none"
           className="select-none capitalize drop-shadow-sm"
         >
-          {section.width < 60 ? '' : section.type}
+          {section.width < 80 ? '' : section.type}
         </text>
       )}
 
@@ -124,10 +124,10 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
           <circle
             cx={section.x + section.width}
             cy={section.y + section.height}
-            r="5"
+            r="6"
             fill="#FFFFFF"
             stroke={color}
-            strokeWidth="3"
+            strokeWidth="4"
             className="cursor-se-resize"
             onMouseDown={(e) => {
               e.stopPropagation();

@@ -3,9 +3,10 @@ import { Point } from '../types';
 
 interface PathVisualizationProps {
   path: Point[];
+  isMobile?: boolean;
 }
 
-const PathVisualization: React.FC<PathVisualizationProps> = ({ path }) => {
+const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = false }) => {
   if (path.length < 2) return null;
 
   const pathString = path.reduce((acc, point, index) => {
@@ -20,7 +21,7 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path }) => {
         d={pathString}
         fill="none"
         stroke="#10B981"
-        strokeWidth="6"
+        strokeWidth={isMobile ? "8" : "6"}
         strokeLinecap="round"
         strokeLinejoin="round"
         className="drop-shadow-lg"
@@ -31,10 +32,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path }) => {
         d={pathString}
         fill="none"
         stroke="#34D399"
-        strokeWidth="3"
+        strokeWidth={isMobile ? "4" : "3"}
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeDasharray="15,15"
+        strokeDasharray={isMobile ? "20,20" : "15,15"}
         className="animate-pulse drop-shadow-sm"
       />
       
@@ -44,10 +45,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path }) => {
           key={index}
           cx={point.x}
           cy={point.y}
-          r="4"
+          r={isMobile ? "6" : "4"}
           fill="#10B981"
           stroke="#FFFFFF"
-          strokeWidth="2"
+          strokeWidth={isMobile ? "3" : "2"}
           className="animate-pulse drop-shadow-lg"
         />
       ))}
@@ -63,10 +64,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path }) => {
         return (
           <g key={`arrow-${index}`} transform={`translate(${point.x}, ${point.y}) rotate(${angle * 180 / Math.PI})`}>
             <polygon
-              points="-6,-3 6,0 -6,3"
+              points={isMobile ? "-8,-4 8,0 -8,4" : "-6,-3 6,0 -6,3"}
               fill="#10B981"
               stroke="#FFFFFF"
-              strokeWidth="1"
+              strokeWidth={isMobile ? "2" : "1"}
               className="drop-shadow-sm"
             />
           </g>

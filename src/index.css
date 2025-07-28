@@ -39,6 +39,21 @@
     min-height: 44px;
     min-width: 44px;
   }
+  
+  /* Prevent zoom on double tap for mobile navigation */
+  * {
+    touch-action: manipulation;
+  }
+  
+  /* Improve scrolling performance on mobile */
+  .overflow-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Better touch targets */
+  svg {
+    touch-action: manipulation;
+  }
 }
 
 /* Improved focus states for accessibility */
@@ -47,4 +62,30 @@ input:focus-visible,
 select:focus-visible {
   outline: 2px solid #3B82F6;
   outline-offset: 2px;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  /* Prevent text selection on interactive elements */
+  .select-none {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Improve tap targets */
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Better scrollbar on mobile */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #6B7280;
+    border-radius: 4px;
+  }
 }
