@@ -69,17 +69,13 @@ const FloorMap: React.FC<FloorMapProps> = ({
   };
 
   // Find the nearest corner of the closest section to the clicked point
-  onSectionUpdate: (sectionId: string, updates: Partial<OfficeSection>) => void;
-  isMobile: boolean;
-  isNavigating: boolean;
-  zoomLevel: number;
-  mapTransform: { x: number; y: number };
-  onMapTransform: (transform: { x: number; y: number }) => void;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onResetZoom: () => void;
-  onPathUpdate: (path: Point[]) => void;
-}
+  const handleSVGClick = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
+    if (!svgRef.current) return;
+
+    const rect = svgRef.current.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / zoomLevel - mapTransform.x;
+    const y = (event.clientY - rect.top) / zoomLevel - mapTransform.y;
+    const point: Point = { x, y };
 
     if (isAddingSection) {
       if (!isDrawing) {
