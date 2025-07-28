@@ -1,25 +1,3 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { FloorData, Point, OfficeSection } from '../types';
-import { findPath } from '../utils/pathfinding';
-import { calculatePixelDistanceInMeters, formatDistance } from '../utils/geoUtils';
-import { X } from 'lucide-react';
-import OfficeSpace from './OfficeSpace';
-import PathVisualization from './PathVisualization';
-
-interface FloorMapProps {
-  floorData: FloorData;
-  startPoint: Point | null;
-  endPoint: Point | null;
-  onPointSelect: (point: Point, type: 'start' | 'end') => void;
-  onClearPath: () => void;
-  isAddingSection: boolean;
-  onAddSection: (section: Omit<OfficeSection, 'id'>) => void;
-  selectedSection: string | null;
-  onSectionSelect: (sectionId: string | null) => void;
-  onSectionUpdate: (sectionId: string, updates: Partial<OfficeSection>) => void;
-  isMobile: boolean;
-  isNavigating: boolean;
-  zoomLevel: number;
   mapTransform: { x: number; y: number };
   onMapTransform: (transform: { x: number; y: number }) => void;
   onZoomIn: () => void;
@@ -418,11 +396,3 @@ const FloorMap: React.FC<FloorMapProps> = ({
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
             </svg>
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default FloorMap;
