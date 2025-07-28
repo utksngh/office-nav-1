@@ -82,13 +82,14 @@
   /* Better scrolling on mobile */
   .custom-scrollbar {
     scrollbar-width: auto;
-  }
     overflow-x: auto !important;
     overflow-y: auto !important;
     scroll-behavior: smooth;
+  }
   
   .custom-scrollbar::-webkit-scrollbar {
     width: 12px;
+    height: 12px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -104,6 +105,10 @@
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #9CA3AF;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-corner {
+    background: #374151;
   }
   
   /* Prevent zoom on input focus */
@@ -123,6 +128,15 @@
   
   .touch-pan-y {
     touch-action: pan-y;
+  }
+  
+  /* Force proper scrolling behavior */
+  .overflow-auto {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-x pan-y !important;
   }
 }
 

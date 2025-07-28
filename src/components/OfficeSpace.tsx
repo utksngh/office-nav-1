@@ -139,7 +139,7 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
         x={section.x + section.width / 2}
         y={section.y + section.height / 2}
         fill="white"
-        fontSize={Math.min(('ontouchstart' in window) ? 18 : 16, section.width / 6, section.height / 3) / zoomLevel}
+        fontSize={Math.min(('ontouchstart' in window) ? 18 : 16, section.width / 6, section.height / 3)}
         fontWeight="600"
         textAnchor="middle"
         dominantBaseline="middle"
@@ -152,9 +152,9 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
       {section.type && (
         <text
           x={section.x + section.width / 2}
-          y={section.y + section.height / 2 + 18 / zoomLevel}
+          y={section.y + section.height / 2 + 18}
           fill="rgba(255,255,255,0.8)"
-          fontSize={Math.min(('ontouchstart' in window) ? 15 : 13, section.width / 8, section.height / 5) / zoomLevel}
+          fontSize={Math.min(('ontouchstart' in window) ? 15 : 13, section.width / 8, section.height / 5)}
           fontWeight="400"
           textAnchor="middle"
           dominantBaseline="middle"
@@ -171,10 +171,10 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
           <circle
             cx={section.x + section.width}
             cy={section.y + section.height}
-            r={(('ontouchstart' in window) ? 10 : 8) / zoomLevel}
+            r={('ontouchstart' in window) ? 10 : 8}
             fill="#FFFFFF"
             stroke={color}
-            strokeWidth={(('ontouchstart' in window) ? 3 : 2) / zoomLevel}
+            strokeWidth={('ontouchstart' in window) ? 3 : 2}
             className="cursor-se-resize"
             onMouseDown={(e) => {
               e.stopPropagation();
