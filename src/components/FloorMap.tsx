@@ -69,36 +69,6 @@ const FloorMap: React.FC<FloorMapProps> = ({
   };
 
   // Find the nearest corner of the closest section to the clicked point
-  const findNearestCorner = (clickPoint: Point): Point => {
-    // Only snap to corners if very close (within 20 pixels)
-    const cornerThreshold = 20;
-    let nearestCorner = clickPoint;
-    let minDistance = cornerThreshold;
-
-    // Only check corners if click is very close to them
-    for (const section of floorData.sections) {
-      const corners = [
-        { x: section.x, y: section.y },
-        { x: section.x + section.width, y: section.y },
-        { x: section.x, y: section.y + section.height },
-        { x: section.x + section.width, y: section.y + section.height }
-      ];
-
-      for (const corner of corners) {
-        const distance = Math.sqrt(
-          Math.pow(corner.x - clickPoint.x, 2) + 
-          Math.pow(corner.y - clickPoint.y, 2)
-        );
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          nearestCorner = corner;
-        }
-      }
-    }
-
-    return nearestCorner;
-  };
   const handleSVGClick = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
     if (!svgRef.current) return;
 
@@ -131,18 +101,17 @@ const FloorMap: React.FC<FloorMapProps> = ({
       }
     } else {
       // Point selection for pathfinding
-      // Use the exact clicked point for more precise navigation
-      const optimizedPoint = point;
+      // Use exact clicked point - no snapping or optimization
       if (!startPoint) {
-        onPointSelect(optimizedPoint, 'start');
+        onPointSelect(point, 'start');
       } else if (!endPoint) {
-        onPointSelect(optimizedPoint, 'end');
+        onPointSelect(point, 'end');
       } else {
         // Reset and set new start point
-        onPointSelect(optimizedPoint, 'start');
+        onPointSelect(point, 'start');
       }
     }
-  }, [isAddingSection, isDrawing, drawStart, startPoint, endPoint, onPointSelect, onAddSection, floorData.sections, zoomLevel, mapTransform]);
+  }, [isAddingSection, isDrawing, drawStart, startPoint, endPoint, onPointSelect, onAddSection, zoomLevel, mapTransform]);
 
   // Calculate path when both points are set
   React.useEffect(() => {
