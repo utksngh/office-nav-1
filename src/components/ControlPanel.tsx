@@ -93,7 +93,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       <aside className={`
         ${isMobile ? 'fixed' : 'relative'} ${isMobile ? 'top-0 left-0' : ''} h-full
         ${isMobile ? 'w-full max-w-[85vw]' : 'w-80 lg:w-96'} 
-        bg-white border-r border-gray-200 
+        bg-white border-r border-gray-100 
         ${isMobile ? 'p-4' : 'p-4 lg:p-6'} overflow-y-auto z-50 shadow-2xl
         transform transition-all duration-300 ease-in-out
         ${isVisible || !isMobile ? 'translate-x-0' : '-translate-x-full'}
@@ -102,7 +102,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         {isMobile && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-gray-600 hover:text-gray-900 bg-gray-100 rounded-2xl transition-all duration-200"
+            className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700 bg-gray-50 rounded-2xl transition-all duration-200"
           >
             <X className="w-5 h-5" />
           </button>
@@ -110,23 +110,23 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         
       <div className={`${isMobile ? 'space-y-4' : 'space-y-4 lg:space-y-6'}`}>
         {/* Navigation Controls */}
-        <div className={`bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-purple-200 shadow-sm`}>
+        <div className={`bg-gray-50 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-gray-100 shadow-sm`}>
           <h3 className={`${isMobile ? 'text-lg' : 'text-lg lg:text-xl'} font-black ${isMobile ? 'mb-4' : 'mb-4'} flex items-center gap-3 text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
-            <div className={`${isMobile ? 'p-2' : 'p-2'} bg-gradient-to-br from-purple-400 to-purple-500 rounded-2xl`}>
+            <div className={`${isMobile ? 'p-2' : 'p-2'} bg-gray-900 rounded-2xl`}>
               <Navigation className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'} text-white`} />
             </div>
             Navigation Control
           </h3>
           
           {startPoint && endPoint ? (
-            <div className={`${isMobile ? 'p-4' : 'p-4'} bg-teal-100 border border-teal-200 rounded-2xl text-center`}>
-              <p className={`text-teal-600 ${isMobile ? 'text-base' : 'text-base'} font-bold`}>
+            <div className={`${isMobile ? 'p-4' : 'p-4'} bg-white border border-gray-200 rounded-2xl text-center`}>
+              <p className={`text-gray-700 ${isMobile ? 'text-base' : 'text-base'} font-bold`}>
                 ✅ Route is ready for navigation!
               </p>
             </div>
           ) : (
-            <div className={`${isMobile ? 'p-4' : 'p-4'} bg-yellow-100 border border-yellow-200 rounded-2xl text-center`}>
-              <p className={`text-yellow-600 ${isMobile ? 'text-base' : 'text-base'} font-bold`}>
+            <div className={`${isMobile ? 'p-4' : 'p-4'} bg-white border border-gray-200 rounded-2xl text-center`}>
+              <p className={`text-gray-600 ${isMobile ? 'text-base' : 'text-base'} font-bold`}>
                 {!startPoint ? 'Set start point on map' : 'Set destination on map'}
               </p>
             </div>
@@ -134,7 +134,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className={`bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-gray-200 shadow-sm`}>
+        <div className={`bg-gray-50 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-gray-100 shadow-sm`}>
           <h3 className={`${isMobile ? 'text-lg' : 'text-lg lg:text-xl'} font-black ${isMobile ? 'mb-4' : 'mb-4'} text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
             Quick Actions
           </h3>
@@ -160,7 +160,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             
             <button
               onClick={saveLayout}
-              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-4 py-3 text-sm'} bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 rounded-2xl transition-all duration-300 font-bold shadow-sm`}
+              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-4 py-3 text-sm'} bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-700 border border-gray-200 rounded-2xl transition-all duration-300 font-bold shadow-sm`}
             >
               <Save className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} mx-auto mb-1`} />
               Save
@@ -168,7 +168,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             
             <button
               onClick={saveToFile}
-              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-4 py-3 text-sm'} bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 rounded-2xl transition-all duration-300 font-bold shadow-sm`}
+              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-4 py-3 text-sm'} bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-700 border border-gray-200 rounded-2xl transition-all duration-300 font-bold shadow-sm`}
             >
               <Download className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} mx-auto mb-1`} />
               Export
@@ -176,7 +176,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             
             <button
               onClick={loadFromFile}
-              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-4 py-3 text-sm'} bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 rounded-2xl transition-all duration-300 font-bold shadow-sm`}
+              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-4 py-3 text-sm'} bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-700 border border-gray-200 rounded-2xl transition-all duration-300 font-bold shadow-sm`}
             >
               <Upload className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} mx-auto mb-1`} />
               Import
@@ -185,7 +185,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </div>
 
         {/* Navigation Status */}
-        <div className={`bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-blue-200 shadow-sm`}>
+        <div className={`bg-gray-50 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-gray-100 shadow-sm`}>
           <h3 className={`${isMobile ? 'text-lg' : 'text-lg lg:text-xl'} font-black ${isMobile ? 'mb-4' : 'mb-4'} text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
             Route Status
           </h3>
@@ -194,6 +194,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-white rounded-2xl border border-gray-200`}>
               <span className="text-gray-600 font-medium">Start Point:</span>
               <span className={`font-bold ${startPoint ? 'text-teal-600' : 'text-gray-500'}`}>
+              <span className={`font-bold ${startPoint ? 'text-gray-700' : 'text-gray-500'}`}>
                 {startPoint ? 
                   `${Math.round(startPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(startPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 
                   'Not set'
@@ -203,7 +204,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             
             <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-white rounded-2xl border border-gray-200`}>
               <span className="text-gray-600 font-medium">End Point:</span>
-              <span className={`font-bold ${endPoint ? 'text-red-500' : 'text-gray-500'}`}>
+              <span className={`font-bold ${endPoint ? 'text-gray-700' : 'text-gray-500'}`}>
                 {endPoint ? 
                   `${Math.round(endPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(endPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 
                   'Not set'
@@ -212,9 +213,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
             
             {startPoint && endPoint && (
-              <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-purple-100 border border-purple-200 rounded-2xl`}>
+              <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-gray-100 border border-gray-200 rounded-2xl`}>
                 <span className="text-gray-600 font-medium">Distance:</span>
-                <span className="text-purple-600 font-black text-lg">
+                <span className="text-gray-900 font-black text-lg">
                   {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, currentFloor.metersPerPixel))}
                 </span>
               </div>
@@ -223,7 +224,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             {(startPoint || endPoint) && (
               <button
                 onClick={onClearPath}
-                className={`w-full ${isMobile ? 'mt-4 px-5 py-3 text-base' : 'mt-4 px-5 py-3 text-base'} bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white rounded-2xl transition-all duration-300 font-bold shadow-sm hover:shadow-md transform hover:scale-105`}
+                className={`w-full ${isMobile ? 'mt-4 px-5 py-3 text-base' : 'mt-4 px-5 py-3 text-base'} bg-gray-900 hover:bg-gray-800 text-white rounded-2xl transition-all duration-300 font-bold shadow-sm hover:shadow-md`}
               >
                 Clear Path
               </button>
@@ -232,10 +233,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </div>
 
         {/* Floor Sections */}
-        <div className={`bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-yellow-200 shadow-sm`}>
+        <div className={`bg-gray-50 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-gray-100 shadow-sm`}>
           <h3 className={`${isMobile ? 'text-lg' : 'text-lg lg:text-xl'} font-black ${isMobile ? 'mb-4' : 'mb-4'} flex items-center justify-between text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
             <span>Rooms & Areas</span>
-            <span className={`${isMobile ? 'text-sm' : 'text-sm'} bg-yellow-200 text-yellow-700 ${isMobile ? 'px-3 py-1.5' : 'px-3 py-1.5'} rounded-full font-bold`}>
+            <span className={`${isMobile ? 'text-sm' : 'text-sm'} bg-gray-200 text-gray-700 ${isMobile ? 'px-3 py-1.5' : 'px-3 py-1.5'} rounded-full font-bold`}>
               {currentFloor.sections.length}
             </span>
           </h3>
@@ -246,8 +247,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 key={section.id}
                 className={`${isMobile ? 'p-4' : 'p-4'} rounded-2xl cursor-pointer transition-all duration-300 border ${
                   selectedSection === section.id
-                    ? 'bg-gradient-to-r from-purple-100 to-purple-200 border-purple-300 shadow-md'
-                    : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300'
+                    ? 'bg-gray-100 border-gray-300 shadow-sm'
+                    : 'bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-700 border border-gray-200'
                 }`}
                 onClick={() => onSectionSelect(section.id)}
               >
@@ -274,7 +275,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
         {/* Section Editor */}
         {selectedSectionData && (
-          <div className={`bg-gradient-to-br from-red-50 to-red-100 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-red-200 shadow-sm`}>
+          <div className={`bg-gray-50 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-gray-100 shadow-sm`}>
             <div className={`flex items-center justify-between ${isMobile ? 'mb-4' : 'mb-5'}`}>
               <h3 className={`${isMobile ? 'text-lg' : 'text-lg lg:text-xl'} font-black text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>Room Details</h3>
               <div className={`flex ${isMobile ? 'gap-2' : 'gap-2'}`}>
@@ -282,7 +283,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   <>
                     <button
                       onClick={handleSave}
-                      className={`${isMobile ? 'p-2.5' : 'p-2.5'} text-teal-600 hover:bg-teal-500 hover:text-white rounded-2xl transition-all duration-300 shadow-sm border border-teal-200`}
+                      className={`${isMobile ? 'p-2.5' : 'p-2.5'} text-gray-600 hover:bg-gray-600 hover:text-white rounded-2xl transition-all duration-300 shadow-sm border border-gray-200`}
                     >
                       <Save className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} />
                     </button>
@@ -297,13 +298,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   <>
                     <button
                       onClick={handleEdit}
-                      className={`${isMobile ? 'p-2.5' : 'p-2.5'} text-purple-600 hover:bg-purple-500 hover:text-white rounded-2xl transition-all duration-300 shadow-sm border border-purple-200`}
+                      className={`${isMobile ? 'p-2.5' : 'p-2.5'} text-gray-600 hover:bg-gray-600 hover:text-white rounded-2xl transition-all duration-300 shadow-sm border border-gray-200`}
                     >
                       <Edit3 className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} />
                     </button>
                     <button
                       onClick={() => onSectionDelete(selectedSection)}
-                      className={`${isMobile ? 'p-2.5' : 'p-2.5'} text-red-600 hover:bg-red-500 hover:text-white rounded-2xl transition-all duration-300 shadow-sm border border-red-200`}
+                      className={`${isMobile ? 'p-2.5' : 'p-2.5'} text-gray-600 hover:bg-gray-600 hover:text-white rounded-2xl transition-all duration-300 shadow-sm border border-gray-200`}
                     >
                       <Trash2 className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} />
                     </button>
@@ -322,7 +323,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                     type="text"
                     value={editData.name || ''}
                     onChange={(e) => setEditData({...editData, name: e.target.value})}
-                    className={`w-full ${isMobile ? 'px-4 py-3 text-base' : 'px-4 py-3'} bg-white border border-gray-300 rounded-2xl text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 font-medium`}
+                    className={`w-full ${isMobile ? 'px-4 py-3 text-base' : 'px-4 py-3'} bg-white border border-gray-300 rounded-2xl text-gray-900 focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 font-medium`}
                   />
                 </div>
 
@@ -333,7 +334,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   <select
                     value={editData.type || ''}
                     onChange={(e) => setEditData({...editData, type: e.target.value as OfficeSection['type']})}
-                    className={`w-full ${isMobile ? 'px-4 py-3 text-base' : 'px-4 py-3'} bg-white border border-gray-300 rounded-2xl text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 font-medium`}
+                    className={`w-full ${isMobile ? 'px-4 py-3 text-base' : 'px-4 py-3'} bg-white border border-gray-300 rounded-2xl text-gray-900 focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 font-medium`}
                   >
                     {sectionTypes.map(type => (
                       <option key={type} value={type}>
@@ -353,7 +354,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                       step="0.1"
                       value={editData.width ? (editData.width * currentFloor.metersPerPixel).toFixed(1) : ''}
                       onChange={(e) => setEditData({...editData, width: Number(e.target.value) / currentFloor.metersPerPixel})}
-                      className={`w-full ${isMobile ? 'px-4 py-3 text-base' : 'px-4 py-3'} bg-white border border-gray-300 rounded-2xl text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 font-medium`}
+                      className={`w-full ${isMobile ? 'px-4 py-3 text-base' : 'px-4 py-3'} bg-white border border-gray-300 rounded-2xl text-gray-900 focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 font-medium`}
                     />
                   </div>
                   <div>
@@ -365,7 +366,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                       step="0.1"
                       value={editData.height ? (editData.height * currentFloor.metersPerPixel).toFixed(1) : ''}
                       onChange={(e) => setEditData({...editData, height: Number(e.target.value) / currentFloor.metersPerPixel})}
-                      className={`w-full ${isMobile ? 'px-4 py-3 text-base' : 'px-4 py-3'} bg-white border border-gray-300 rounded-2xl text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 font-medium`}
+                      className={`w-full ${isMobile ? 'px-4 py-3 text-base' : 'px-4 py-3'} bg-white border border-gray-300 rounded-2xl text-gray-900 focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 font-medium`}
                     />
                   </div>
                 </div>
@@ -382,15 +383,15 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 </div>
                 <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-white rounded-2xl border border-gray-200`}>
                   <span className="text-gray-600 font-medium">Coordinates:</span>
-                  <span className={`${isMobile ? 'text-sm' : 'text-sm'} font-mono text-purple-600 font-bold`}>{formatCoordinates(selectedSectionData.coordinates)}</span>
+                  <span className={`${isMobile ? 'text-sm' : 'text-sm'} font-mono text-gray-600 font-bold`}>{formatCoordinates(selectedSectionData.coordinates)}</span>
                 </div>
                 <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-white rounded-2xl border border-gray-200`}>
                   <span className="text-gray-600 font-medium">Size:</span>
                   <span className="font-bold text-gray-900">{(selectedSectionData.width * currentFloor.metersPerPixel).toFixed(1)}m × {(selectedSectionData.height * currentFloor.metersPerPixel).toFixed(1)}m</span>
                 </div>
-                <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-teal-100 border border-teal-200 rounded-2xl`}>
+                <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-gray-100 border border-gray-200 rounded-2xl`}>
                   <span className="text-gray-600 font-medium">Area:</span>
-                  <span className="font-black text-teal-600 text-lg">{((selectedSectionData.width * selectedSectionData.height * currentFloor.metersPerPixel * currentFloor.metersPerPixel)).toFixed(1)} m²</span>
+                  <span className="font-black text-gray-900 text-lg">{((selectedSectionData.width * selectedSectionData.height * currentFloor.metersPerPixel * currentFloor.metersPerPixel)).toFixed(1)} m²</span>
                 </div>
               </div>
             )}
@@ -398,7 +399,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         )}
 
         {/* Instructions */}
-        <div className={`bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-gray-200 shadow-sm`}>
+        <div className={`bg-gray-50 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-gray-100 shadow-sm`}>
           <h3 className={`${isMobile ? 'text-lg' : 'text-lg lg:text-xl'} font-black ${isMobile ? 'mb-4' : 'mb-4'} text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>Instructions</h3>
           <div className={`${isMobile ? 'text-base' : 'text-base'} text-gray-700 ${isMobile ? 'space-y-2' : 'space-y-3'} font-medium`}>
             <p>• Tap map to set navigation points</p>

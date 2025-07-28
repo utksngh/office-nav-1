@@ -360,7 +360,7 @@ function App() {
       <header className={`bg-white border-b border-gray-200 shadow-sm ${isMobile ? 'sticky top-0 z-30 px-4 py-4' : 'px-8 py-6'}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`${isMobile ? 'p-2' : 'p-3'} bg-gradient-to-br from-purple-400 to-purple-500 rounded-2xl shadow-lg`}>
+            <div className={`${isMobile ? 'p-2' : 'p-3'} bg-gray-900 rounded-2xl shadow-sm`}>
               <Navigation className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6 md:w-7 md:h-7'} text-white`} />
             </div>
             <div>
@@ -374,15 +374,15 @@ function App() {
           </div>
           
           <div className={`flex items-center ${isMobile ? 'gap-3' : 'gap-4'}`}>
-            <div className={`flex bg-gray-100 rounded-2xl ${isMobile ? 'p-1' : 'p-1.5'} ${isMobile ? 'text-sm' : 'text-base'} shadow-sm border border-gray-200`}>
+            <div className={`flex bg-gray-50 rounded-2xl ${isMobile ? 'p-1' : 'p-1.5'} ${isMobile ? 'text-sm' : 'text-base'} shadow-sm border border-gray-100`}>
               {[1, 2].map(floor => (
                 <button
                   key={floor}
                   onClick={() => handleFloorChange(floor)}
                   className={`${isMobile ? 'px-4 py-2' : 'px-5 py-2.5 md:px-6 md:py-3'} rounded-xl transition-all duration-300 font-bold ${
                     currentFloor === floor
-                      ? 'bg-gradient-to-r from-purple-400 to-purple-500 text-white shadow-md transform scale-105'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   <span className={`${isMobile ? 'inline' : 'hidden sm:inline'}`}>{floor === 1 ? '5th' : '6th'}</span>
@@ -395,7 +395,7 @@ function App() {
               <div className={`flex gap-1 md:gap-2`}>
                 <button
                   onClick={saveLayout}
-                  className={`p-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 hover:text-gray-900 transition-all duration-300 shadow-sm border border-gray-200`}
+                  className={`p-3 bg-gray-50 text-gray-500 rounded-2xl hover:bg-gray-100 hover:text-gray-700 transition-all duration-300 shadow-sm border border-gray-100`}
                   title="Save Layout"
                 >
                   <Save className={`w-5 h-5 md:w-6 md:h-6`} />
@@ -403,7 +403,7 @@ function App() {
                 
                 <button
                   onClick={saveToFile}
-                  className={`p-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 hover:text-gray-900 transition-all duration-300 shadow-sm border border-gray-200`}
+                  className={`p-3 bg-gray-50 text-gray-500 rounded-2xl hover:bg-gray-100 hover:text-gray-700 transition-all duration-300 shadow-sm border border-gray-100`}
                   title="Download Layout"
                 >
                   <Download className={`w-5 h-5 md:w-6 md:h-6`} />
@@ -411,7 +411,7 @@ function App() {
                 
                 <button
                   onClick={loadFromFile}
-                  className={`p-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 hover:text-gray-900 transition-all duration-300 shadow-sm border border-gray-200`}
+                  className={`p-3 bg-gray-50 text-gray-500 rounded-2xl hover:bg-gray-100 hover:text-gray-700 transition-all duration-300 shadow-sm border border-gray-100`}
                   title="Upload Layout"
                 >
                   <Upload className={`w-5 h-5 md:w-6 md:h-6`} />
@@ -421,8 +421,8 @@ function App() {
                   onClick={() => setIsAddingSection(!isAddingSection)}
                   className={`p-3 rounded-2xl transition-all duration-300 shadow-sm border ${
                     isAddingSection
-                      ? 'bg-gradient-to-r from-teal-400 to-teal-500 text-white transform scale-105 border-teal-300'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 border-gray-200'
+                      ? 'bg-gray-900 text-white border-gray-900'
+                      : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 border-gray-100'
                   }`}
                   title="Add Section"
                   onClick={() => {
@@ -440,7 +440,7 @@ function App() {
             {isMobile && (
               <button
                 onClick={() => setShowControlPanel(!showControlPanel)}
-                className={`p-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 hover:text-gray-900 transition-all duration-300 shadow-sm border border-gray-200`}
+                className={`p-3 bg-gray-50 text-gray-500 rounded-2xl hover:bg-gray-100 hover:text-gray-700 transition-all duration-300 shadow-sm border border-gray-100`}
                 title="Toggle Panel"
               >
                 <Settings className={`w-5 h-5`} />
@@ -474,10 +474,10 @@ function App() {
         />
         
         <main className={`flex-1 ${isMobile ? 'p-2' : 'p-3 md:p-4 lg:p-6'}`}>
-          <div className={`bg-white ${isMobile ? 'rounded-2xl' : 'rounded-3xl'} shadow-lg border border-gray-200 ${isMobile ? 'p-4' : 'p-6 md:p-8'} h-full flex flex-col`}>
+          <div className={`bg-white ${isMobile ? 'rounded-2xl' : 'rounded-3xl'} shadow-sm border border-gray-100 ${isMobile ? 'p-4' : 'p-6 md:p-8'} h-full flex flex-col`}>
             <div className={`flex items-center justify-between ${isMobile ? 'mb-3' : 'mb-4 md:mb-6'}`}>
               <div className="flex items-center gap-3">
-                <div className={`${isMobile ? 'p-2' : 'p-3'} bg-gradient-to-br from-teal-400 to-teal-500 rounded-2xl shadow-md`}>
+                <div className={`${isMobile ? 'p-2' : 'p-3'} bg-gray-100 rounded-2xl`}>
                   <MapPin className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5 md:w-6 md:h-6'} text-white`} />
                 </div>
                 <div>
@@ -492,10 +492,10 @@ function App() {
               
               <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-4'}`}>
                 {/* Zoom Controls */}
-                <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-2'} bg-gray-100 rounded-2xl ${isMobile ? 'p-1' : 'p-1.5'} shadow-sm border border-gray-200`}>
+                <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-2'} bg-gray-50 rounded-2xl ${isMobile ? 'p-1' : 'p-1.5'} shadow-sm border border-gray-100`}>
                   <button
                     onClick={handleZoomOut}
-                    className={`${isMobile ? 'p-2.5' : 'p-2'} text-gray-600 hover:text-gray-900 hover:bg-white rounded-xl transition-all duration-300 ${isMobile ? 'min-w-[40px] min-h-[40px] flex items-center justify-center' : ''}`}
+                    className={`${isMobile ? 'p-2.5' : 'p-2'} text-gray-500 hover:text-gray-700 hover:bg-white rounded-xl transition-all duration-300 ${isMobile ? 'min-w-[40px] min-h-[40px] flex items-center justify-center' : ''}`}
                     title="Zoom Out"
                   >
                     <svg className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -505,7 +505,7 @@ function App() {
                   
                   <button
                     onClick={handleResetZoom}
-                    className={`${isMobile ? 'px-3 py-2 text-sm font-bold min-w-[60px]' : 'px-3 py-1.5 text-sm'} text-gray-600 hover:text-gray-900 hover:bg-white rounded-xl transition-all duration-300 font-mono ${isMobile ? 'min-h-[40px] flex items-center justify-center' : ''}`}
+                    className={`${isMobile ? 'px-3 py-2 text-sm font-bold min-w-[60px]' : 'px-3 py-1.5 text-sm'} text-gray-500 hover:text-gray-700 hover:bg-white rounded-xl transition-all duration-300 font-mono ${isMobile ? 'min-h-[40px] flex items-center justify-center' : ''}`}
                     title="Reset Zoom"
                   >
                     {Math.round(zoomLevel * 100)}%
@@ -513,7 +513,7 @@ function App() {
                   
                   <button
                     onClick={handleZoomIn}
-                    className={`${isMobile ? 'p-2.5' : 'p-2'} text-gray-600 hover:text-gray-900 hover:bg-white rounded-xl transition-all duration-300 ${isMobile ? 'min-w-[40px] min-h-[40px] flex items-center justify-center' : ''}`}
+                    className={`${isMobile ? 'p-2.5' : 'p-2'} text-gray-500 hover:text-gray-700 hover:bg-white rounded-xl transition-all duration-300 ${isMobile ? 'min-w-[40px] min-h-[40px] flex items-center justify-center' : ''}`}
                     title="Zoom In"
                   >
                     <svg className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -524,22 +524,22 @@ function App() {
                 
                 <div className={`${isMobile ? 'text-xs' : 'text-xs md:text-sm'}`}>
                 {isNavigating ? (
-                  <span className={`flex items-center gap-2 text-purple-600 bg-purple-100 ${isMobile ? 'px-4 py-2' : 'px-4 py-2'} rounded-full border border-purple-200`}>
-                    <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-purple-500 rounded-full animate-pulse`}></div>
+                  <span className={`flex items-center gap-2 text-gray-700 bg-gray-100 ${isMobile ? 'px-4 py-2' : 'px-4 py-2'} rounded-full border border-gray-200`}>
+                    <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-gray-600 rounded-full animate-pulse`}></div>
                     <span className="font-bold">Navigating</span>
                   </span>
                 ) : startPoint && endPoint ? (
-                  <span className={`flex items-center gap-2 text-teal-600 bg-teal-100 ${isMobile ? 'px-4 py-2' : 'px-4 py-2'} rounded-full border border-teal-200`}>
-                    <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-teal-500 rounded-full animate-pulse`}></div>
+                  <span className={`flex items-center gap-2 text-gray-700 bg-gray-100 ${isMobile ? 'px-4 py-2' : 'px-4 py-2'} rounded-full border border-gray-200`}>
+                    <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-gray-600 rounded-full animate-pulse`}></div>
                     <span className="font-bold">Route Ready</span>
                   </span>
                 ) : startPoint ? (
-                  <span className={`flex items-center gap-2 text-yellow-600 bg-yellow-100 ${isMobile ? 'px-4 py-2' : 'px-4 py-2'} rounded-full border border-yellow-200`}>
-                    <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-yellow-500 rounded-full animate-pulse`}></div>
+                  <span className={`flex items-center gap-2 text-gray-600 bg-gray-50 ${isMobile ? 'px-4 py-2' : 'px-4 py-2'} rounded-full border border-gray-100`}>
+                    <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-gray-500 rounded-full animate-pulse`}></div>
                     <span className="font-bold">{isMobile ? 'Set end' : 'Select destination'}</span>
                   </span>
                 ) : (
-                  <span className={`flex items-center gap-2 text-gray-600 bg-gray-100 ${isMobile ? 'px-4 py-2' : 'px-4 py-2'} rounded-full border border-gray-200`}>
+                  <span className={`flex items-center gap-2 text-gray-500 bg-gray-50 ${isMobile ? 'px-4 py-2' : 'px-4 py-2'} rounded-full border border-gray-100`}>
                     <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-gray-500 rounded-full`}></div>
                     <span className="font-bold">{isMobile ? 'Set start' : 'Tap to set start'}</span>
                   </span>
@@ -550,7 +550,7 @@ function App() {
 
             <div 
               ref={setMapContainerRef}
-              className={`flex-1 overflow-auto ${isMobile ? 'rounded-2xl' : 'rounded-3xl'} border border-gray-200 shadow-inner bg-gray-50`}
+              className={`flex-1 overflow-auto ${isMobile ? 'rounded-2xl' : 'rounded-3xl'} border border-gray-100 shadow-inner bg-gray-50`}
               style={isMobile ? { 
                 overscrollBehavior: 'contain',
                 WebkitOverflowScrolling: 'touch'
@@ -587,9 +587,9 @@ function App() {
       {/* Welcome Instructions Modal */}
       {showInstructions && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className={`bg-white rounded-3xl shadow-2xl border border-gray-200 ${isMobile ? 'w-full max-w-sm mx-2' : 'max-w-lg w-full'} ${isMobile ? 'p-6' : 'p-8'}`}>
+          <div className={`bg-white rounded-3xl shadow-xl border border-gray-100 ${isMobile ? 'w-full max-w-sm mx-2' : 'max-w-lg w-full'} ${isMobile ? 'p-6' : 'p-8'}`}>
             <div className={`text-center ${isMobile ? 'mb-5' : 'mb-6'}`}>
-              <div className={`${isMobile ? 'p-4' : 'p-4'} bg-gradient-to-br from-purple-400 to-purple-500 rounded-3xl shadow-lg mx-auto w-fit ${isMobile ? 'mb-4' : 'mb-6'}`}>
+              <div className={`${isMobile ? 'p-4' : 'p-4'} bg-gray-900 rounded-3xl shadow-sm mx-auto w-fit ${isMobile ? 'mb-4' : 'mb-6'}`}>
                 <Navigation className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'} text-white`} />
               </div>
               <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-black text-gray-900 ${isMobile ? 'mb-2' : 'mb-3'}`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
@@ -602,8 +602,8 @@ function App() {
             
             <div className={`${isMobile ? 'space-y-4' : 'space-y-4'} ${isMobile ? 'mb-5' : 'mb-6'}`}>
               <div className={`flex items-start ${isMobile ? 'gap-2.5' : 'gap-3'}`}>
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} bg-teal-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                  <div className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} bg-teal-500 rounded-full`}></div>
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} bg-gray-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                  <div className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} bg-gray-600 rounded-full`}></div>
                 </div>
                 <div>
                   <h3 className={`font-bold text-gray-900 ${isMobile ? 'text-base' : 'text-base'}`}>Set Navigation Points</h3>
@@ -612,8 +612,8 @@ function App() {
               </div>
               
               <div className={`flex items-start ${isMobile ? 'gap-2.5' : 'gap-3'}`}>
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} bg-purple-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                  <Plus className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-purple-500`} />
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} bg-gray-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                  <Plus className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-gray-600`} />
                 </div>
                 <div>
                   <h3 className={`font-bold text-gray-900 ${isMobile ? 'text-base' : 'text-base'}`}>Add Rooms</h3>
@@ -622,8 +622,8 @@ function App() {
               </div>
               
               <div className={`flex items-start ${isMobile ? 'gap-2.5' : 'gap-3'}`}>
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} bg-yellow-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                  <Settings className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-yellow-600`} />
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} bg-gray-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                  <Settings className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-gray-600`} />
                 </div>
                 <div>
                   <h3 className={`font-bold text-gray-900 ${isMobile ? 'text-base' : 'text-base'}`}>Manage Floors</h3>
@@ -632,8 +632,8 @@ function App() {
               </div>
               
               <div className={`flex items-start ${isMobile ? 'gap-2.5' : 'gap-3'}`}>
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} bg-red-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                  <MapPin className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-red-500`} />
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} bg-gray-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                  <MapPin className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-gray-600`} />
                 </div>
                 <div>
                   <h3 className={`font-bold text-gray-900 ${isMobile ? 'text-base' : 'text-base'}`}>Smart Pathfinding</h3>
@@ -644,7 +644,7 @@ function App() {
             
             <button
               onClick={dismissInstructions}
-              className={`w-full ${isMobile ? 'px-6 py-4 text-lg' : 'px-6 py-4 text-lg'} bg-gradient-to-r from-purple-400 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-white rounded-2xl transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:scale-105`}
+              className={`w-full ${isMobile ? 'px-6 py-4 text-lg' : 'px-6 py-4 text-lg'} bg-gray-900 hover:bg-gray-800 text-white rounded-2xl transition-all duration-300 font-bold shadow-sm hover:shadow-md`}
             >
               Get Started
             </button>
@@ -654,7 +654,7 @@ function App() {
       
       {/* Save Notification */}
       {saveNotification && (
-        <div className={`fixed ${isMobile ? 'top-4 right-4 left-4' : 'top-6 right-6'} z-50 bg-teal-500 text-white ${isMobile ? 'px-4 py-3' : 'px-5 py-4'} rounded-2xl shadow-2xl border border-teal-400 flex items-center ${isMobile ? 'justify-center' : ''} gap-3 animate-in slide-in-from-right duration-300`}>
+        <div className={`fixed ${isMobile ? 'top-4 right-4 left-4' : 'top-6 right-6'} z-50 bg-gray-900 text-white ${isMobile ? 'px-4 py-3' : 'px-5 py-4'} rounded-2xl shadow-xl flex items-center ${isMobile ? 'justify-center' : ''} gap-3 animate-in slide-in-from-right duration-300`}>
           <Check className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} />
           <span className={`font-bold ${isMobile ? 'text-base' : 'text-lg'}`}>{saveNotification}</span>
         </div>

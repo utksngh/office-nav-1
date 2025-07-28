@@ -22,7 +22,7 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
       <path
         d={pathString}
         fill="none"
-        stroke={isNavigating ? "#8B5CF6" : "#00B29E"}
+        stroke={isNavigating ? "#374151" : "#00B29E"}
         strokeWidth={(isMobile ? 12 : 8) / zoomLevel}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -33,7 +33,7 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
       <path
         d={pathString}
         fill="none"
-        stroke={isNavigating ? "#A78BFA" : "#5EEAD4"}
+        stroke={isNavigating ? "#6B7280" : "#5EEAD4"}
         strokeWidth={(isMobile ? 6 : 4) / zoomLevel}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -64,7 +64,7 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
           cx={point.x}
           cy={point.y}
           r={(isMobile ? 10 : 6) / zoomLevel}
-          fill={isNavigating ? "#8B5CF6" : "#00B29E"}
+          fill={isNavigating ? "#374151" : "#00B29E"}
           stroke="#FFFFFF"
           strokeWidth={(isMobile ? 5 : 3) / zoomLevel}
           className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
@@ -83,7 +83,7 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
           <g key={`arrow-${index}`} transform={`translate(${point.x}, ${point.y}) rotate(${angle * 180 / Math.PI})`}>
             <polygon
               points={isMobile ? `${-12/zoomLevel},${-6/zoomLevel} ${12/zoomLevel},0 ${-12/zoomLevel},${6/zoomLevel}` : `${-8/zoomLevel},${-4/zoomLevel} ${8/zoomLevel},0 ${-8/zoomLevel},${4/zoomLevel}`}
-              fill={isNavigating ? "#8B5CF6" : "#00B29E"}
+              fill={isNavigating ? "#374151" : "#00B29E"}
               stroke="#FFFFFF"
               strokeWidth={(isMobile ? 4 : 2) / zoomLevel}
               className={`drop-shadow-sm ${isNavigating ? 'animate-pulse' : ''}`}
