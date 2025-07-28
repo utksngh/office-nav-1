@@ -419,19 +419,18 @@ function App() {
                 </button>
                 
                 <button
-                  onClick={() => setIsAddingSection(!isAddingSection)}
-                  className={`p-2 rounded-xl transition-all duration-300 shadow-lg ${
-                    isAddingSection
-                      ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white transform scale-105'
-                      : 'bg-gray-700/80 backdrop-blur-sm text-gray-300 hover:bg-gray-600 hover:text-white'
-                  }`}
-                  title="Add Section"
                   onClick={() => {
                     setIsAddingSection(!isAddingSection);
                     if (isMobile) {
                       setSelectedSection(null); // Reset selection on mobile
                     }
                   }}
+                  className={`p-2 rounded-xl transition-all duration-300 shadow-lg ${
+                    isAddingSection
+                      ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white transform scale-105'
+                      : 'bg-gray-700/80 backdrop-blur-sm text-gray-300 hover:bg-gray-600 hover:text-white'
+                  }`}
+                  title="Add Section"
                 >
                   <Plus className={`w-4 h-4 md:w-5 md:h-5`} />
                 </button>
@@ -558,10 +557,16 @@ function App() {
 
             <div 
               className="w-full h-full overflow-hidden"
-                  touchAction: 'pan-x pan-y',
-                  scrollBehavior: 'smooth'
-                } : { overflow: 'auto' }}
-              >
+              ref={setMapContainerRef}
+              style={isMobile ? { 
+                overflow: 'scroll',
+                overflowX: 'scroll',
+                overflowY: 'scroll',
+                WebkitOverflowScrolling: 'touch',
+                touchAction: 'pan-x pan-y',
+                scrollBehavior: 'smooth'
+              } : { overflow: 'auto' }}
+            >
               
               <FloorMap
                 floorData={floorData[currentFloor]}
@@ -583,12 +588,10 @@ function App() {
                 mapTransform={mapTransform}
                 onMapTransform={setMapTransform}
                 setZoomLevel={setZoomLevel}
-               onZoomIn={handleZoomIn}
-               onZoomOut={handleZoomOut}
-               onResetZoom={handleResetZoom}
+                onZoomIn={handleZoomIn}
+                onZoomOut={handleZoomOut}
+                onResetZoom={handleResetZoom}
               />
-              </div>
-              </div>
             </div>
           </div>
         </main>
@@ -685,25 +688,6 @@ function App() {
               onClick={dismissInstructions}
               className={`w-full ${isMobile ? 'px-5 py-3 text-base' : 'px-4 py-3'} bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105`}
             >
-              <div 
-                ref={setMapContainerRef}
-                className="w-full h-full"
-                style={isMobile ? { 
-                  overflow: 'scroll',
-                  overflowX: 'scroll',
-                  overflowY: 'scroll',
-                  WebkitOverflowScrolling: 'touch',
-                  touchAction: 'pan-x pan-y',
-                  scrollBehavior: 'smooth',
-                  overscrollBehavior: 'contain',
-                  height: '100%',
-                  width: '100%'
-                } : { 
-                  overflow: 'auto',
-                  height: '100%',
-                  width: '100%'
-                }}
-              >
               Get Started
             </button>
           </div>
