@@ -41,6 +41,14 @@
 
 /* Touch-friendly mobile interactions */
 @media (max-width: 768px) {
+  /* Force proper scrolling on mobile */
+  .overflow-auto, [style*="overflow: auto"] {
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-x pan-y !important;
+  }
+  
   button:not(.compact), .cursor-pointer:not(.compact) {
     min-height: 44px;
     min-width: 44px;

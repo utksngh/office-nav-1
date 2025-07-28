@@ -557,19 +557,19 @@ function App() {
             </div>
 
             <div 
-              ref={setMapContainerRef}
-              className={`flex-1 ${isMobile ? 'rounded-md' : 'rounded-xl'} border border-gray-700/50 shadow-inner relative`}
-              style={isMobile ? { 
-                overscrollBehavior: 'contain',
-                WebkitOverflowScrolling: 'touch',
-                touchAction: 'pan-x pan-y',
-                overflowX: 'auto',
-                overflowY: 'auto',
-                scrollBehavior: 'smooth',
-                height: '100%',
-                width: '100%'
-              } : {}}
+              className={`flex-1 ${isMobile ? 'rounded-md' : 'rounded-xl'} border border-gray-700/50 shadow-inner relative overflow-hidden`}
             >
+              <div 
+                ref={setMapContainerRef}
+                className="w-full h-full"
+                style={isMobile ? { 
+                  overflow: 'auto',
+                  overscrollBehavior: 'contain',
+                  WebkitOverflowScrolling: 'touch',
+                  touchAction: 'pan-x pan-y',
+                  scrollBehavior: 'smooth'
+                } : { overflow: 'auto' }}
+              >
               
               <FloorMap
                 floorData={floorData[currentFloor]}
@@ -595,6 +595,7 @@ function App() {
                onZoomOut={handleZoomOut}
                onResetZoom={handleResetZoom}
               />
+              </div>
             </div>
           </div>
         </main>
