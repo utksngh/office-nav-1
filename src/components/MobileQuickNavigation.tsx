@@ -215,33 +215,44 @@ const MobileQuickNavigation: React.FC<MobileQuickNavigationProps> = ({
               )}
             </div>
           )}
-                      onClick={(e) => {
-                        e.preventDefault();
+        </div>
+
+        {/* Current Points Display */}
         {(startPoint || endPoint) && (
           <div className="flex gap-2">
             {startPoint && (
               <div className="flex-1 flex items-center justify-between p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-md">
-                      <div className="flex-1">
+                <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
                   <span className="text-xs text-emerald-400 font-medium">Start Set</span>
                 </div>
-                onFocus={() => {
-                  if (searchQuery.length > 0) {
-                    setShowSearchResults(true);
-                  }
-                }}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleClearStart();
+                  }}
+                  onFocus={() => {
+                    if (searchQuery.length > 0) {
+                      setShowSearchResults(true);
+                    }
+                  }}
+                  className="p-1 text-emerald-400 hover:bg-emerald-400 hover:text-white rounded transition-all duration-200"
+                >
+                  <X className="w-3 h-3" />
                 </button>
               </div>
             )}
             
             {endPoint && (
-                      <div className={`${searchType === 'start' ? 'text-emerald-400' : 'text-red-400'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
-                <div className="flex items-center gap-2">
-                  <Target className="w-3 h-3 text-red-400" />
-                  <span className="text-xs text-red-400 font-medium">End Set</span>
+              <div className="flex-1 flex items-center justify-between p-2.5 bg-red-500/10 border border-red-500/20 rounded-md">
+                <div className={`${searchType === 'start' ? 'text-emerald-400' : 'text-red-400'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+                  <div className="flex items-center gap-2">
+                    <Target className="w-3 h-3 text-red-400" />
+                    <span className="text-xs text-red-400 font-medium">End Set</span>
+                  </div>
                 </div>
                 <button
-                  <div className="p-4 text-center text-gray-400 text-sm">
+                  onClick={handleClearEnd}
                   className="p-1 text-red-400 hover:bg-red-400 hover:text-white rounded transition-all duration-200"
                 >
                   <X className="w-3 h-3" />
