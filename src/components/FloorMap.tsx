@@ -233,7 +233,9 @@ const FloorMap: React.FC<FloorMapProps> = ({
           width: `${Math.max(scaledWidth, minWidth)}px`,
           height: `${Math.max(scaledHeight, minHeight)}px`,
           transformOrigin: '0 0',
-          minHeight: `${Math.max(scaledHeight, minHeight)}px`
+          touchAction: 'pan-x pan-y',
+          overflowX: 'auto',
+          overflowY: 'auto'
         }}
       >
         {/* Grid */}

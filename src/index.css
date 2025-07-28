@@ -83,6 +83,9 @@
   .custom-scrollbar {
     scrollbar-width: auto;
   }
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    scroll-behavior: smooth;
   
   .custom-scrollbar::-webkit-scrollbar {
     width: 12px;
@@ -225,21 +228,26 @@ select:focus-visible {
   }
   
   /* Better touch scrolling for map */
-  .touch-pan-x.touch-pan-y {
+  .overflow-auto {
     touch-action: pan-x pan-y;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
   
   /* Better scrolling behavior */
   .overflow-auto {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    overflow-x: auto;
+    overflow-y: auto;
+    scroll-behavior: smooth;
   }
   
   /* Ensure map container allows both horizontal and vertical scrolling */
   .overflow-auto {
     overflow-x: auto;
     overflow-y: auto;
+    touch-action: pan-x pan-y;
   }
   
   /* Better scrollbars for mobile */

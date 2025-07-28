@@ -562,8 +562,10 @@ function App() {
               style={isMobile ? { 
                 overscrollBehavior: 'contain',
                 WebkitOverflowScrolling: 'touch',
-                position: 'relative',
-                touchAction: 'pan-x pan-y'
+                touchAction: 'pan-x pan-y',
+                overflowX: 'auto',
+                overflowY: 'auto',
+                scrollBehavior: 'smooth'
               } : {}}
             >
               
