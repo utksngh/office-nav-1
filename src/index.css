@@ -127,6 +127,26 @@ select:focus-visible {
 
 /* Mobile-specific improvements */
 @media (max-width: 768px) {
+  /* Enhanced touch targets for zoom controls */
+  button[title*="Zoom"] {
+    min-width: 48px !important;
+    min-height: 48px !important;
+    touch-action: manipulation;
+  }
+  
+  /* Better floating button positioning */
+  .fixed.bottom-6 {
+    bottom: 1.5rem;
+  }
+  
+  .fixed.left-6 {
+    left: 1.5rem;
+  }
+  
+  .fixed.right-6 {
+    right: 1.5rem;
+  }
+  
   /* Ensure proper viewport handling */
   html {
     -webkit-text-size-adjust: 100%;

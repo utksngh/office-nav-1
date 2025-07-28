@@ -341,7 +341,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
       </svg>
 
       {/* Instructions */}
-      <div className={`absolute ${isMobile ? 'top-3 left-3' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[160px]' : ''}`}>
+      <div className={`absolute ${isMobile ? 'top-3 left-3' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[180px]' : ''}`}>
         {isNavigating ? (
           <div className="text-blue-600">
             <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
@@ -371,9 +371,9 @@ const FloorMap: React.FC<FloorMapProps> = ({
             <p className={`${isMobile ? 'mt-2' : 'mt-1'} text-gray-700`}>
               {isMobile ? 'Tap to set points' : 'Click near corners for optimal paths'}
             </p>
-            {isMobile && (
+            {isMobile && zoomLevel !== 1 && (
               <p className={`${isMobile ? 'mt-1 text-xs' : 'mt-1'} text-gray-500`}>
-                Swipe to navigate
+                Pinch to zoom, swipe to navigate
               </p>
             )}
           </div>
@@ -403,14 +403,47 @@ const FloorMap: React.FC<FloorMapProps> = ({
       )}
       
       {/* Mobile Reset Selection Button */}
-      {isMobile && selectedSection && (
+      {isMobile && selectedSection && !isAddingSection && (
         <button
           onClick={() => onSectionSelect(null)}
-          className="fixed bottom-6 right-6 p-4 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50"
+          className="fixed bottom-6 right-6 p-4 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50 min-w-[56px] min-h-[56px] flex items-center justify-center"
           style={{ zIndex: 1000 }}
         >
           <X className="w-6 h-6" />
         </button>
+      )}
+      
+      {/* Mobile Zoom Controls - Alternative Position */}
+      {isMobile && (
+        <div className="fixed bottom-6 left-6 flex flex-col gap-2 z-40">
+          <button
+            onClick={handleZoomIn}
+            className="p-3 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[56px] flex items-center justify-center"
+            title="Zoom In"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+            </svg>
+          </button>
+          
+          <button
+            onClick={handleResetZoom}
+            className="px-3 py-2 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[40px] flex items-center justify-center font-mono text-sm font-semibold"
+            title="Reset Zoom"
+          >
+            {Math.round(zoomLevel * 100)}%
+          </button>
+          
+          <button
+            onClick={handleZoomOut}
+            className="p-3 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[56px] flex items-center justify-center"
+            title="Zoom Out"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+            </svg>
+          </button>
+        </div>
       )}
     </div>
   );
