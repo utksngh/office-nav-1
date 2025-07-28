@@ -160,9 +160,13 @@ const MobileQuickNavigation: React.FC<MobileQuickNavigationProps> = ({
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                setShowSearchResults(e.target.value.length > 0);
+                setShowSearchResults(e.target.value.trim().length > 0);
               }}
-              onFocus={() => setShowSearchResults(searchQuery.length > 0)}
+              onFocus={() => {
+                if (searchQuery.trim().length > 0) {
+                  setShowSearchResults(true);
+                }
+              }}
               onBlur={() => {
                 // Delay hiding results to allow for clicks
                 setTimeout(() => setShowSearchResults(false), 300);
@@ -172,47 +176,48 @@ const MobileQuickNavigation: React.FC<MobileQuickNavigationProps> = ({
           </div>
           
           {/* Search Results Dropdown */}
-          {showSearchResults && searchQuery && (
+          {showSearchResults && searchQuery.trim() && filteredSections.length > 0 && (
             <div 
               className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600/50 rounded-lg shadow-2xl max-h-48 overflow-y-auto custom-scrollbar" 
               style={{ zIndex: 99999 }}
               onMouseDown={(e) => e.preventDefault()}
             >
-              {filteredSections.length > 0 ? (
-                filteredSections.map((section) => (
-                  <div
-                    key={section.id}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleSearchSelect(section);
-                    }}
-                    className="w-full p-3 text-left hover:bg-gray-700/80 active:bg-gray-600/90 transition-all duration-200 border-b border-gray-600/30 last:border-b-0 flex items-center justify-between group cursor-pointer touch-manipulation"
-                  >
-                    <div className="flex-1 pointer-events-none">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-sm shadow-sm border border-white/20"
-                          style={{ backgroundColor: getSectionTypeColor(section.type) }}
-                        />
-                        <span className="font-medium text-white text-sm">
-                          {section.name}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-300 capitalize ml-5">
-                        {section.type} • {(section.width * currentFloor.metersPerPixel).toFixed(1)}m × {(section.height * currentFloor.metersPerPixel).toFixed(1)}m
-                      </p>
+              {filteredSections.map((section) => (
+                <div
+                  key={section.id}
+                  onClick={() => handleSearchSelect(section)}
+                  className="w-full p-3 text-left hover:bg-gray-700/80 active:bg-gray-600/90 transition-all duration-200 border-b border-gray-600/30 last:border-b-0 flex items-center justify-between group cursor-pointer touch-manipulation"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-sm shadow-sm border border-white/20"
+                        style={{ backgroundColor: getSectionTypeColor(section.type) }}
+                      />
+                      <span className="font-medium text-white text-sm">
+                        {section.name}
+                      </span>
                     </div>
-                    <div className={`${searchType === 'start' ? 'text-emerald-400' : 'text-red-400'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none`}>
-                      <Target className="w-4 h-4" />
-                    </div>
+                    <p className="text-xs text-gray-300 capitalize ml-5">
+                      {section.type} • {(section.width * currentFloor.metersPerPixel).toFixed(1)}m × {(section.height * currentFloor.metersPerPixel).toFixed(1)}m
+                    </p>
                   </div>
-                ))
-              ) : (
-                <div className="p-4 text-center text-gray-400 text-sm pointer-events-none">
-                  No rooms found matching "{searchQuery}"
+                  <div className={`${searchType === 'start' ? 'text-emerald-400' : 'text-red-400'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+                    <Target className="w-4 h-4" />
+                  </div>
                 </div>
-              )}
+              ))}
+            </div>
+          )}
+          
+          {/* No Results Message */}
+          {showSearchResults && searchQuery.trim() && filteredSections.length === 0 && (
+            <div 
+              className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600/50 rounded-lg shadow-2xl p-4 text-center text-gray-400 text-sm"
+              style={{ zIndex: 99999 }}
+            >
+              <Search className="w-6 h-6 mx-auto mb-2 opacity-50" />
+              No rooms found matching "{searchQuery}"
             </div>
           )}
         </div>
@@ -227,15 +232,7 @@ const MobileQuickNavigation: React.FC<MobileQuickNavigationProps> = ({
                   <span className="text-xs text-emerald-400 font-medium">Start Set</span>
                 </div>
                 <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClearStart();
-                  }}
-                  onFocus={() => {
-                    if (searchQuery.length > 0) {
-                      setShowSearchResults(true);
-                    }
-                  }}
+                  onClick={handleClearStart}
                   className="p-1 text-emerald-400 hover:bg-emerald-400 hover:text-white rounded transition-all duration-200"
                 >
                   <X className="w-3 h-3" />
@@ -245,11 +242,9 @@ const MobileQuickNavigation: React.FC<MobileQuickNavigationProps> = ({
             
             {endPoint && (
               <div className="flex-1 flex items-center justify-between p-2.5 bg-red-500/10 border border-red-500/20 rounded-md">
-                <div className={`${searchType === 'start' ? 'text-emerald-400' : 'text-red-400'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
-                  <div className="flex items-center gap-2">
-                    <Target className="w-3 h-3 text-red-400" />
-                    <span className="text-xs text-red-400 font-medium">End Set</span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Target className="w-3 h-3 text-red-400" />
+                  <span className="text-xs text-red-400 font-medium">End Set</span>
                 </div>
                 <button
                   onClick={handleClearEnd}

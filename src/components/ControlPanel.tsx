@@ -168,7 +168,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 if (isMobile && selectedSection) {
                   // Reset selection when toggling add mode on mobile
                   onSectionSelect(null);
-                }
+                setShowSearchResults(e.target.value.trim().length > 0);
               }}
               className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} rounded-lg transition-all duration-300 font-medium shadow-lg ${
                 isAddingSection
@@ -283,31 +283,97 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <div
-                              className={`w-3 h-3 rounded-sm shadow-sm border border-white/20`}
-                              style={{ backgroundColor: getSectionTypeColor(section.type) }}
-                            />
-                            <span className={`font-medium text-white text-sm`}>
-                              {section.name}
-                            </span>
-                          </div>
-                          <p className={`text-xs text-gray-300 capitalize ml-5`}>
-                            {section.type} • {(section.width * currentFloor.metersPerPixel).toFixed(1)}m × {(section.height * currentFloor.metersPerPixel).toFixed(1)}m
-                          </p>
-                        </div>
-                        <div className={`${searchType === 'start' ? 'text-emerald-400' : 'text-red-400'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+              {filteredSections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => handleSearchSelect(section)}
+                  className={`w-full p-3 text-left hover:bg-gray-600/80 active:bg-gray-500/90 transition-all duration-200 border-b border-gray-600/30 last:border-b-0 flex items-center justify-between group cursor-pointer touch-manipulation`}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-3 h-3 rounded-sm shadow-sm border border-white/20`}
+                        style={{ backgroundColor: getSectionTypeColor(section.type) }}
+                      />
+                      <span className={`font-medium text-white text-sm`}>
+                        {section.name}
+                      </span>
                           <Target className={`w-4 h-4`} />
-                        </div>
-                      </button>
-                    ))
-                  ) : (
-                    <div className={`p-4 text-center text-gray-400 text-sm`}>
-                      <Search className={`w-6 h-6 mx-auto mb-2 opacity-50`} />
-                      No rooms found matching "{searchQuery}"
-                    </div>
-                  )}
+                    <p className={`text-xs text-gray-300 capitalize ml-5`}>
+                      {section.type} • {(section.width * currentFloor.metersPerPixel).toFixed(1)}m × {(section.height * currentFloor.metersPerPixel).toFixed(1)}m
+                    </p>
+                  </div>
+                  <div className={`${searchType === 'start' ? 'text-emerald-400' : 'text-red-400'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+                    <Target className={`w-4 h-4`} />
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+          
+          {/* No Results Message */}
+          {showSearchResults && searchQuery.trim() && filteredSections.length === 0 && (
+            <div className={`absolute top-full left-0 right-0 mt-2 bg-gray-700 border border-gray-600/50 rounded-lg shadow-2xl p-4 text-center text-gray-400 text-sm`} style={{ zIndex: 99999 }}>
+              <Search className={`w-6 h-6 mx-auto mb-2 opacity-50`} />
+              No rooms found matching "{searchQuery}"
+            </div>
+          )}
+        </div>
+        
+        {/* Current Selection Display */}
+        {(startPoint || endPoint) && (
+          <div className={`mt-3 space-y-2`}>
+            {startPoint && (
+              <div className={`flex items-center justify-between p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-md`}>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 bg-emerald-400 rounded-full animate-pulse`}></div>
+                  <span className={`text-sm text-emerald-400 font-medium`}>Start Point Set</span>
                 </div>
-              )}
+                <button
+                  onClick={() => onClearPath()}
+                  className={`p-1 text-emerald-400 hover:bg-emerald-400 hover:text-white rounded transition-all duration-200`}
+                >
+                  <X className={`w-3 h-3`} />
+                </button>
+              </div>
+            )}
+            
+            {endPoint && (
+              <div className={`flex items-center justify-between p-2.5 bg-red-500/10 border border-red-500/20 rounded-md`}>
+                <div className="flex items-center gap-2">
+                  <Target className={`w-3 h-3 text-red-400`} />
+                  <span className={`text-sm text-red-400 font-medium`}>End Point Set</span>
+                </div>
+                <button
+                  onClick={() => onClearPath()}
+                  className={`p-1 text-red-400 hover:bg-red-400 hover:text-white rounded transition-all duration-200`}
+                >
+                  <X className={`w-3 h-3`} />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const getSectionTypeColor = (type: OfficeSection['type']) => {
+  const colors = {
+    office: '#3B82F6',
+    meeting: '#8B5CF6',
+    reception: '#10B981',
+    cafeteria: '#F59E0B',
+    storage: '#6B7280',
+    department: '#EF4444',
+    executive: '#F97316',
+    lounge: '#06B6D4'
+  };
+  return colors[type];
+};
+
+export default ControlPanel;
             </div>
             
             {/* Current Selection Display */}
@@ -476,7 +542,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
 
             {isEditing ? (
-              <div className={`${isMobile ? 'space-y-3' : 'space-y-3'}`}>
+                if (searchQuery.trim().length > 0) {
                 <div>
                   <label className={`block ${isMobile ? 'text-sm' : 'text-sm'} font-semibold text-gray-300 ${isMobile ? 'mb-2' : 'mb-2'}`}>
                     Name
@@ -489,15 +555,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   />
                 </div>
 
-                <div>
+          {showSearchResults && searchQuery.trim() && filteredSections.length > 0 && (
                   <label className={`block ${isMobile ? 'text-sm' : 'text-sm'} font-semibold text-gray-300 ${isMobile ? 'mb-2' : 'mb-2'}`}>
-                    Type
-                  </label>
-                  <select
-                    value={editData.type || ''}
-                    onChange={(e) => setEditData({...editData, type: e.target.value as OfficeSection['type']})}
-                    className={`w-full ${isMobile ? 'px-3 py-2.5 text-sm' : 'px-3 py-2.5'} bg-gray-600/80 border border-gray-500/50 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
-                  >
                     {sectionTypes.map(type => (
                       <option key={type} value={type}>
                         {type.charAt(0).toUpperCase() + type.slice(1)}
