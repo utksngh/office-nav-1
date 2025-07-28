@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FloorData, Point, OfficeSection } from '../types';
-import { MapPin, Trash2, Edit3, Save, X } from 'lucide-react';
+import { MapPin, Trash2, Edit3, Save, X, Plus, Navigation, Download, Upload } from 'lucide-react';
 import { formatDistance, formatCoordinates, calculatePixelDistanceInMeters } from '../utils/geoUtils';
 
 interface ControlPanelProps {
