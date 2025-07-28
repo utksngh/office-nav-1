@@ -23,6 +23,7 @@ interface ControlPanelProps {
   isNavigating: boolean;
   onStartNavigation: () => void;
   onStopNavigation: () => void;
+  onSectionSelect: (sectionId: string | null) => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -45,6 +46,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   isNavigating,
   onStartNavigation,
   onStopNavigation,
+  onSectionSelect,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<OfficeSection>>({});
 
@@ -138,12 +141,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           
           <div className={`grid grid-cols-2 ${isMobile ? 'gap-3' : 'gap-2'}`}>
             <button
-              onClick={onToggleAddingSection}
-              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-3 py-2.5 text-xs'} rounded-xl transition-all duration-300 font-medium shadow-lg ${
-                isAddingSection
-                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white transform scale-105'
-                  : 'bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white'
-              }`}
               onClick={() => {
                 onToggleAddingSection();
                 if (isMobile && selectedSection) {
@@ -151,6 +148,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   onSectionSelect(null);
                 }
               }}
+              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-3 py-2.5 text-xs'} rounded-xl transition-all duration-300 font-medium shadow-lg ${
+                isAddingSection
+                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white transform scale-105'
+                  : 'bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white'
+              }`}
             >
               <Plus className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'} mx-auto mb-1`} />
               Add Room
@@ -247,7 +249,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                     ? 'bg-gradient-to-r from-blue-500/20 to-blue-600/20 border-blue-400/50 shadow-lg'
                     : 'bg-gray-600/50 hover:bg-gray-600/70 border-gray-500/30 hover:border-gray-400/50'
                 }`}
-                onClick={() => {}}
+                onClick={() => onSectionSelect(section.id)}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
