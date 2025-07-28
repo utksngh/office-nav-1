@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Navigation, Plus, Save, Download, Upload, Settings, Check, MapPin } from 'lucide-react';
 import FloorMap from './components/FloorMap';
 import ControlPanel from './components/ControlPanel';
+import MobileQuickNavigation from './components/MobileQuickNavigation';
 import { FloorData, Point, OfficeSection } from './types';
 import { pixelToGeo } from './utils/geoUtils';
 
@@ -563,6 +564,25 @@ function App() {
                 WebkitOverflowScrolling: 'touch'
               } : {}}
             >
+              {/* Mobile Quick Navigation - Above Map */}
+              {isMobile && (
+                <div className="sticky top-0 z-30 bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 p-3 shadow-lg">
+                  <MobileQuickNavigation
+                    currentFloor={floorData[currentFloor]}
+                    startPoint={startPoint}
+                    endPoint={endPoint}
+                    onSetNavigationPoint={(point, type) => {
+                      if (type === 'start') {
+                        setStartPoint(point);
+                      } else {
+                        setEndPoint(point);
+                      }
+                    }}
+                    onClearPath={clearPath}
+                  />
+                </div>
+              )}
+              
               <FloorMap
                 floorData={floorData[currentFloor]}
                 startPoint={startPoint}
