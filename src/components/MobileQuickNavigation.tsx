@@ -146,7 +146,7 @@ const MobileQuickNavigation: React.FC<MobileQuickNavigationProps> = ({
             onFocus={() => setShowSearchResults(searchQuery.length > 0)}
             onBlur={() => {
               // Delay hiding results to allow for clicks
-              setTimeout(() => setShowSearchResults(false), 150);
+              setTimeout(() => setShowSearchResults(false), 200);
             }}
             className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-700/80 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 shadow-inner"
           />
@@ -154,13 +154,21 @@ const MobileQuickNavigation: React.FC<MobileQuickNavigationProps> = ({
         
         {/* Search Results Dropdown */}
         {showSearchResults && searchQuery && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800/95 backdrop-blur-sm border border-gray-600/50 rounded-lg shadow-2xl z-[9999] max-h-48 overflow-y-auto custom-scrollbar">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800/98 backdrop-blur-md border border-gray-600/50 rounded-lg shadow-2xl max-h-48 overflow-y-auto custom-scrollbar" style={{ zIndex: 99999 }}>
             {filteredSections.length > 0 ? (
               filteredSections.map((section) => (
                 <button
                   key={section.id}
-                  onClick={() => handleSearchSelect(section)}
-                  className="w-full p-3 text-left hover:bg-gray-700/70 transition-all duration-200 border-b border-gray-600/30 last:border-b-0 flex items-center justify-between group"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleSearchSelect(section);
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSearchSelect(section);
+                  }}
+                  className="w-full p-3 text-left hover:bg-gray-700/80 active:bg-gray-600/90 transition-all duration-200 border-b border-gray-600/30 last:border-b-0 flex items-center justify-between group cursor-pointer touch-manipulation"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">

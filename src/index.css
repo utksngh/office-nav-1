@@ -124,8 +124,22 @@
 }
 
 /* Ensure dropdown menus are always on top */
-.z-\[9999\] {
-  z-index: 9999 !important;
+.dropdown-top {
+  z-index: 99999 !important;
+  position: relative;
+}
+
+/* Ensure search dropdowns are always clickable */
+.search-dropdown {
+  z-index: 99999 !important;
+  pointer-events: auto !important;
+}
+
+.search-dropdown button {
+  pointer-events: auto !important;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: rgba(59, 130, 246, 0.1);
 }
 
 /* Improved focus states for accessibility */
@@ -183,6 +197,13 @@ select:focus-visible {
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+  }
+  
+  /* Enhanced touch interaction for dropdowns */
+  .search-dropdown button {
+    min-height: 48px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.2);
   }
   
   /* Improve horizontal scrolling on mobile */
