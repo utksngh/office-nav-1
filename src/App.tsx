@@ -565,24 +565,6 @@ function App() {
                 position: 'relative'
               } : {}}
             >
-              {/* Mobile Quick Navigation - Above Map */}
-              {isMobile && (
-                <div className="sticky top-0 bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 p-3 shadow-lg transition-all duration-300" style={{ zIndex: 40 }}>
-                  <MobileQuickNavigation
-                    currentFloor={floorData[currentFloor]}
-                    startPoint={startPoint}
-                    endPoint={endPoint}
-                    onSetNavigationPoint={(point, type) => {
-                      if (type === 'start') {
-                        setStartPoint(point);
-                      } else {
-                        setEndPoint(point);
-                      }
-                    }}
-                    onClearPath={clearPath}
-                  />
-                </div>
-              )}
               
               <FloorMap
                 floorData={floorData[currentFloor]}
