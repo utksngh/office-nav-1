@@ -13,7 +13,7 @@ const METERS_PER_PIXEL = 0.1; // 10cm per pixel for detailed indoor mapping
 const initialFloorData: Record<number, FloorData> = {
   1: {
     id: 1,
-    name: 'Ground Floor',
+    name: '5th Floor',
     width: 1000, // 100 meters wide
     height: 800, // 80 meters tall
     centerCoordinates: OFFICE_CENTER,
@@ -55,7 +55,7 @@ const initialFloorData: Record<number, FloorData> = {
   },
   2: {
     id: 2,
-    name: 'First Floor',
+    name: '6th Floor',
     width: 1000,
     height: 800,
     centerCoordinates: OFFICE_CENTER,
