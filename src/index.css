@@ -127,6 +127,14 @@ select:focus-visible {
 
 /* Mobile-specific improvements */
 @media (max-width: 768px) {
+  /* Enhanced search dropdown for mobile */
+  .search-dropdown-mobile {
+    left: -1rem !important;
+    right: -1rem !important;
+    width: calc(100vw - 2rem) !important;
+    max-width: none !important;
+  }
+  
   /* Enhanced touch targets for zoom controls */
   button[title*="Zoom"] {
     min-width: 48px !important;

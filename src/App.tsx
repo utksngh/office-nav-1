@@ -376,34 +376,43 @@ function App() {
           </div>
           
           {/* Search Bar */}
-          <div className={`flex-1 ${isMobile ? 'mx-3' : 'mx-6'} ${isMobile ? 'max-w-none' : 'max-w-md'} relative z-10`}>
+          <div className={`flex-1 ${isMobile ? 'mx-3' : 'mx-6'} ${isMobile ? 'max-w-none' : 'max-w-md'} relative`}>
             <SearchBar
               sections={floorData[currentFloor].sections}
               onSectionSelect={(sectionId) => {
                 setSelectedSection(sectionId);
                 setHighlightedSection(null);
-                // Auto-scroll to section if possible
-                if (mapContainerRef) {
-                  const section = floorData[currentFloor].sections.find(s => s.id === sectionId);
-                  if (section) {
-                    const containerRect = mapContainerRef.getBoundingClientRect();
-                    const sectionCenterX = section.x + section.width / 2;
-                    const sectionCenterY = section.y + section.height / 2;
-                    
-                    const newScrollLeft = sectionCenterX - containerRect.width / 2;
-                    const newScrollTop = sectionCenterY - containerRect.height / 2;
-                    
-                    mapContainerRef.scrollTo({
-                      left: Math.max(0, newScrollLeft),
-                      top: Math.max(0, newScrollTop),
-                      behavior: 'smooth'
-                    });
-                  }
-                }
               }}
               onSectionHighlight={setHighlightedSection}
               selectedSection={selectedSection}
               isMobile={isMobile}
+              onAutoScroll={(sectionId) => {
+                // Auto-scroll to section with enhanced mobile support
+                if (mapContainerRef) {
+                  const section = floorData[currentFloor].sections.find(s => s.id === sectionId);
+                  if (section) {
+                    const containerRect = mapContainerRef.getBoundingClientRect();
+                    const sectionCenterX = (section.x + section.width / 2) * zoomLevel;
+                    const sectionCenterY = (section.y + section.height / 2) * zoomLevel;
+                    
+                    // Calculate optimal scroll position with padding
+                    const padding = isMobile ? 100 : 50;
+                    const newScrollLeft = Math.max(0, sectionCenterX - containerRect.width / 2);
+                    const newScrollTop = Math.max(0, sectionCenterY - containerRect.height / 2);
+                    
+                    mapContainerRef.scrollTo({
+                      left: newScrollLeft,
+                      top: newScrollTop,
+                      behavior: 'smooth'
+                    });
+                    
+                    // Show notification for mobile users
+                    if (isMobile) {
+                      showSaveNotification(`Navigated to ${section.name}`);
+                    }
+                  }
+                }
+              }}
             />
           </div>
           

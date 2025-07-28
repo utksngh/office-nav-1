@@ -8,6 +8,7 @@ interface SearchBarProps {
   onSectionHighlight: (sectionId: string | null) => void;
   selectedSection: string | null;
   isMobile: boolean;
+  onAutoScroll?: (sectionId: string) => void;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
@@ -15,7 +16,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onSectionSelect,
   onSectionHighlight,
   selectedSection,
-  isMobile
+  isMobile,
+  onAutoScroll
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -94,6 +96,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   const handleSectionSelect = (section: OfficeSection) => {
     onSectionSelect(section.id);
+    onAutoScroll?.(section.id);
     setSearchTerm(section.name);
     setIsOpen(false);
     setHighlightedIndex(-1);
@@ -123,7 +126,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <div ref={searchRef} className={`relative ${isMobile ? 'w-full' : 'w-full max-w-md'}`}>
+    <div ref={searchRef} className={`relative ${isMobile ? 'w-full' : 'w-full max-w-md'} z-10`}>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} text-gray-400`} />
@@ -156,7 +159,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       {/* Search Results Dropdown */}
       {isOpen && filteredSections.length > 0 && (
-        <div className={`absolute top-full left-0 right-0 ${isMobile ? 'mt-2' : 'mt-1'} bg-gray-800/95 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl z-[60] ${isMobile ? 'max-h-80' : 'max-h-64'} overflow-y-auto custom-scrollbar`}>
+        <div className={`absolute top-full ${isMobile ? 'left-0 right-0' : 'left-0 right-0'} ${isMobile ? 'mt-2' : 'mt-1'} bg-gray-800/95 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl z-[60] ${isMobile ? 'max-h-80' : 'max-h-64'} overflow-y-auto custom-scrollbar`}>
           {filteredSections.map((section, index) => (
             <button
               key={section.id}
@@ -199,7 +202,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       {/* No Results */}
       {isOpen && searchTerm && filteredSections.length === 0 && (
-        <div className={`absolute top-full left-0 right-0 ${isMobile ? 'mt-2' : 'mt-1'} bg-gray-800/95 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl z-[60]`}>
+        <div className={`absolute top-full ${isMobile ? 'left-0 right-0' : 'left-0 right-0'} ${isMobile ? 'mt-2' : 'mt-1'} bg-gray-800/95 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl z-[60]`}>
           <div className={`${isMobile ? 'p-4' : 'p-3'} text-center text-gray-400`}>
             <Search className={`${isMobile ? 'w-8 h-8' : 'w-6 h-6'} mx-auto mb-2 opacity-50`} />
             <p className={`${isMobile ? 'text-base' : 'text-sm'}`}>No rooms found</p>
