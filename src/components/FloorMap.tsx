@@ -22,6 +22,9 @@ interface FloorMapProps {
   zoomLevel: number;
   mapTransform: { x: number; y: number };
   onMapTransform: (transform: { x: number; y: number }) => void;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onResetZoom: () => void;
 }
 
 const FloorMap: React.FC<FloorMapProps> = ({
@@ -39,7 +42,10 @@ const FloorMap: React.FC<FloorMapProps> = ({
   isNavigating,
   zoomLevel,
   mapTransform,
-  onMapTransform
+  onMapTransform,
+  onZoomIn,
+  onZoomOut,
+  onResetZoom
 }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawStart, setDrawStart] = useState<Point | null>(null);
@@ -417,7 +423,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
       {isMobile && (
         <div className="fixed bottom-6 left-6 flex flex-col gap-2 z-40">
           <button
-            onClick={handleZoomIn}
+            onClick={onZoomIn}
             className="p-3 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[56px] flex items-center justify-center"
             title="Zoom In"
           >
@@ -427,7 +433,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
           </button>
           
           <button
-            onClick={handleResetZoom}
+            onClick={onResetZoom}
             className="px-3 py-2 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[40px] flex items-center justify-center font-mono text-sm font-semibold"
             title="Reset Zoom"
           >
@@ -435,7 +441,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
           </button>
           
           <button
-            onClick={handleZoomOut}
+            onClick={onZoomOut}
             className="p-3 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[56px] flex items-center justify-center"
             title="Zoom Out"
           >

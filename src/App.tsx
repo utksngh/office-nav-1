@@ -575,6 +575,9 @@ function App() {
                 zoomLevel={zoomLevel}
                 mapTransform={mapTransform}
                 onMapTransform={setMapTransform}
+               onZoomIn={handleZoomIn}
+               onZoomOut={handleZoomOut}
+               onResetZoom={handleResetZoom}
               />
             </div>
           </div>
