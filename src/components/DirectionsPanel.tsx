@@ -49,10 +49,10 @@ const FloorMap: React.FC<FloorMapProps> = ({
   onResetZoom,
   onPathUpdate
 }) => {
+  const svgRef = useRef<SVGSVGElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawStart, setDrawStart] = useState<Point | null>(null);
   const [currentPath, setCurrentPath] = useState<Point[]>([]);
-  const svgRef = useRef<SVGSVGElement>(null);
 
   const getSectionTypeColor = (type: OfficeSection['type']) => {
     const colors = {
@@ -70,9 +70,10 @@ const FloorMap: React.FC<FloorMapProps> = ({
 
   // Find the nearest corner of the closest section to the clicked point
   const handleSVGClick = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
-    const rect = svgRef.current?.getBoundingClientRect();
-    if (!rect) return;
+    if (!svgRef.current) return;
 
+    const rect = svgRef.current.getBoundingClientRect();
+    // Adjust for zoom and transform
     const x = (event.clientX - rect.left) / zoomLevel - mapTransform.x;
     const y = (event.clientY - rect.top) / zoomLevel - mapTransform.y;
     const point: Point = { x, y };
@@ -86,7 +87,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
           const width = Math.abs(x - drawStart.x);
           const height = Math.abs(y - drawStart.y);
           const newSection: Omit<OfficeSection, 'id'> = {
-            name: 'New Section',
+            name: `Section ${Date.now()}`,
             x: Math.min(drawStart.x, x),
             y: Math.min(drawStart.y, y),
             width,

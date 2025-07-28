@@ -70,12 +70,41 @@ const FloorMap: React.FC<FloorMapProps> = ({
 
   // Find the nearest corner of the closest section to the clicked point
   const handleSVGClick = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
-    if (!svgRef.current) return;
-    
-    const rect = svgRef.current.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / zoomLevel - mapTransform.x;
-    const y = (event.clientY - rect.top) / zoomLevel - mapTransform.y;
+    const svgRect = svgRef.current?.getBoundingClientRect();
+    if (!svgRect) return;
+
+    const x = (event.clientX - svgRect.left) / zoomLevel - mapTransform.x;
+    const y = (event.clientY - svgRect.top) / zoomLevel - mapTransform.y;
     const point: Point = { x, y };
+
+    // Find the closest section
+    let closestSection: OfficeSection | null = null;
+    let minDistance = Infinity;
+
+    floorData.sections.forEach((section) => {
+      const centerX = section.x + section.width / 2;
+      const centerY = section.y + section.height / 2;
+      const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestSection = section;
+      }
+    });
+
+    if (closestSection) {
+      // Set point at the center of the section
+      const point: Point = {
+        x: closestSection.x + closestSection.width / 2,
+        y: closestSection.y + closestSection.height / 2
+      };
+      
+      if (type === 'start') {
+        setStartPoint(point);
+      } else {
+        setEndPoint(point);
+      }
+    }
 
     if (isAddingSection) {
       if (!isDrawing) {
