@@ -46,7 +46,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
   onMapTransform,
   onZoomIn,
   onZoomOut,
-  onResetZoom
+  onResetZoom,
   onPathUpdate
 }) => {
   const [isDrawing, setIsDrawing] = useState(false);
