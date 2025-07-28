@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigation, Plus, Save, Download, Upload, Settings, Check } from 'lucide-react';
+import { Navigation, Plus, Save, Download, Upload, Settings, Check, MapPin } from 'lucide-react';
 import FloorMap from './components/FloorMap';
 import ControlPanel from './components/ControlPanel';
 import { FloorData, Point, OfficeSection } from './types';
