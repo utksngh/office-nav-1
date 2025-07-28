@@ -359,7 +359,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
-      <header className={`bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 shadow-xl ${isMobile ? 'sticky top-0 z-30 px-3 py-3' : 'px-6 py-4'}`}>
+      <header className={`bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 shadow-xl ${isMobile ? 'sticky top-0 z-50 px-3 py-3' : 'px-6 py-4'} relative`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`${isMobile ? 'p-2' : 'p-2'} bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg`}>
@@ -376,7 +376,7 @@ function App() {
           </div>
           
           {/* Search Bar */}
-          <div className={`flex-1 ${isMobile ? 'mx-4' : 'mx-6'} ${isMobile ? 'max-w-none' : 'max-w-md'}`}>
+          <div className={`flex-1 ${isMobile ? 'mx-3' : 'mx-6'} ${isMobile ? 'max-w-none' : 'max-w-md'} relative z-10`}>
             <SearchBar
               sections={floorData[currentFloor].sections}
               onSectionSelect={(sectionId) => {

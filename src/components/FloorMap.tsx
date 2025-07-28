@@ -350,7 +350,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
       </svg>
 
       {/* Instructions */}
-      <div className={`absolute ${isMobile ? 'top-3 left-3' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[180px]' : ''}`}>
+      <div className={`absolute ${isMobile ? 'top-3 left-3' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[180px]' : ''} z-10`}>
         {isNavigating ? (
           <div className="text-blue-600">
             <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
@@ -391,7 +391,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
 
       {/* Path info */}
       {currentPath.length > 0 && (
-        <div className={`absolute ${isMobile ? 'top-3 right-3' : 'top-4 right-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[120px]' : 'min-w-[120px]'} shadow-xl border border-gray-300/50`}>
+        <div className={`absolute ${isMobile ? 'top-3 right-3' : 'top-4 right-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[120px]' : 'min-w-[120px]'} shadow-xl border border-gray-300/50 z-10`}>
           <div className={`${isNavigating ? 'text-blue-600' : 'text-emerald-600'}`}>
             <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
               <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} ${isNavigating ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full animate-pulse`}></div>
@@ -415,7 +415,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
       {isMobile && selectedSection && !isAddingSection && (
         <button
           onClick={() => onSectionSelect(null)}
-          className="fixed bottom-6 right-6 p-4 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50 min-w-[56px] min-h-[56px] flex items-center justify-center"
+          className="fixed bottom-6 right-6 p-4 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-40 min-w-[56px] min-h-[56px] flex items-center justify-center"
           style={{ zIndex: 1000 }}
         >
           <X className="w-6 h-6" />
@@ -424,7 +424,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
       
       {/* Mobile Zoom Controls - Alternative Position */}
       {isMobile && (
-        <div className="fixed bottom-6 left-6 flex flex-col gap-2 z-40">
+        <div className="fixed bottom-6 left-6 flex flex-col gap-2 z-30">
           <button
             onClick={onZoomIn}
             className="p-3 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[56px] flex items-center justify-center"
