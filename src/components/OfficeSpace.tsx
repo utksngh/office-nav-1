@@ -21,19 +21,48 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
 
   const handleMouseDown = (event: React.MouseEvent) => {
     event.stopPropagation();
-    setIsDragging(true);
-    setDragStart({
-      x: event.clientX - section.x,
-      y: event.clientY - section.y
-    });
+    
+    // For mobile, we need to handle touch events differently
+    if ('ontouchstart' in window) {
+      // Mobile touch handling
+      setIsDragging(true);
+      const rect = (event.target as Element).closest('svg')?.getBoundingClientRect();
+      if (rect) {
+        setDragStart({
+          x: event.clientX - rect.left - section.x,
+          y: event.clientY - rect.top - section.y
+        });
+      }
+    } else {
+      // Desktop mouse handling
+      setIsDragging(true);
+      setDragStart({
+        x: event.clientX - section.x,
+        y: event.clientY - section.y
+      });
+    }
     onSelect();
   };
 
   const handleMouseMove = (event: React.MouseEvent) => {
     if (!isDragging) return;
     
-    const newX = event.clientX - dragStart.x;
-    const newY = event.clientY - dragStart.y;
+    let newX, newY;
+    
+    if ('ontouchstart' in window) {
+      // Mobile touch handling
+      const rect = (event.target as Element).closest('svg')?.getBoundingClientRect();
+      if (rect) {
+        newX = event.clientX - rect.left - dragStart.x;
+        newY = event.clientY - rect.top - dragStart.y;
+      } else {
+        return;
+      }
+    } else {
+      // Desktop mouse handling
+      newX = event.clientX - dragStart.x;
+      newY = event.clientY - dragStart.y;
+    }
     
     onUpdate({ x: Math.max(0, newX), y: Math.max(0, newY) });
   };
@@ -45,8 +74,23 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
   React.useEffect(() => {
     if (isDragging) {
       const handleGlobalMouseMove = (event: MouseEvent) => {
-        const newX = event.clientX - dragStart.x;
-        const newY = event.clientY - dragStart.y;
+        let newX, newY;
+        
+        if ('ontouchstart' in window) {
+          // For mobile, we need to find the SVG element to get proper coordinates
+          const svgElement = document.querySelector('svg');
+          const rect = svgElement?.getBoundingClientRect();
+          if (rect) {
+            newX = event.clientX - rect.left - dragStart.x;
+            newY = event.clientY - rect.top - dragStart.y;
+          } else {
+            return;
+          }
+        } else {
+          newX = event.clientX - dragStart.x;
+          newY = event.clientY - dragStart.y;
+        }
+        
         onUpdate({ x: Math.max(0, newX), y: Math.max(0, newY) });
       };
 
@@ -66,7 +110,7 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
 
   return (
     <g
-      className={`cursor-move transition-all duration-300 ${
+      className={`${('ontouchstart' in window) ? 'cursor-pointer' : 'cursor-move'} transition-all duration-300 ${
         isSelected ? 'drop-shadow-lg' : ''
       }`}
       onMouseDown={handleMouseDown}
@@ -92,7 +136,7 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
         x={section.x + section.width / 2}
         y={section.y + section.height / 2}
         fill="white"
-        fontSize={Math.min(16, section.width / 6, section.height / 3)}
+        fontSize={Math.min(('ontouchstart' in window) ? 18 : 16, section.width / 6, section.height / 3)}
         fontWeight="700"
         textAnchor="middle"
         dominantBaseline="middle"
@@ -107,7 +151,7 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
           x={section.x + section.width / 2}
           y={section.y + section.height / 2 + 18}
           fill="rgba(255,255,255,0.8)"
-          fontSize={Math.min(13, section.width / 8, section.height / 5)}
+          fontSize={Math.min(('ontouchstart' in window) ? 15 : 13, section.width / 8, section.height / 5)}
           fontWeight="500"
           textAnchor="middle"
           dominantBaseline="middle"
@@ -124,10 +168,10 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
           <circle
             cx={section.x + section.width}
             cy={section.y + section.height}
-            r="6"
+            r={('ontouchstart' in window) ? "8" : "6"}
             fill="#FFFFFF"
             stroke={color}
-            strokeWidth="4"
+            strokeWidth={('ontouchstart' in window) ? "5" : "4"}
             className="cursor-se-resize"
             onMouseDown={(e) => {
               e.stopPropagation();

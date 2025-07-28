@@ -21,7 +21,7 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
         d={pathString}
         fill="none"
         stroke="#10B981"
-        strokeWidth={isMobile ? "8" : "6"}
+        strokeWidth={isMobile ? "10" : "6"}
         strokeLinecap="round"
         strokeLinejoin="round"
         className="drop-shadow-lg"
@@ -32,10 +32,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
         d={pathString}
         fill="none"
         stroke="#34D399"
-        strokeWidth={isMobile ? "4" : "3"}
+        strokeWidth={isMobile ? "5" : "3"}
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeDasharray={isMobile ? "20,20" : "15,15"}
+        strokeDasharray={isMobile ? "25,25" : "15,15"}
         className="animate-pulse drop-shadow-sm"
       />
       
@@ -45,10 +45,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
           key={index}
           cx={point.x}
           cy={point.y}
-          r={isMobile ? "6" : "4"}
+          r={isMobile ? "8" : "4"}
           fill="#10B981"
           stroke="#FFFFFF"
-          strokeWidth={isMobile ? "3" : "2"}
+          strokeWidth={isMobile ? "4" : "2"}
           className="animate-pulse drop-shadow-lg"
         />
       ))}
@@ -64,10 +64,10 @@ const PathVisualization: React.FC<PathVisualizationProps> = ({ path, isMobile = 
         return (
           <g key={`arrow-${index}`} transform={`translate(${point.x}, ${point.y}) rotate(${angle * 180 / Math.PI})`}>
             <polygon
-              points={isMobile ? "-8,-4 8,0 -8,4" : "-6,-3 6,0 -6,3"}
+              points={isMobile ? "-10,-5 10,0 -10,5" : "-6,-3 6,0 -6,3"}
               fill="#10B981"
               stroke="#FFFFFF"
-              strokeWidth={isMobile ? "2" : "1"}
+              strokeWidth={isMobile ? "3" : "1"}
               className="drop-shadow-sm"
             />
           </g>
