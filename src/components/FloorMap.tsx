@@ -218,7 +218,8 @@ const FloorMap: React.FC<FloorMapProps> = ({
       style={{
         overscrollBehavior: 'contain',
         WebkitOverflowScrolling: 'touch',
-        scrollBehavior: 'smooth'
+        scrollBehavior: 'smooth',
+        touchAction: 'pan-x pan-y'
       }}
     >
       <svg
@@ -231,8 +232,8 @@ const FloorMap: React.FC<FloorMapProps> = ({
         style={{
           width: `${Math.max(scaledWidth, minWidth)}px`,
           height: `${Math.max(scaledHeight, minHeight)}px`,
-          transform: `scale(${zoomLevel}) translate(${mapTransform.x}px, ${mapTransform.y}px)`,
-          transformOrigin: '0 0'
+          transformOrigin: '0 0',
+          minHeight: `${Math.max(scaledHeight, minHeight)}px`
         }}
       >
         {/* Grid */}

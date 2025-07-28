@@ -236,6 +236,12 @@ select:focus-visible {
     overscroll-behavior: contain;
   }
   
+  /* Ensure map container allows both horizontal and vertical scrolling */
+  .overflow-auto {
+    overflow-x: auto;
+    overflow-y: auto;
+  }
+  
   /* Better scrollbars for mobile */
   .overflow-auto::-webkit-scrollbar {
     width: 6px;

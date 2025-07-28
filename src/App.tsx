@@ -558,11 +558,12 @@ function App() {
 
             <div 
               ref={setMapContainerRef}
-              className={`flex-1 overflow-auto ${isMobile ? 'rounded-md' : 'rounded-xl'} border border-gray-700/50 shadow-inner relative`}
+              className={`flex-1 overflow-auto custom-scrollbar ${isMobile ? 'rounded-md' : 'rounded-xl'} border border-gray-700/50 shadow-inner relative`}
               style={isMobile ? { 
                 overscrollBehavior: 'contain',
                 WebkitOverflowScrolling: 'touch',
-                position: 'relative'
+                position: 'relative',
+                touchAction: 'pan-x pan-y'
               } : {}}
             >
               
