@@ -465,19 +465,9 @@ const FloorMap: React.FC<FloorMapProps> = ({
         </div>
       )}
       
-      {/* Mobile Reset Selection Button */}
-      {isMobile && selectedSection && !isAddingSection && (
-        <button
-          onClick={() => onSectionSelect(null)}
-          className="absolute bottom-4 right-4 p-3 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-30 min-w-[48px] min-h-[48px] flex items-center justify-center"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      )}
-      
       {/* Mobile Zoom Controls - Alternative Position */}
       {isMobile && (
-        <div className="absolute bottom-4 left-4 flex flex-col gap-2 z-30">
+        <div className="absolute bottom-20 left-4 flex flex-col gap-2 z-30">
           <button
             onClick={onZoomIn}
             className="p-2.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[48px] flex items-center justify-center"

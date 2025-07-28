@@ -595,6 +595,35 @@ function App() {
         </main>
       </div>
       
+      {/* Sticky Clear Path Button */}
+      {(startPoint || endPoint) && (
+        <button
+          onClick={clearPath}
+          className={`fixed ${isMobile ? 'bottom-20 right-4' : 'bottom-6 right-6'} ${isMobile ? 'w-14 h-14' : 'w-12 h-12'} bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-40 flex items-center justify-center group`}
+          title="Clear Path"
+        >
+          <svg 
+            className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} transition-transform duration-300 group-hover:rotate-90`} 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2.5} 
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
+            />
+          </svg>
+          
+          {/* Tooltip */}
+          <div className={`absolute ${isMobile ? 'bottom-16 right-0' : 'bottom-14 right-0'} bg-gray-900/95 backdrop-blur-sm text-white ${isMobile ? 'px-3 py-2 text-sm' : 'px-2.5 py-1.5 text-xs'} rounded-lg shadow-xl border border-gray-700/50 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap transform translate-y-2 group-hover:translate-y-0`}>
+            Clear Path
+            <div className={`absolute top-full ${isMobile ? 'right-6' : 'right-4'} w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900/95`}></div>
+          </div>
+        </button>
+      )}
+      
       {/* Welcome Instructions Modal */}
       {showInstructions && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
