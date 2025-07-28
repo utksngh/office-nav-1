@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigation, MapPin, Plus, Save, Download, Upload, Settings } from 'lucide-react';
+import { Navigation, MapPin, Plus, Save, Download, Upload, Settings, Check } from 'lucide-react';
 import FloorMap from './components/FloorMap';
 import ControlPanel from './components/ControlPanel';
 import { FloorData, Point, OfficeSection } from './types';
@@ -103,6 +103,8 @@ function App() {
   const [showControlPanel, setShowControlPanel] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showSaveOptions, setShowSaveOptions] = useState(false);
+  const [saveNotification, setSaveNotification] = useState('');
+  const [mapContainerRef, setMapContainerRef] = useState<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -117,7 +119,21 @@ function App() {
   // Auto-save to localStorage whenever floorData changes
   React.useEffect(() => {
     localStorage.setItem('officeFloorData', JSON.stringify(floorData));
+    if (saveNotification !== 'auto') {
+      setSaveNotification('auto');
+      setTimeout(() => setSaveNotification(''), 2000);
+    }
   }, [floorData]);
+
+  const showSaveNotification = (message: string) => {
+    setSaveNotification(message);
+    setTimeout(() => setSaveNotification(''), 3000);
+  };
+
+  const saveLayout = () => {
+    localStorage.setItem('officeFloorData', JSON.stringify(floorData));
+    showSaveNotification('Layout saved successfully!');
+  };
 
   const saveToFile = () => {
     const dataStr = JSON.stringify(floorData, null, 2);
@@ -130,7 +146,7 @@ function App() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    setShowSaveOptions(false);
+    showSaveNotification('Layout exported successfully!');
   };
 
   const loadFromFile = () => {
@@ -148,15 +164,15 @@ function App() {
             clearPath();
             setSelectedSection(null);
             setIsAddingSection(false);
+            showSaveNotification('Layout imported successfully!');
           } catch (error) {
-            alert('Error loading file. Please make sure it\'s a valid office layout file.');
+            showSaveNotification('Error loading file. Invalid format.');
           }
         };
         reader.readAsText(file);
       }
     };
     input.click();
-    setShowSaveOptions(false);
   };
 
   const resetToDefault = () => {
@@ -166,7 +182,7 @@ function App() {
       clearPath();
       setSelectedSection(null);
       setIsAddingSection(false);
-      setShowSaveOptions(false);
+      showSaveNotification('Layout reset to default!');
     }
   };
   const addSection = (section: Omit<OfficeSection, 'id'>) => {
@@ -180,6 +196,23 @@ function App() {
       )
     };
     
+    // Auto-scroll to the new section
+    if (mapContainerRef) {
+      const sectionCenterX = newSection.x + newSection.width / 2;
+      const sectionCenterY = newSection.y + newSection.height / 2;
+      
+      // Calculate scroll position to center the new section
+      const containerRect = mapContainerRef.getBoundingClientRect();
+      const scrollLeft = sectionCenterX - containerRect.width / 2;
+      const scrollTop = sectionCenterY - containerRect.height / 2;
+      
+      mapContainerRef.scrollTo({
+        left: Math.max(0, scrollLeft),
+        top: Math.max(0, scrollTop),
+        behavior: 'smooth'
+      });
+    }
+    
     setFloorData(prev => ({
       ...prev,
       [currentFloor]: {
@@ -187,6 +220,7 @@ function App() {
         sections: [...prev[currentFloor].sections, newSection]
       }
     }));
+    setIsAddingSection(false); // Exit adding mode after adding section
   };
 
   const updateSection = (sectionId: string, updates: Partial<OfficeSection>) => {
@@ -276,50 +310,29 @@ function App() {
             </div>
             
             <div className="flex gap-1 md:gap-2">
-              <div className="relative">
-                <button
-                  onClick={() => setShowSaveOptions(!showSaveOptions)}
-                  className="p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg"
-                  title="Save/Load Layout"
-                >
-                  <Save className="w-4 h-4 md:w-5 md:h-5" />
-                </button>
-                
-                {showSaveOptions && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-40"
-                      onClick={() => setShowSaveOptions(false)}
-                    />
-                    <div className="absolute right-0 top-12 bg-gray-800/95 backdrop-blur-sm border border-gray-700/50 rounded-xl shadow-2xl z-50 min-w-48">
-                      <div className="p-2 space-y-1">
-                        <button
-                          onClick={saveToFile}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-all duration-200"
-                        >
-                          <Download className="w-4 h-4" />
-                          Export Layout
-                        </button>
-                        <button
-                          onClick={loadFromFile}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-all duration-200"
-                        >
-                          <Upload className="w-4 h-4" />
-                          Import Layout
-                        </button>
-                        <hr className="border-gray-700/50 my-1" />
-                        <button
-                          onClick={resetToDefault}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-all duration-200"
-                        >
-                          <Navigation className="w-4 h-4" />
-                          Reset to Default
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
+              <button
+                onClick={saveLayout}
+                className="p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg"
+                title="Save Layout"
+              >
+                <Save className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
+              
+              <button
+                onClick={saveToFile}
+                className="p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg"
+                title="Download Layout"
+              >
+                <Download className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
+              
+              <button
+                onClick={loadFromFile}
+                className="p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg"
+                title="Upload Layout"
+              >
+                <Upload className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
               
               <button
                 onClick={() => setShowControlPanel(!showControlPanel)}
@@ -397,7 +410,10 @@ function App() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-hidden rounded-xl border border-gray-700/50 shadow-inner">
+            <div 
+              ref={setMapContainerRef}
+              className="flex-1 overflow-auto rounded-xl border border-gray-700/50 shadow-inner"
+            >
               <FloorMap
                 floorData={floorData[currentFloor]}
                 startPoint={startPoint}
@@ -417,6 +433,14 @@ function App() {
           </div>
         </main>
       </div>
+      
+      {/* Save Notification */}
+      {saveNotification && (
+        <div className="fixed top-4 right-4 z-50 bg-emerald-500/90 backdrop-blur-sm text-white px-4 py-3 rounded-xl shadow-2xl border border-emerald-400/50 flex items-center gap-2 animate-in slide-in-from-right duration-300">
+          <Check className="w-5 h-5" />
+          <span className="font-medium">{saveNotification}</span>
+        </div>
+      )}
     </div>
   );
 }
