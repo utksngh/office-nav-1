@@ -255,7 +255,15 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                     setSearchQuery(e.target.value);
                     setShowSearchResults(e.target.value.length > 0);
                   }}
-                  onFocus={() => setShowSearchResults(searchQuery.length > 0)}
+                  onFocus={() => {
+                    if (searchQuery.length > 0) {
+                      setShowSearchResults(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    // Delay hiding results to allow for clicks
+                    setTimeout(() => setShowSearchResults(false), 200);
+                  }}
                   className={`w-full pl-10 pr-4 py-3 text-sm bg-gray-600/80 border border-gray-500/50 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 shadow-inner`}
                 />
               </div>
@@ -267,13 +275,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                     filteredSections.map((section) => (
                       <button
                         key={section.id}
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          handleSearchSelect(section);
-                        }}
                         onClick={(e) => {
                           e.preventDefault();
-                          e.stopPropagation();
                           handleSearchSelect(section);
                         }}
                         className={`w-full p-3 text-left hover:bg-gray-600/80 active:bg-gray-500/90 transition-all duration-200 border-b border-gray-600/30 last:border-b-0 flex items-center justify-between group cursor-pointer touch-manipulation`}
