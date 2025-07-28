@@ -4,6 +4,7 @@ import { OfficeSection } from '../types';
 interface OfficeSpaceProps {
   section: OfficeSection;
   isSelected: boolean;
+  isHighlighted?: boolean;
   onSelect: () => void;
   onUpdate: (updates: Partial<OfficeSection>) => void;
   color: string;
@@ -13,6 +14,7 @@ interface OfficeSpaceProps {
 const OfficeSpace: React.FC<OfficeSpaceProps> = ({
   section,
   isSelected,
+  isHighlighted = false,
   onSelect,
   onUpdate,
   color,
@@ -113,26 +115,44 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
   return (
     <g
       className={`${('ontouchstart' in window) ? 'cursor-pointer' : 'cursor-move'} transition-all duration-300 ${
-        isSelected ? 'drop-shadow-lg' : ''
+        isSelected || isHighlighted ? 'drop-shadow-lg' : ''
       }`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
+      {/* Highlight glow effect */}
+      {isHighlighted && (
+        <rect
+          x={section.x - 8 / zoomLevel}
+          y={section.y - 8 / zoomLevel}
+          width={section.width + 16 / zoomLevel}
+          height={section.height + 16 / zoomLevel}
+          fill="none"
+          stroke="#60A5FA"
+          strokeWidth={6 / zoomLevel}
+          strokeOpacity={0.6}
+          rx={12 / zoomLevel}
+          ry={12 / zoomLevel}
+          className="animate-pulse"
+          filter="blur(2px)"
+        />
+      )}
+      
       <rect
         x={section.x}
         y={section.y}
         width={section.width}
         height={section.height}
         fill={color}
-        fillOpacity={isSelected ? 0.95 : 0.85}
-        stroke={isSelected ? '#FFFFFF' : '#FFFFFF'}
-        strokeWidth={(isSelected ? 4 : 2) / zoomLevel}
-        strokeOpacity={isSelected ? 1 : 0.6}
+        fillOpacity={isSelected ? 0.95 : isHighlighted ? 0.9 : 0.85}
+        stroke={isSelected ? '#FFFFFF' : isHighlighted ? '#60A5FA' : '#FFFFFF'}
+        strokeWidth={(isSelected ? 4 : isHighlighted ? 3 : 2) / zoomLevel}
+        strokeOpacity={isSelected ? 1 : isHighlighted ? 0.8 : 0.6}
         rx={8 / zoomLevel}
         ry={8 / zoomLevel}
-        className="transition-all duration-300"
-        filter={isSelected ? "drop-shadow(0 8px 16px rgba(0,0,0,0.3))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.1))"}
+        className={`transition-all duration-300 ${isHighlighted ? 'animate-pulse' : ''}`}
+        filter={isSelected ? "drop-shadow(0 8px 16px rgba(0,0,0,0.3))" : isHighlighted ? "drop-shadow(0 4px 8px rgba(96,165,250,0.3))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.1))"}
       />
       
       <text
@@ -144,7 +164,7 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
         textAnchor="middle"
         dominantBaseline="middle"
         pointerEvents="none"
-        className="select-none drop-shadow-sm"
+        className={`select-none drop-shadow-sm ${isHighlighted ? 'animate-pulse' : ''}`}
       >
         {section.width < 100 ? section.name.split(' ')[0] : section.name}
       </text>
@@ -159,7 +179,7 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
           textAnchor="middle"
           dominantBaseline="middle"
           pointerEvents="none"
-          className="select-none capitalize drop-shadow-sm"
+          className={`select-none capitalize drop-shadow-sm ${isHighlighted ? 'animate-pulse' : ''}`}
         >
           {section.width < 80 ? '' : section.type}
         </text>

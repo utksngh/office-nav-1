@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Navigation, Plus, Save, Download, Upload, Settings, Check, MapPin } from 'lucide-react';
 import FloorMap from './components/FloorMap';
 import ControlPanel from './components/ControlPanel';
+import SearchBar from './components/SearchBar';
 import { FloorData, Point, OfficeSection } from './types';
 import { pixelToGeo } from './utils/geoUtils';
 
@@ -109,6 +110,7 @@ function App() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [mapTransform, setMapTransform] = useState({ x: 0, y: 0 });
+  const [highlightedSection, setHighlightedSection] = useState<string | null>(null);
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -373,6 +375,38 @@ function App() {
             </div>
           </div>
           
+          {/* Search Bar */}
+          <div className={`flex-1 ${isMobile ? 'mx-4' : 'mx-6'} ${isMobile ? 'max-w-none' : 'max-w-md'}`}>
+            <SearchBar
+              sections={floorData[currentFloor].sections}
+              onSectionSelect={(sectionId) => {
+                setSelectedSection(sectionId);
+                setHighlightedSection(null);
+                // Auto-scroll to section if possible
+                if (mapContainerRef) {
+                  const section = floorData[currentFloor].sections.find(s => s.id === sectionId);
+                  if (section) {
+                    const containerRect = mapContainerRef.getBoundingClientRect();
+                    const sectionCenterX = section.x + section.width / 2;
+                    const sectionCenterY = section.y + section.height / 2;
+                    
+                    const newScrollLeft = sectionCenterX - containerRect.width / 2;
+                    const newScrollTop = sectionCenterY - containerRect.height / 2;
+                    
+                    mapContainerRef.scrollTo({
+                      left: Math.max(0, newScrollLeft),
+                      top: Math.max(0, newScrollTop),
+                      behavior: 'smooth'
+                    });
+                  }
+                }
+              }}
+              onSectionHighlight={setHighlightedSection}
+              selectedSection={selectedSection}
+              isMobile={isMobile}
+            />
+          </div>
+          
           <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-4'}`}>
             <div className={`flex bg-gray-700/80 backdrop-blur-sm rounded-xl p-1 ${isMobile ? 'text-xs' : 'text-sm'} shadow-lg`}>
               {[1, 2].map(floor => (
@@ -578,6 +612,7 @@ function App() {
                onZoomIn={handleZoomIn}
                onZoomOut={handleZoomOut}
                onResetZoom={handleResetZoom}
+               highlightedSection={highlightedSection}
               />
             </div>
           </div>

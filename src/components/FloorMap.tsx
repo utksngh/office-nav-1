@@ -25,6 +25,7 @@ interface FloorMapProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onResetZoom: () => void;
+  highlightedSection?: string | null;
 }
 
 const FloorMap: React.FC<FloorMapProps> = ({
@@ -46,6 +47,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
   onZoomIn,
   onZoomOut,
   onResetZoom
+  highlightedSection
 }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawStart, setDrawStart] = useState<Point | null>(null);
@@ -229,6 +231,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
             key={section.id}
             section={section}
             isSelected={selectedSection === section.id}
+            isHighlighted={highlightedSection === section.id}
             onSelect={() => onSectionSelect(section.id)}
             onUpdate={(updates) => onSectionUpdate(section.id, updates)}
             color={getSectionTypeColor(section.type)}

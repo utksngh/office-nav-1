@@ -24,6 +24,7 @@ interface ControlPanelProps {
   onStartNavigation: () => void;
   onStopNavigation: () => void;
   onSectionSelect: (sectionId: string | null) => void;
+  onSectionSelect: (sectionId: string | null) => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -46,7 +47,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   isNavigating,
   onStartNavigation,
   onStopNavigation,
-  onSectionSelect,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<OfficeSection>>({});
