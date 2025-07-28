@@ -193,7 +193,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <div className={`${isMobile ? 'space-y-3' : 'space-y-3'} ${isMobile ? 'text-base' : 'text-base'}`}>
             <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-white rounded-2xl border border-gray-200`}>
               <span className="text-gray-600 font-medium">Start Point:</span>
-              <span className={`font-bold ${startPoint ? 'text-teal-600' : 'text-gray-500'}`}>
               <span className={`font-bold ${startPoint ? 'text-gray-700' : 'text-gray-500'}`}>
                 {startPoint ? 
                   `${Math.round(startPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(startPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 
