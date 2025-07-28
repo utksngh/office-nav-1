@@ -23,7 +23,6 @@ interface ControlPanelProps {
   isNavigating: boolean;
   onStartNavigation: () => void;
   onStopNavigation: () => void;
-  onSectionSelect: (sectionId: string | null) => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -46,7 +45,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   isNavigating,
   onStartNavigation,
   onStopNavigation,
-}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<OfficeSection>>({});
 
@@ -249,7 +247,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                     ? 'bg-gradient-to-r from-blue-500/20 to-blue-600/20 border-blue-400/50 shadow-lg'
                     : 'bg-gray-600/50 hover:bg-gray-600/70 border-gray-500/30 hover:border-gray-400/50'
                 }`}
-                onClick={() => onSectionSelect(section.id)}
+                onClick={() => {}}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
