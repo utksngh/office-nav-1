@@ -347,60 +347,55 @@ const FloorMap: React.FC<FloorMapProps> = ({
       </svg>
 
       {/* Instructions */}
-      <div className={`absolute ${isMobile ? 'top-3 left-3' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[180px]' : ''}`}>
+      <div className={`absolute ${isMobile ? 'top-2 left-2' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[160px]' : ''}`}>
         {isNavigating ? (
           <div className="text-blue-600">
-            <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
               🧭 Navigating
             </p>
-            <p className={`${isMobile ? 'mt-2' : 'mt-1'} text-gray-700`}>
-              {isMobile ? 'Following route' : 'Following the optimal route'}
+            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
+              Following route
             </p>
           </div>
         ) : isAddingSection ? (
           <div className="text-emerald-600">
-            <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-emerald-600 rounded-full animate-pulse`}></div>
-              Adding Section Mode
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-emerald-600 rounded-full animate-pulse`}></div>
+              {isMobile ? 'Adding Room' : 'Adding Section Mode'}
             </p>
-            <p className={`${isMobile ? 'mt-2' : 'mt-1'} text-gray-700`}>
-              {isMobile ? 'Tap twice to create' : 'Click two points to create a rectangle'}
+            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
+              {isMobile ? 'Tap twice' : 'Click two points to create a rectangle'}
             </p>
           </div>
         ) : (
           <div className="text-blue-600">
-            <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
-              Navigation Mode
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
+              {isMobile ? 'Navigation' : 'Navigation Mode'}
             </p>
-            <p className={`${isMobile ? 'mt-2' : 'mt-1'} text-gray-700`}>
-              {isMobile ? 'Tap to set points' : 'Click near corners for optimal paths'}
+            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
+              {isMobile ? 'Tap to set' : 'Click near corners for optimal paths'}
             </p>
-            {isMobile && zoomLevel !== 1 && (
-              <p className={`${isMobile ? 'mt-1 text-xs' : 'mt-1'} text-gray-500`}>
-                Pinch to zoom, swipe to navigate
-              </p>
-            )}
           </div>
         )}
       </div>
 
       {/* Path info */}
       {currentPath.length > 0 && (
-        <div className={`absolute ${isMobile ? 'top-3 right-3' : 'top-4 right-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-xl' : 'rounded-xl'} ${isMobile ? 'p-3' : 'p-3'} ${isMobile ? 'text-sm' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[120px]' : 'min-w-[120px]'} shadow-xl border border-gray-300/50`}>
+        <div className={`absolute ${isMobile ? 'top-2 right-2' : 'top-4 right-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[100px]' : 'min-w-[120px]'} shadow-xl border border-gray-300/50`}>
           <div className={`${isNavigating ? 'text-blue-600' : 'text-emerald-600'}`}>
-            <p className={`font-bold flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} ${isNavigating ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full animate-pulse`}></div>
+            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} ${isNavigating ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full animate-pulse`}></div>
               {isNavigating ? '🧭 Active' : 'Route Ready'}
             </p>
             {startPoint && endPoint && (
               <>
-                <p className={`${isMobile ? 'mt-2' : 'mt-1'} font-medium`}>
-                  {isMobile ? '' : 'Distance: '}{formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel))}
+                <p className={`${isMobile ? 'mt-1' : 'mt-1'} font-medium`}>
+                  {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel))}
                 </p>
-                <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-600 ${isMobile ? 'mt-1' : 'mt-1'}`}>
-                  {isMobile ? '~' : 'Walking time: ~'}{Math.ceil(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel) / 1.4)} sec
+                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-600 ${isMobile ? 'mt-0.5' : 'mt-1'}`}>
+                  ~{Math.ceil(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel) / 1.4)} sec
                 </p>
               </>
             )}
@@ -412,29 +407,29 @@ const FloorMap: React.FC<FloorMapProps> = ({
       {isMobile && selectedSection && !isAddingSection && (
         <button
           onClick={() => onSectionSelect(null)}
-          className="fixed bottom-6 right-6 p-4 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50 min-w-[56px] min-h-[56px] flex items-center justify-center"
+          className="fixed bottom-4 right-4 p-3 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50 min-w-[48px] min-h-[48px] flex items-center justify-center"
           style={{ zIndex: 1000 }}
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5" />
         </button>
       )}
       
       {/* Mobile Zoom Controls - Alternative Position */}
       {isMobile && (
-        <div className="fixed bottom-6 left-6 flex flex-col gap-2 z-40">
+        <div className="fixed bottom-4 left-4 flex flex-col gap-2 z-40">
           <button
             onClick={onZoomIn}
-            className="p-3 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[56px] flex items-center justify-center"
+            className="p-2.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[48px] flex items-center justify-center"
             title="Zoom In"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
             </svg>
           </button>
           
           <button
             onClick={onResetZoom}
-            className="px-3 py-2 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[40px] flex items-center justify-center font-mono text-sm font-semibold"
+            className="px-2.5 py-1.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[36px] flex items-center justify-center font-mono text-xs font-semibold"
             title="Reset Zoom"
           >
             {Math.round(zoomLevel * 100)}%
@@ -442,10 +437,10 @@ const FloorMap: React.FC<FloorMapProps> = ({
           
           <button
             onClick={onZoomOut}
-            className="p-3 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[56px] flex items-center justify-center"
+            className="p-2.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[48px] flex items-center justify-center"
             title="Zoom Out"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
             </svg>
           </button>
