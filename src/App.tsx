@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigation, Plus, Save, Download, Upload, Settings, Check, MapPin } from 'lucide-react';
+import { Navigation, Plus, Save, Download, Upload, Settings, Check, MapPin, Menu } from 'lucide-react';
 import FloorMap from './components/FloorMap';
 import ControlPanel from './components/ControlPanel';
 import { FloorData, Point, OfficeSection } from './types';
@@ -356,33 +356,33 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
-      <header className={`bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 shadow-xl ${isMobile ? 'sticky top-0 z-30 px-3 py-3' : 'px-6 py-4'}`}>
+    <div className="min-h-screen bg-white text-gray-900 overflow-hidden">
+      <header className={`bg-white border-b border-gray-200 shadow-sm ${isMobile ? 'sticky top-0 z-30 px-4 py-4' : 'px-8 py-6'}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`${isMobile ? 'p-1.5' : 'p-2'} bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg`}>
-              <Navigation className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5 md:w-6 md:h-6'} text-white`} />
+            <div className={`${isMobile ? 'p-2' : 'p-3'} bg-gradient-to-br from-purple-400 to-purple-500 rounded-2xl shadow-lg`}>
+              <Navigation className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6 md:w-7 md:h-7'} text-white`} />
             </div>
             <div>
-              <h1 className={`${isMobile ? 'text-base' : 'text-lg md:text-2xl'} font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent`}>
+              <h1 className={`${isMobile ? 'text-xl' : 'text-2xl md:text-4xl'} font-black text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
                 Office Navigation
               </h1>
-              <p className={`text-gray-400 ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} hidden sm:block`}>
+              <p className={`text-gray-600 ${isMobile ? 'text-sm' : 'text-sm md:text-base'} hidden sm:block font-medium`}>
                 Intelligent pathfinding and office management
               </p>
             </div>
           </div>
           
           <div className={`flex items-center ${isMobile ? 'gap-3' : 'gap-4'}`}>
-            <div className={`flex bg-gray-700/80 backdrop-blur-sm rounded-lg ${isMobile ? 'p-0.5' : 'p-1'} ${isMobile ? 'text-xs' : 'text-sm'} shadow-lg`}>
+            <div className={`flex bg-gray-100 rounded-2xl ${isMobile ? 'p-1' : 'p-1.5'} ${isMobile ? 'text-sm' : 'text-base'} shadow-sm border border-gray-200`}>
               {[1, 2].map(floor => (
                 <button
                   key={floor}
                   onClick={() => handleFloorChange(floor)}
-                  className={`${isMobile ? 'px-2.5 py-1.5' : 'px-3 py-2 md:px-4 md:py-2'} rounded-md transition-all duration-300 font-medium ${
+                  className={`${isMobile ? 'px-4 py-2' : 'px-5 py-2.5 md:px-6 md:py-3'} rounded-xl transition-all duration-300 font-bold ${
                     currentFloor === floor
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg transform scale-105'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                      ? 'bg-gradient-to-r from-purple-400 to-purple-500 text-white shadow-md transform scale-105'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-white'
                   }`}
                 >
                   <span className={`${isMobile ? 'inline' : 'hidden sm:inline'}`}>{floor === 1 ? '5th' : '6th'}</span>
@@ -395,34 +395,34 @@ function App() {
               <div className={`flex gap-1 md:gap-2`}>
                 <button
                   onClick={saveLayout}
-                  className={`p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg`}
+                  className={`p-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 hover:text-gray-900 transition-all duration-300 shadow-sm border border-gray-200`}
                   title="Save Layout"
                 >
-                  <Save className={`w-4 h-4 md:w-5 md:h-5`} />
+                  <Save className={`w-5 h-5 md:w-6 md:h-6`} />
                 </button>
                 
                 <button
                   onClick={saveToFile}
-                  className={`p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg`}
+                  className={`p-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 hover:text-gray-900 transition-all duration-300 shadow-sm border border-gray-200`}
                   title="Download Layout"
                 >
-                  <Download className={`w-4 h-4 md:w-5 md:h-5`} />
+                  <Download className={`w-5 h-5 md:w-6 md:h-6`} />
                 </button>
                 
                 <button
                   onClick={loadFromFile}
-                  className={`p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg`}
+                  className={`p-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 hover:text-gray-900 transition-all duration-300 shadow-sm border border-gray-200`}
                   title="Upload Layout"
                 >
-                  <Upload className={`w-4 h-4 md:w-5 md:h-5`} />
+                  <Upload className={`w-5 h-5 md:w-6 md:h-6`} />
                 </button>
                 
                 <button
                   onClick={() => setIsAddingSection(!isAddingSection)}
-                  className={`p-2 rounded-xl transition-all duration-300 shadow-lg ${
+                  className={`p-3 rounded-2xl transition-all duration-300 shadow-sm border ${
                     isAddingSection
-                      ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white transform scale-105'
-                      : 'bg-gray-700/80 backdrop-blur-sm text-gray-300 hover:bg-gray-600 hover:text-white'
+                      ? 'bg-gradient-to-r from-teal-400 to-teal-500 text-white transform scale-105 border-teal-300'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 border-gray-200'
                   }`}
                   title="Add Section"
                   onClick={() => {
@@ -432,7 +432,7 @@ function App() {
                     }
                   }}
                 >
-                  <Plus className={`w-4 h-4 md:w-5 md:h-5`} />
+                  <Plus className={`w-5 h-5 md:w-6 md:h-6`} />
                 </button>
               </div>
             )}
@@ -440,7 +440,7 @@ function App() {
             {isMobile && (
               <button
                 onClick={() => setShowControlPanel(!showControlPanel)}
-                className={`p-2 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-lg hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg`}
+                className={`p-3 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 hover:text-gray-900 transition-all duration-300 shadow-sm border border-gray-200`}
                 title="Toggle Panel"
               >
                 <Settings className={`w-5 h-5`} />
@@ -474,17 +474,17 @@ function App() {
         />
         
         <main className={`flex-1 ${isMobile ? 'p-2' : 'p-3 md:p-4 lg:p-6'}`}>
-          <div className={`bg-gray-800/90 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-2xl'} shadow-2xl border border-gray-700/50 ${isMobile ? 'p-3' : 'p-4 md:p-6'} h-full flex flex-col`}>
+          <div className={`bg-white ${isMobile ? 'rounded-2xl' : 'rounded-3xl'} shadow-lg border border-gray-200 ${isMobile ? 'p-4' : 'p-6 md:p-8'} h-full flex flex-col`}>
             <div className={`flex items-center justify-between ${isMobile ? 'mb-3' : 'mb-4 md:mb-6'}`}>
               <div className="flex items-center gap-3">
-                <div className={`${isMobile ? 'p-1.5' : 'p-2'} bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg shadow-lg`}>
-                  <MapPin className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4 md:w-5 md:h-5'} text-white`} />
+                <div className={`${isMobile ? 'p-2' : 'p-3'} bg-gradient-to-br from-teal-400 to-teal-500 rounded-2xl shadow-md`}>
+                  <MapPin className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5 md:w-6 md:h-6'} text-white`} />
                 </div>
                 <div>
-                  <h2 className={`${isMobile ? 'text-base' : 'text-lg md:text-xl'} font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent`}>
+                  <h2 className={`${isMobile ? 'text-lg' : 'text-xl md:text-2xl'} font-black text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
                     {floorData[currentFloor].name}
                   </h2>
-                  <p className={`${isMobile ? 'text-xs' : 'text-xs md:text-sm'} text-gray-400`}>
+                  <p className={`${isMobile ? 'text-sm' : 'text-sm md:text-base'} text-gray-600 font-medium`}>
                     {(floorData[currentFloor].width * floorData[currentFloor].metersPerPixel).toFixed(0)}m × {(floorData[currentFloor].height * floorData[currentFloor].metersPerPixel).toFixed(0)}m
                   </p>
                 </div>
@@ -492,20 +492,20 @@ function App() {
               
               <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-4'}`}>
                 {/* Zoom Controls */}
-                <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-2'} bg-gray-700/80 backdrop-blur-sm rounded-lg ${isMobile ? 'p-1' : 'p-1'} shadow-lg`}>
+                <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-2'} bg-gray-100 rounded-2xl ${isMobile ? 'p-1' : 'p-1.5'} shadow-sm border border-gray-200`}>
                   <button
                     onClick={handleZoomOut}
-                    className={`${isMobile ? 'p-2' : 'p-1.5'} text-gray-300 hover:text-white hover:bg-gray-600 rounded-md transition-all duration-300 ${isMobile ? 'min-w-[36px] min-h-[36px] flex items-center justify-center' : ''}`}
+                    className={`${isMobile ? 'p-2.5' : 'p-2'} text-gray-600 hover:text-gray-900 hover:bg-white rounded-xl transition-all duration-300 ${isMobile ? 'min-w-[40px] min-h-[40px] flex items-center justify-center' : ''}`}
                     title="Zoom Out"
                   >
-                    <svg className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
                     </svg>
                   </button>
                   
                   <button
                     onClick={handleResetZoom}
-                    className={`${isMobile ? 'px-2 py-1.5 text-xs font-semibold min-w-[50px]' : 'px-2 py-1 text-xs'} text-gray-300 hover:text-white hover:bg-gray-600 rounded-md transition-all duration-300 font-mono ${isMobile ? 'min-h-[36px] flex items-center justify-center' : ''}`}
+                    className={`${isMobile ? 'px-3 py-2 text-sm font-bold min-w-[60px]' : 'px-3 py-1.5 text-sm'} text-gray-600 hover:text-gray-900 hover:bg-white rounded-xl transition-all duration-300 font-mono ${isMobile ? 'min-h-[40px] flex items-center justify-center' : ''}`}
                     title="Reset Zoom"
                   >
                     {Math.round(zoomLevel * 100)}%
@@ -513,10 +513,10 @@ function App() {
                   
                   <button
                     onClick={handleZoomIn}
-                    className={`${isMobile ? 'p-2' : 'p-1.5'} text-gray-300 hover:text-white hover:bg-gray-600 rounded-md transition-all duration-300 ${isMobile ? 'min-w-[36px] min-h-[36px] flex items-center justify-center' : ''}`}
+                    className={`${isMobile ? 'p-2.5' : 'p-2'} text-gray-600 hover:text-gray-900 hover:bg-white rounded-xl transition-all duration-300 ${isMobile ? 'min-w-[40px] min-h-[40px] flex items-center justify-center' : ''}`}
                     title="Zoom In"
                   >
-                    <svg className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                     </svg>
                   </button>
@@ -524,24 +524,24 @@ function App() {
                 
                 <div className={`${isMobile ? 'text-xs' : 'text-xs md:text-sm'}`}>
                 {isNavigating ? (
-                  <span className={`flex items-center gap-1.5 text-blue-400 bg-blue-400/10 ${isMobile ? 'px-2.5 py-1.5' : 'px-3 py-1'} rounded-full`}>
-                    <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-blue-400 rounded-full animate-pulse`}></div>
-                    <span className="font-medium">Navigating</span>
+                  <span className={`flex items-center gap-2 text-purple-600 bg-purple-100 ${isMobile ? 'px-4 py-2' : 'px-4 py-2'} rounded-full border border-purple-200`}>
+                    <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-purple-500 rounded-full animate-pulse`}></div>
+                    <span className="font-bold">Navigating</span>
                   </span>
                 ) : startPoint && endPoint ? (
-                  <span className={`flex items-center gap-1.5 text-emerald-400 bg-emerald-400/10 ${isMobile ? 'px-2.5 py-1.5' : 'px-3 py-1'} rounded-full`}>
-                    <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-emerald-400 rounded-full animate-pulse`}></div>
-                    <span className="font-medium">Route Ready</span>
+                  <span className={`flex items-center gap-2 text-teal-600 bg-teal-100 ${isMobile ? 'px-4 py-2' : 'px-4 py-2'} rounded-full border border-teal-200`}>
+                    <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-teal-500 rounded-full animate-pulse`}></div>
+                    <span className="font-bold">Route Ready</span>
                   </span>
                 ) : startPoint ? (
-                  <span className={`flex items-center gap-1.5 text-yellow-400 bg-yellow-400/10 ${isMobile ? 'px-2.5 py-1.5' : 'px-3 py-1'} rounded-full`}>
-                    <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-yellow-400 rounded-full animate-pulse`}></div>
-                    <span className="font-medium">{isMobile ? 'Set end' : 'Select destination'}</span>
+                  <span className={`flex items-center gap-2 text-yellow-600 bg-yellow-100 ${isMobile ? 'px-4 py-2' : 'px-4 py-2'} rounded-full border border-yellow-200`}>
+                    <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-yellow-500 rounded-full animate-pulse`}></div>
+                    <span className="font-bold">{isMobile ? 'Set end' : 'Select destination'}</span>
                   </span>
                 ) : (
-                  <span className={`flex items-center gap-1.5 text-gray-400 bg-gray-400/10 ${isMobile ? 'px-2.5 py-1.5' : 'px-3 py-1'} rounded-full`}>
-                    <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-gray-400 rounded-full`}></div>
-                    <span className="font-medium">{isMobile ? 'Set start' : 'Tap to set start'}</span>
+                  <span className={`flex items-center gap-2 text-gray-600 bg-gray-100 ${isMobile ? 'px-4 py-2' : 'px-4 py-2'} rounded-full border border-gray-200`}>
+                    <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-gray-500 rounded-full`}></div>
+                    <span className="font-bold">{isMobile ? 'Set start' : 'Tap to set start'}</span>
                   </span>
                 )}
                 </div>
@@ -550,7 +550,7 @@ function App() {
 
             <div 
               ref={setMapContainerRef}
-              className={`flex-1 overflow-auto ${isMobile ? 'rounded-md' : 'rounded-xl'} border border-gray-700/50 shadow-inner`}
+              className={`flex-1 overflow-auto ${isMobile ? 'rounded-2xl' : 'rounded-3xl'} border border-gray-200 shadow-inner bg-gray-50`}
               style={isMobile ? { 
                 overscrollBehavior: 'contain',
                 WebkitOverflowScrolling: 'touch'
@@ -586,65 +586,65 @@ function App() {
       
       {/* Welcome Instructions Modal */}
       {showInstructions && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-          <div className={`bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700/50 ${isMobile ? 'w-full max-w-sm mx-2' : 'max-w-md w-full'} ${isMobile ? 'p-5' : 'p-6'}`}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className={`bg-white rounded-3xl shadow-2xl border border-gray-200 ${isMobile ? 'w-full max-w-sm mx-2' : 'max-w-lg w-full'} ${isMobile ? 'p-6' : 'p-8'}`}>
             <div className={`text-center ${isMobile ? 'mb-5' : 'mb-6'}`}>
-              <div className={`${isMobile ? 'p-3' : 'p-3'} bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg mx-auto w-fit ${isMobile ? 'mb-3' : 'mb-4'}`}>
-                <Navigation className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} text-white`} />
+              <div className={`${isMobile ? 'p-4' : 'p-4'} bg-gradient-to-br from-purple-400 to-purple-500 rounded-3xl shadow-lg mx-auto w-fit ${isMobile ? 'mb-4' : 'mb-6'}`}>
+                <Navigation className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'} text-white`} />
               </div>
-              <h2 className={`${isMobile ? 'text-xl' : 'text-xl'} font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent ${isMobile ? 'mb-1' : 'mb-2'}`}>
+              <h2 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-black text-gray-900 ${isMobile ? 'mb-2' : 'mb-3'}`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
                 Welcome to Office Navigation!
               </h2>
-              <p className={`text-gray-400 ${isMobile ? 'text-sm' : 'text-sm'}`}>
+              <p className={`text-gray-600 ${isMobile ? 'text-base' : 'text-lg'} font-medium`}>
                 Your intelligent indoor navigation system
               </p>
             </div>
             
             <div className={`${isMobile ? 'space-y-4' : 'space-y-4'} ${isMobile ? 'mb-5' : 'mb-6'}`}>
               <div className={`flex items-start ${isMobile ? 'gap-2.5' : 'gap-3'}`}>
-                <div className={`${isMobile ? 'w-6 h-6' : 'w-6 h-6'} bg-emerald-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                  <div className={`${isMobile ? 'w-2 h-2' : 'w-2 h-2'} bg-emerald-400 rounded-full`}></div>
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} bg-teal-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                  <div className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} bg-teal-500 rounded-full`}></div>
                 </div>
                 <div>
-                  <h3 className={`font-semibold text-white ${isMobile ? 'text-sm' : 'text-sm'}`}>Set Navigation Points</h3>
-                  <p className={`text-gray-400 ${isMobile ? 'text-xs' : 'text-xs'}`}>Tap on the map to set your start point, then tap again for your destination</p>
+                  <h3 className={`font-bold text-gray-900 ${isMobile ? 'text-base' : 'text-base'}`}>Set Navigation Points</h3>
+                  <p className={`text-gray-600 ${isMobile ? 'text-sm' : 'text-sm'} font-medium`}>Tap on the map to set your start point, then tap again for your destination</p>
                 </div>
               </div>
               
               <div className={`flex items-start ${isMobile ? 'gap-2.5' : 'gap-3'}`}>
-                <div className={`${isMobile ? 'w-6 h-6' : 'w-6 h-6'} bg-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                  <Plus className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} text-blue-400`} />
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} bg-purple-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                  <Plus className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-purple-500`} />
                 </div>
                 <div>
-                  <h3 className={`font-semibold text-white ${isMobile ? 'text-sm' : 'text-sm'}`}>Add Rooms</h3>
-                  <p className={`text-gray-400 ${isMobile ? 'text-xs' : 'text-xs'}`}>Use the + button to add new rooms and areas to the floor plan</p>
+                  <h3 className={`font-bold text-gray-900 ${isMobile ? 'text-base' : 'text-base'}`}>Add Rooms</h3>
+                  <p className={`text-gray-600 ${isMobile ? 'text-sm' : 'text-sm'} font-medium`}>Use the + button to add new rooms and areas to the floor plan</p>
                 </div>
               </div>
               
               <div className={`flex items-start ${isMobile ? 'gap-2.5' : 'gap-3'}`}>
-                <div className={`${isMobile ? 'w-6 h-6' : 'w-6 h-6'} bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                  <Settings className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} text-purple-400`} />
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} bg-yellow-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                  <Settings className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-yellow-600`} />
                 </div>
                 <div>
-                  <h3 className={`font-semibold text-white ${isMobile ? 'text-sm' : 'text-sm'}`}>Manage Floors</h3>
-                  <p className={`text-gray-400 ${isMobile ? 'text-xs' : 'text-xs'}`}>Switch between floors and {isMobile ? 'tap the settings icon' : 'use the side panel'} to view room details</p>
+                  <h3 className={`font-bold text-gray-900 ${isMobile ? 'text-base' : 'text-base'}`}>Manage Floors</h3>
+                  <p className={`text-gray-600 ${isMobile ? 'text-sm' : 'text-sm'} font-medium`}>Switch between floors and {isMobile ? 'tap the settings icon' : 'use the side panel'} to view room details</p>
                 </div>
               </div>
               
               <div className={`flex items-start ${isMobile ? 'gap-2.5' : 'gap-3'}`}>
-                <div className={`${isMobile ? 'w-6 h-6' : 'w-6 h-6'} bg-yellow-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                  <MapPin className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} text-yellow-400`} />
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-8 h-8'} bg-red-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                  <MapPin className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-red-500`} />
                 </div>
                 <div>
-                  <h3 className={`font-semibold text-white ${isMobile ? 'text-sm' : 'text-sm'}`}>Smart Pathfinding</h3>
-                  <p className={`text-gray-400 ${isMobile ? 'text-xs' : 'text-xs'}`}>The system automatically finds the shortest route while avoiding obstacles</p>
+                  <h3 className={`font-bold text-gray-900 ${isMobile ? 'text-base' : 'text-base'}`}>Smart Pathfinding</h3>
+                  <p className={`text-gray-600 ${isMobile ? 'text-sm' : 'text-sm'} font-medium`}>The system automatically finds the shortest route while avoiding obstacles</p>
                 </div>
               </div>
             </div>
             
             <button
               onClick={dismissInstructions}
-              className={`w-full ${isMobile ? 'px-5 py-3 text-base' : 'px-4 py-3'} bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105`}
+              className={`w-full ${isMobile ? 'px-6 py-4 text-lg' : 'px-6 py-4 text-lg'} bg-gradient-to-r from-purple-400 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-white rounded-2xl transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:scale-105`}
             >
               Get Started
             </button>
@@ -654,9 +654,9 @@ function App() {
       
       {/* Save Notification */}
       {saveNotification && (
-        <div className={`fixed ${isMobile ? 'top-3 right-3 left-3' : 'top-4 right-4'} z-50 bg-emerald-500/90 backdrop-blur-sm text-white ${isMobile ? 'px-3 py-2.5' : 'px-4 py-3'} rounded-lg shadow-2xl border border-emerald-400/50 flex items-center ${isMobile ? 'justify-center' : ''} gap-2 animate-in slide-in-from-right duration-300`}>
-          <Check className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
-          <span className={`font-medium ${isMobile ? 'text-sm' : ''}`}>{saveNotification}</span>
+        <div className={`fixed ${isMobile ? 'top-4 right-4 left-4' : 'top-6 right-6'} z-50 bg-teal-500 text-white ${isMobile ? 'px-4 py-3' : 'px-5 py-4'} rounded-2xl shadow-2xl border border-teal-400 flex items-center ${isMobile ? 'justify-center' : ''} gap-3 animate-in slide-in-from-right duration-300`}>
+          <Check className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} />
+          <span className={`font-bold ${isMobile ? 'text-base' : 'text-lg'}`}>{saveNotification}</span>
         </div>
       )}
     </div>

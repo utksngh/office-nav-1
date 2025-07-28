@@ -158,7 +158,7 @@ const FloorMap: React.FC<FloorMapProps> = ({
   const minHeight = isMobile ? Math.max(window.innerHeight * 0.8, 700) : 600;
 
   return (
-    <div className={`relative w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} overflow-auto`}>
+    <div className={`relative w-full h-full bg-gray-50 ${isMobile ? 'rounded-2xl' : 'rounded-3xl'} overflow-auto border border-gray-200`}>
       <svg
         ref={svgRef}
         width={Math.max(scaledWidth, minWidth)}
@@ -176,37 +176,37 @@ const FloorMap: React.FC<FloorMapProps> = ({
         {/* Grid */}
         <defs>
           {/* Fine grid pattern */}
-          <pattern id="fineGrid" width={10 / zoomLevel} height={10 / zoomLevel} patternUnits="userSpaceOnUse">
-            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#4B5563" strokeWidth="0.3" opacity="0.3"/>
+          <pattern id="fineGrid" width={20 / zoomLevel} height={20 / zoomLevel} patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#E5E7EB" strokeWidth="0.5" opacity="0.8"/>
           </pattern>
           
           {/* Major grid pattern */}
-          <pattern id="majorGrid" width={50 / zoomLevel} height={50 / zoomLevel} patternUnits="userSpaceOnUse">
-            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#6B7280" strokeWidth="0.8" opacity="0.6"/>
+          <pattern id="majorGrid" width={100 / zoomLevel} height={100 / zoomLevel} patternUnits="userSpaceOnUse">
+            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#D1D5DB" strokeWidth="1" opacity="0.8"/>
             <rect width="50" height="50" fill="url(#fineGrid)"/>
           </pattern>
           
           {/* Professional floor texture */}
-          <pattern id="floorTexture" width={100 / zoomLevel} height={100 / zoomLevel} patternUnits="userSpaceOnUse">
-            <rect width="100" height="100" fill="#F3F4F6" opacity="0.05"/>
-            <circle cx="25" cy="25" r="1" fill="#E5E7EB" opacity="0.1"/>
-            <circle cx="75" cy="75" r="1" fill="#E5E7EB" opacity="0.1"/>
+          <pattern id="floorTexture" width={200 / zoomLevel} height={200 / zoomLevel} patternUnits="userSpaceOnUse">
+            <rect width="200" height="200" fill="#FFFFFF" opacity="0.8"/>
+            <circle cx="50" cy="50" r="2" fill="#F3F4F6" opacity="0.5"/>
+            <circle cx="150" cy="150" r="2" fill="#F3F4F6" opacity="0.5"/>
           </pattern>
           
           {/* Gradient definitions */}
-          <linearGradient id="startGradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#10B981" stopOpacity="1"/>
-            <stop offset="100%" stopColor="#065F46" stopOpacity="0.8"/>
+          <linearGradient id="startGradient" cx="50%" cy="50%">
+            <stop offset="0%" stopColor="#00B29E" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#059669" stopOpacity="0.9"/>
           </linearGradient>
           
-          <linearGradient id="endGradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#EF4444" stopOpacity="1"/>
-            <stop offset="100%" stopColor="#7F1D1D" stopOpacity="0.8"/>
+          <linearGradient id="endGradient" cx="50%" cy="50%">
+            <stop offset="0%" stopColor="#FA5A5A" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#DC2626" stopOpacity="0.9"/>
           </linearGradient>
         </defs>
         
         {/* Professional floor background */}
-        <rect width="100%" height="100%" fill="#1F2937" />
+        <rect width="100%" height="100%" fill="#FFFFFF" />
         <rect width="100%" height="100%" fill="url(#majorGrid)" />
         <rect width="100%" height="100%" fill="url(#floorTexture)" />
 
@@ -217,9 +217,9 @@ const FloorMap: React.FC<FloorMapProps> = ({
           width={floorData.width - 4} 
           height={floorData.height - 4} 
           fill="none" 
-          stroke="#9CA3AF" 
-          strokeWidth="3" 
-          strokeDasharray="10,5"
+          stroke="#6B7280" 
+          strokeWidth="4" 
+          strokeDasharray="15,8"
           opacity="0.8"
         />
 
@@ -249,12 +249,12 @@ const FloorMap: React.FC<FloorMapProps> = ({
                 key={index}
                 cx={corner.x}
                 cy={corner.y}
-                r={(isMobile ? 4 : 1.5) / zoomLevel}
-                fill="#3B82F6"
-                fillOpacity={isMobile ? "0.8" : "0.5"}
+                r={(isMobile ? 6 : 3) / zoomLevel}
+                fill="#8B5CF6"
+                fillOpacity={isMobile ? "0.9" : "0.7"}
                 className="pointer-events-none"
                 stroke="#FFFFFF"
-                strokeWidth={0.5 / zoomLevel}
+                strokeWidth={1 / zoomLevel}
               />
             ))}
           </g>
@@ -270,27 +270,28 @@ const FloorMap: React.FC<FloorMapProps> = ({
             <circle
               cx={startPoint.x}
               cy={startPoint.y}
-              r={(isMobile ? 20 : 10) / zoomLevel}
+              r={(isMobile ? 24 : 14) / zoomLevel}
               fill="url(#startGradient)"
               stroke="#FFFFFF"
-              strokeWidth={(isMobile ? 5 : 3) / zoomLevel}
+              strokeWidth={(isMobile ? 6 : 4) / zoomLevel}
               className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
             />
             <circle
               cx={startPoint.x}
               cy={startPoint.y}
-              r={(isMobile ? 10 : 5) / zoomLevel}
+              r={(isMobile ? 12 : 7) / zoomLevel}
               fill="#FFFFFF"
               className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
             />
             <text
               x={startPoint.x}
-              y={startPoint.y - (isMobile ? 32 : 18) / zoomLevel}
-              fill="#10B981"
-              fontSize={(isMobile ? 18 : 12) / zoomLevel}
-              fontWeight="bold"
+              y={startPoint.y - (isMobile ? 38 : 24) / zoomLevel}
+              fill="#00B29E"
+              fontSize={(isMobile ? 22 : 16) / zoomLevel}
+              fontWeight="900"
               textAnchor="middle"
               className="drop-shadow-sm"
+              style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}
             >
               START
             </text>
@@ -303,27 +304,28 @@ const FloorMap: React.FC<FloorMapProps> = ({
             <circle
               cx={endPoint.x}
               cy={endPoint.y}
-              r={(isMobile ? 20 : 10) / zoomLevel}
+              r={(isMobile ? 24 : 14) / zoomLevel}
               fill="url(#endGradient)"
               stroke="#FFFFFF"
-              strokeWidth={(isMobile ? 5 : 3) / zoomLevel}
+              strokeWidth={(isMobile ? 6 : 4) / zoomLevel}
               className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'} drop-shadow-lg`}
             />
             <circle
               cx={endPoint.x}
               cy={endPoint.y}
-              r={(isMobile ? 10 : 5) / zoomLevel}
+              r={(isMobile ? 12 : 7) / zoomLevel}
               fill="#FFFFFF"
               className={`${isNavigating ? 'animate-bounce' : 'animate-pulse'}`}
             />
             <text
               x={endPoint.x}
-              y={endPoint.y - (isMobile ? 32 : 18) / zoomLevel}
-              fill="#EF4444"
-              fontSize={(isMobile ? 18 : 12) / zoomLevel}
-              fontWeight="bold"
+              y={endPoint.y - (isMobile ? 38 : 24) / zoomLevel}
+              fill="#FA5A5A"
+              fontSize={(isMobile ? 22 : 16) / zoomLevel}
+              fontWeight="900"
               textAnchor="middle"
               className="drop-shadow-sm"
+              style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}
             >
               END
             </text>
@@ -337,9 +339,9 @@ const FloorMap: React.FC<FloorMapProps> = ({
             y={drawStart.y}
             width="0"
             height="0"
-            fill="#10B981"
+            fill="#00B29E"
             fillOpacity="0.3"
-            stroke="#10B981"
+            stroke="#00B29E"
             strokeWidth={2 / zoomLevel}
             strokeDasharray="5,5"
           />
@@ -347,34 +349,34 @@ const FloorMap: React.FC<FloorMapProps> = ({
       </svg>
 
       {/* Instructions */}
-      <div className={`absolute ${isMobile ? 'top-2 left-2' : 'top-4 left-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} shadow-xl border border-gray-300/50 ${isMobile ? 'max-w-[160px]' : ''}`}>
+      <div className={`absolute ${isMobile ? 'top-3 left-3' : 'top-6 left-6'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-2xl' : 'rounded-2xl'} ${isMobile ? 'p-4' : 'p-5'} ${isMobile ? 'text-sm' : 'text-sm md:text-base'} shadow-xl border border-gray-200 ${isMobile ? 'max-w-[180px]' : ''}`}>
         {isNavigating ? (
-          <div className="text-blue-600">
-            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
+          <div className="text-purple-600">
+            <p className={`font-black flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-purple-500 rounded-full animate-pulse`}></div>
               🧭 Navigating
             </p>
-            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
+            <p className={`${isMobile ? 'mt-2' : 'mt-2'} text-gray-700 font-medium`}>
               Following route
             </p>
           </div>
         ) : isAddingSection ? (
-          <div className="text-emerald-600">
-            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-emerald-600 rounded-full animate-pulse`}></div>
+          <div className="text-teal-600">
+            <p className={`font-black flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-teal-500 rounded-full animate-pulse`}></div>
               {isMobile ? 'Adding Room' : 'Adding Section Mode'}
             </p>
-            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
+            <p className={`${isMobile ? 'mt-2' : 'mt-2'} text-gray-700 font-medium`}>
               {isMobile ? 'Tap twice' : 'Click two points to create a rectangle'}
             </p>
           </div>
         ) : (
-          <div className="text-blue-600">
-            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} bg-blue-600 rounded-full animate-pulse`}></div>
+          <div className="text-purple-600">
+            <p className={`font-black flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} bg-purple-500 rounded-full animate-pulse`}></div>
               {isMobile ? 'Navigation' : 'Navigation Mode'}
             </p>
-            <p className={`${isMobile ? 'mt-1' : 'mt-1'} text-gray-700`}>
+            <p className={`${isMobile ? 'mt-2' : 'mt-2'} text-gray-700 font-medium`}>
               {isMobile ? 'Tap to set' : 'Click near corners for optimal paths'}
             </p>
           </div>
@@ -383,18 +385,18 @@ const FloorMap: React.FC<FloorMapProps> = ({
 
       {/* Path info */}
       {currentPath.length > 0 && (
-        <div className={`absolute ${isMobile ? 'top-2 right-2' : 'top-4 right-4'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-lg' : 'rounded-xl'} ${isMobile ? 'p-2.5' : 'p-3'} ${isMobile ? 'text-xs' : 'text-xs md:text-sm'} ${isMobile ? 'min-w-[100px]' : 'min-w-[120px]'} shadow-xl border border-gray-300/50`}>
-          <div className={`${isNavigating ? 'text-blue-600' : 'text-emerald-600'}`}>
-            <p className={`font-bold flex items-center ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
-              <div className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} ${isNavigating ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full animate-pulse`}></div>
+        <div className={`absolute ${isMobile ? 'top-3 right-3' : 'top-6 right-6'} bg-white/95 backdrop-blur-sm ${isMobile ? 'rounded-2xl' : 'rounded-2xl'} ${isMobile ? 'p-4' : 'p-5'} ${isMobile ? 'text-sm' : 'text-sm md:text-base'} ${isMobile ? 'min-w-[120px]' : 'min-w-[140px]'} shadow-xl border border-gray-200`}>
+          <div className={`${isNavigating ? 'text-purple-600' : 'text-teal-600'}`}>
+            <p className={`font-black flex items-center ${isMobile ? 'gap-2' : 'gap-2'}`}>
+              <div className={`${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'} ${isNavigating ? 'bg-purple-500' : 'bg-teal-500'} rounded-full animate-pulse`}></div>
               {isNavigating ? '🧭 Active' : 'Route Ready'}
             </p>
             {startPoint && endPoint && (
               <>
-                <p className={`${isMobile ? 'mt-1' : 'mt-1'} font-medium`}>
+                <p className={`${isMobile ? 'mt-2' : 'mt-2'} font-bold text-lg`}>
                   {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel))}
                 </p>
-                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-600 ${isMobile ? 'mt-0.5' : 'mt-1'}`}>
+                <p className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-600 font-medium ${isMobile ? 'mt-1' : 'mt-1'}`}>
                   ~{Math.ceil(calculatePixelDistanceInMeters(startPoint, endPoint, floorData.metersPerPixel) / 1.4)} sec
                 </p>
               </>
@@ -407,10 +409,10 @@ const FloorMap: React.FC<FloorMapProps> = ({
       {isMobile && selectedSection && !isAddingSection && (
         <button
           onClick={() => onSectionSelect(null)}
-          className="fixed bottom-4 right-4 p-3 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50 min-w-[48px] min-h-[48px] flex items-center justify-center"
+          className="fixed bottom-4 right-4 p-4 bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white rounded-3xl shadow-2xl border-2 border-white backdrop-blur-sm transition-all duration-300 transform hover:scale-110 z-50 min-w-[56px] min-h-[56px] flex items-center justify-center"
           style={{ zIndex: 1000 }}
         >
-          <X className="w-5 h-5" />
+          <X className="w-6 h-6" />
         </button>
       )}
       
@@ -419,17 +421,17 @@ const FloorMap: React.FC<FloorMapProps> = ({
         <div className="fixed bottom-4 left-4 flex flex-col gap-2 z-40">
           <button
             onClick={onZoomIn}
-            className="p-2.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[48px] flex items-center justify-center"
+            className="p-3 bg-white/95 backdrop-blur-sm text-gray-700 rounded-3xl shadow-2xl border border-gray-200 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[56px] flex items-center justify-center"
             title="Zoom In"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
             </svg>
           </button>
           
           <button
             onClick={onResetZoom}
-            className="px-2.5 py-1.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[36px] flex items-center justify-center font-mono text-xs font-semibold"
+            className="px-3 py-2 bg-white/95 backdrop-blur-sm text-gray-700 rounded-3xl shadow-2xl border border-gray-200 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[44px] flex items-center justify-center font-mono text-sm font-bold"
             title="Reset Zoom"
           >
             {Math.round(zoomLevel * 100)}%
@@ -437,10 +439,10 @@ const FloorMap: React.FC<FloorMapProps> = ({
           
           <button
             onClick={onZoomOut}
-            className="p-2.5 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-2xl border border-gray-600/50 transition-all duration-300 transform hover:scale-110 min-w-[48px] min-h-[48px] flex items-center justify-center"
+            className="p-3 bg-white/95 backdrop-blur-sm text-gray-700 rounded-3xl shadow-2xl border border-gray-200 transition-all duration-300 transform hover:scale-110 min-w-[56px] min-h-[56px] flex items-center justify-center"
             title="Zoom Out"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
             </svg>
           </button>

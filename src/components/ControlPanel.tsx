@@ -93,7 +93,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       <aside className={`
         ${isMobile ? 'fixed' : 'relative'} ${isMobile ? 'top-0 left-0' : ''} h-full
         ${isMobile ? 'w-full max-w-[85vw]' : 'w-80 lg:w-96'} 
-        bg-gray-800/95 backdrop-blur-sm border-r border-gray-700/50 
+        bg-white border-r border-gray-200 
         ${isMobile ? 'p-4' : 'p-4 lg:p-6'} overflow-y-auto z-50 shadow-2xl
         transform transition-all duration-300 ease-in-out
         ${isVisible || !isMobile ? 'translate-x-0' : '-translate-x-full'}
@@ -102,7 +102,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         {isMobile && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white bg-gray-700/50 rounded-lg backdrop-blur-sm transition-all duration-200"
+            className="absolute top-4 right-4 p-2 text-gray-600 hover:text-gray-900 bg-gray-100 rounded-2xl transition-all duration-200"
           >
             <X className="w-5 h-5" />
           </button>
@@ -110,23 +110,23 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         
       <div className={`${isMobile ? 'space-y-4' : 'space-y-4 lg:space-y-6'}`}>
         {/* Navigation Controls */}
-        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
-          <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-3' : 'mb-3'} flex items-center gap-2`}>
-            <div className={`${isMobile ? 'p-1.5' : 'p-1.5'} bg-gradient-to-br from-blue-500 to-blue-600 rounded-md`}>
-              <Navigation className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} text-white`} />
+        <div className={`bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-purple-200 shadow-sm`}>
+          <h3 className={`${isMobile ? 'text-lg' : 'text-lg lg:text-xl'} font-black ${isMobile ? 'mb-4' : 'mb-4'} flex items-center gap-3 text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+            <div className={`${isMobile ? 'p-2' : 'p-2'} bg-gradient-to-br from-purple-400 to-purple-500 rounded-2xl`}>
+              <Navigation className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'} text-white`} />
             </div>
             Navigation Control
           </h3>
           
           {startPoint && endPoint ? (
-            <div className={`${isMobile ? 'p-3' : 'p-3'} bg-emerald-500/10 border border-emerald-500/20 rounded-md text-center`}>
-              <p className={`text-emerald-400 ${isMobile ? 'text-sm' : 'text-sm'} font-medium`}>
+            <div className={`${isMobile ? 'p-4' : 'p-4'} bg-teal-100 border border-teal-200 rounded-2xl text-center`}>
+              <p className={`text-teal-600 ${isMobile ? 'text-base' : 'text-base'} font-bold`}>
                 ✅ Route is ready for navigation!
               </p>
             </div>
           ) : (
-            <div className={`${isMobile ? 'p-3' : 'p-3'} bg-yellow-500/10 border border-yellow-500/20 rounded-md text-center`}>
-              <p className={`text-yellow-400 ${isMobile ? 'text-sm' : 'text-sm'} font-medium`}>
+            <div className={`${isMobile ? 'p-4' : 'p-4'} bg-yellow-100 border border-yellow-200 rounded-2xl text-center`}>
+              <p className={`text-yellow-600 ${isMobile ? 'text-base' : 'text-base'} font-bold`}>
                 {!startPoint ? 'Set start point on map' : 'Set destination on map'}
               </p>
             </div>
@@ -134,12 +134,12 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
-          <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-3' : 'mb-3'}`}>
+        <div className={`bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-gray-200 shadow-sm`}>
+          <h3 className={`${isMobile ? 'text-lg' : 'text-lg lg:text-xl'} font-black ${isMobile ? 'mb-4' : 'mb-4'} text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
             Quick Actions
           </h3>
           
-          <div className={`grid grid-cols-2 ${isMobile ? 'gap-2' : 'gap-2'}`}>
+          <div className={`grid grid-cols-2 ${isMobile ? 'gap-3' : 'gap-3'}`}>
             <button
               onClick={() => {
                 onToggleAddingSection();
@@ -148,52 +148,52 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   onSectionSelect(null);
                 }
               }}
-              className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} rounded-lg transition-all duration-300 font-medium shadow-lg ${
+              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-4 py-3 text-sm'} rounded-2xl transition-all duration-300 font-bold shadow-sm ${
                 isAddingSection
-                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white transform scale-105'
-                  : 'bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white'
+                  ? 'bg-gradient-to-r from-teal-400 to-teal-500 text-white transform scale-105'
+                  : 'bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200'
               }`}
             >
-              <Plus className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} mx-auto mb-1`} />
+              <Plus className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} mx-auto mb-1`} />
               Add Room
             </button>
             
             <button
               onClick={saveLayout}
-              className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white rounded-lg transition-all duration-300 font-medium shadow-lg`}
+              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-4 py-3 text-sm'} bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 rounded-2xl transition-all duration-300 font-bold shadow-sm`}
             >
-              <Save className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} mx-auto mb-1`} />
+              <Save className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} mx-auto mb-1`} />
               Save
             </button>
             
             <button
               onClick={saveToFile}
-              className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white rounded-lg transition-all duration-300 font-medium shadow-lg`}
+              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-4 py-3 text-sm'} bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 rounded-2xl transition-all duration-300 font-bold shadow-sm`}
             >
-              <Download className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} mx-auto mb-1`} />
+              <Download className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} mx-auto mb-1`} />
               Export
             </button>
             
             <button
               onClick={loadFromFile}
-              className={`${isMobile ? 'px-3 py-2.5 text-xs' : 'px-3 py-2.5 text-xs'} bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 hover:text-white rounded-lg transition-all duration-300 font-medium shadow-lg`}
+              className={`${isMobile ? 'px-4 py-3 text-sm' : 'px-4 py-3 text-sm'} bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 rounded-2xl transition-all duration-300 font-bold shadow-sm`}
             >
-              <Upload className={`${isMobile ? 'w-3 h-3' : 'w-3 h-3'} mx-auto mb-1`} />
+              <Upload className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} mx-auto mb-1`} />
               Import
             </button>
           </div>
         </div>
 
         {/* Navigation Status */}
-        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
-          <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-3' : 'mb-3'}`}>
+        <div className={`bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-blue-200 shadow-sm`}>
+          <h3 className={`${isMobile ? 'text-lg' : 'text-lg lg:text-xl'} font-black ${isMobile ? 'mb-4' : 'mb-4'} text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
             Route Status
           </h3>
           
-          <div className={`${isMobile ? 'space-y-3' : 'space-y-3'} ${isMobile ? 'text-sm' : 'text-sm'}`}>
-            <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-gray-600/30 rounded-md`}>
-              <span className="text-gray-400">Start Point:</span>
-              <span className={`font-medium ${startPoint ? 'text-emerald-400' : 'text-gray-500'}`}>
+          <div className={`${isMobile ? 'space-y-3' : 'space-y-3'} ${isMobile ? 'text-base' : 'text-base'}`}>
+            <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-white rounded-2xl border border-gray-200`}>
+              <span className="text-gray-600 font-medium">Start Point:</span>
+              <span className={`font-bold ${startPoint ? 'text-teal-600' : 'text-gray-500'}`}>
                 {startPoint ? 
                   `${Math.round(startPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(startPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 
                   'Not set'
@@ -201,9 +201,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               </span>
             </div>
             
-            <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-gray-600/30 rounded-md`}>
-              <span className="text-gray-400">End Point:</span>
-              <span className={`font-medium ${endPoint ? 'text-red-400' : 'text-gray-500'}`}>
+            <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-white rounded-2xl border border-gray-200`}>
+              <span className="text-gray-600 font-medium">End Point:</span>
+              <span className={`font-bold ${endPoint ? 'text-red-500' : 'text-gray-500'}`}>
                 {endPoint ? 
                   `${Math.round(endPoint.x * currentFloor.metersPerPixel * 10) / 10}m, ${Math.round(endPoint.y * currentFloor.metersPerPixel * 10) / 10}m` : 
                   'Not set'
@@ -212,9 +212,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
             
             {startPoint && endPoint && (
-              <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-blue-500/10 border border-blue-500/20 rounded-md`}>
-                <span className="text-gray-400">Distance:</span>
-                <span className="text-blue-400 font-bold">
+              <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-purple-100 border border-purple-200 rounded-2xl`}>
+                <span className="text-gray-600 font-medium">Distance:</span>
+                <span className="text-purple-600 font-black text-lg">
                   {formatDistance(calculatePixelDistanceInMeters(startPoint, endPoint, currentFloor.metersPerPixel))}
                 </span>
               </div>
@@ -223,7 +223,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             {(startPoint || endPoint) && (
               <button
                 onClick={onClearPath}
-                className={`w-full ${isMobile ? 'mt-3 px-4 py-2.5 text-sm' : 'mt-3 px-4 py-2.5 text-sm'} bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105`}
+                className={`w-full ${isMobile ? 'mt-4 px-5 py-3 text-base' : 'mt-4 px-5 py-3 text-base'} bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white rounded-2xl transition-all duration-300 font-bold shadow-sm hover:shadow-md transform hover:scale-105`}
               >
                 Clear Path
               </button>
@@ -232,36 +232,36 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </div>
 
         {/* Floor Sections */}
-        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
-          <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-3' : 'mb-3'} flex items-center justify-between`}>
+        <div className={`bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-yellow-200 shadow-sm`}>
+          <h3 className={`${isMobile ? 'text-lg' : 'text-lg lg:text-xl'} font-black ${isMobile ? 'mb-4' : 'mb-4'} flex items-center justify-between text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
             <span>Rooms & Areas</span>
-            <span className={`${isMobile ? 'text-xs' : 'text-xs'} bg-blue-500/20 text-blue-400 ${isMobile ? 'px-2.5 py-1' : 'px-2 py-1'} rounded-full`}>
+            <span className={`${isMobile ? 'text-sm' : 'text-sm'} bg-yellow-200 text-yellow-700 ${isMobile ? 'px-3 py-1.5' : 'px-3 py-1.5'} rounded-full font-bold`}>
               {currentFloor.sections.length}
             </span>
           </h3>
           
-          <div className={`${isMobile ? 'space-y-2' : 'space-y-2'} ${isMobile ? 'max-h-64' : 'max-h-64 lg:max-h-96'} overflow-y-auto custom-scrollbar`}>
+          <div className={`${isMobile ? 'space-y-3' : 'space-y-3'} ${isMobile ? 'max-h-64' : 'max-h-64 lg:max-h-96'} overflow-y-auto custom-scrollbar`}>
             {currentFloor.sections.map((section) => (
               <div
                 key={section.id}
-                className={`${isMobile ? 'p-3' : 'p-3'} rounded-lg cursor-pointer transition-all duration-300 border ${
+                className={`${isMobile ? 'p-4' : 'p-4'} rounded-2xl cursor-pointer transition-all duration-300 border ${
                   selectedSection === section.id
-                    ? 'bg-gradient-to-r from-blue-500/20 to-blue-600/20 border-blue-400/50 shadow-lg'
-                    : 'bg-gray-600/50 hover:bg-gray-600/70 border-gray-500/30 hover:border-gray-400/50'
+                    ? 'bg-gradient-to-r from-purple-100 to-purple-200 border-purple-300 shadow-md'
+                    : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300'
                 }`}
                 onClick={() => onSectionSelect(section.id)}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <h4 className="font-semibold truncate text-white">{section.name}</h4>
-                    <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-300 capitalize font-medium`}>{section.type}</p>
-                    <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-400`}>
+                    <h4 className="font-bold truncate text-gray-900">{section.name}</h4>
+                    <p className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-600 capitalize font-medium`}>{section.type}</p>
+                    <p className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-500 font-medium`}>
                       {(section.width * currentFloor.metersPerPixel).toFixed(1)}m × {(section.height * currentFloor.metersPerPixel).toFixed(1)}m
                     </p>
                   </div>
                   
                   <div
-                    className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'} rounded-md shadow-sm border border-white/20`}
+                    className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'} rounded-xl shadow-sm border border-white`}
                     style={{
                       backgroundColor: getSectionTypeColor(section.type)
                     }}
@@ -274,38 +274,38 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
         {/* Section Editor */}
         {selectedSectionData && (
-          <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
-            <div className={`flex items-center justify-between ${isMobile ? 'mb-3' : 'mb-4'}`}>
-              <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold`}>Room Details</h3>
-              <div className={`flex ${isMobile ? 'gap-1.5' : 'gap-1'}`}>
+          <div className={`bg-gradient-to-br from-red-50 to-red-100 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-red-200 shadow-sm`}>
+            <div className={`flex items-center justify-between ${isMobile ? 'mb-4' : 'mb-5'}`}>
+              <h3 className={`${isMobile ? 'text-lg' : 'text-lg lg:text-xl'} font-black text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>Room Details</h3>
+              <div className={`flex ${isMobile ? 'gap-2' : 'gap-2'}`}>
                 {isEditing ? (
                   <>
                     <button
                       onClick={handleSave}
-                      className={`${isMobile ? 'p-2' : 'p-2'} text-emerald-400 hover:bg-emerald-400 hover:text-white rounded-md transition-all duration-300 shadow-sm`}
+                      className={`${isMobile ? 'p-2.5' : 'p-2.5'} text-teal-600 hover:bg-teal-500 hover:text-white rounded-2xl transition-all duration-300 shadow-sm border border-teal-200`}
                     >
-                      <Save className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} />
+                      <Save className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} />
                     </button>
                     <button
                       onClick={handleCancel}
-                      className={`${isMobile ? 'p-2' : 'p-2'} text-gray-400 hover:bg-gray-600 hover:text-white rounded-md transition-all duration-300 shadow-sm`}
+                      className={`${isMobile ? 'p-2.5' : 'p-2.5'} text-gray-600 hover:bg-gray-500 hover:text-white rounded-2xl transition-all duration-300 shadow-sm border border-gray-200`}
                     >
-                      <X className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} />
+                      <X className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} />
                     </button>
                   </>
                 ) : (
                   <>
                     <button
                       onClick={handleEdit}
-                      className={`${isMobile ? 'p-2' : 'p-2'} text-blue-400 hover:bg-blue-400 hover:text-white rounded-md transition-all duration-300 shadow-sm`}
+                      className={`${isMobile ? 'p-2.5' : 'p-2.5'} text-purple-600 hover:bg-purple-500 hover:text-white rounded-2xl transition-all duration-300 shadow-sm border border-purple-200`}
                     >
-                      <Edit3 className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} />
+                      <Edit3 className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} />
                     </button>
                     <button
                       onClick={() => onSectionDelete(selectedSection)}
-                      className={`${isMobile ? 'p-2' : 'p-2'} text-red-400 hover:bg-red-400 hover:text-white rounded-md transition-all duration-300 shadow-sm`}
+                      className={`${isMobile ? 'p-2.5' : 'p-2.5'} text-red-600 hover:bg-red-500 hover:text-white rounded-2xl transition-all duration-300 shadow-sm border border-red-200`}
                     >
-                      <Trash2 className={`${isMobile ? 'w-4 h-4' : 'w-4 h-4'}`} />
+                      <Trash2 className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5'}`} />
                     </button>
                   </>
                 )}
@@ -313,27 +313,27 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
 
             {isEditing ? (
-              <div className={`${isMobile ? 'space-y-3' : 'space-y-3'}`}>
+              <div className={`${isMobile ? 'space-y-4' : 'space-y-4'}`}>
                 <div>
-                  <label className={`block ${isMobile ? 'text-sm' : 'text-sm'} font-semibold text-gray-300 ${isMobile ? 'mb-2' : 'mb-2'}`}>
+                  <label className={`block ${isMobile ? 'text-base' : 'text-base'} font-bold text-gray-700 ${isMobile ? 'mb-2' : 'mb-2'}`}>
                     Name
                   </label>
                   <input
                     type="text"
                     value={editData.name || ''}
                     onChange={(e) => setEditData({...editData, name: e.target.value})}
-                    className={`w-full ${isMobile ? 'px-3 py-2.5 text-sm' : 'px-3 py-2.5'} bg-gray-600/80 border border-gray-500/50 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                    className={`w-full ${isMobile ? 'px-4 py-3 text-base' : 'px-4 py-3'} bg-white border border-gray-300 rounded-2xl text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 font-medium`}
                   />
                 </div>
 
                 <div>
-                  <label className={`block ${isMobile ? 'text-sm' : 'text-sm'} font-semibold text-gray-300 ${isMobile ? 'mb-2' : 'mb-2'}`}>
+                  <label className={`block ${isMobile ? 'text-base' : 'text-base'} font-bold text-gray-700 ${isMobile ? 'mb-2' : 'mb-2'}`}>
                     Type
                   </label>
                   <select
                     value={editData.type || ''}
                     onChange={(e) => setEditData({...editData, type: e.target.value as OfficeSection['type']})}
-                    className={`w-full ${isMobile ? 'px-3 py-2.5 text-sm' : 'px-3 py-2.5'} bg-gray-600/80 border border-gray-500/50 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                    className={`w-full ${isMobile ? 'px-4 py-3 text-base' : 'px-4 py-3'} bg-white border border-gray-300 rounded-2xl text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 font-medium`}
                   >
                     {sectionTypes.map(type => (
                       <option key={type} value={type}>
@@ -343,9 +343,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   </select>
                 </div>
 
-                <div className={`grid grid-cols-2 ${isMobile ? 'gap-2' : 'gap-2'}`}>
+                <div className={`grid grid-cols-2 ${isMobile ? 'gap-3' : 'gap-3'}`}>
                   <div>
-                    <label className={`block ${isMobile ? 'text-sm' : 'text-sm'} font-semibold text-gray-300 ${isMobile ? 'mb-2' : 'mb-2'}`}>
+                    <label className={`block ${isMobile ? 'text-base' : 'text-base'} font-bold text-gray-700 ${isMobile ? 'mb-2' : 'mb-2'}`}>
                       Width (m)
                     </label>
                     <input
@@ -353,11 +353,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                       step="0.1"
                       value={editData.width ? (editData.width * currentFloor.metersPerPixel).toFixed(1) : ''}
                       onChange={(e) => setEditData({...editData, width: Number(e.target.value) / currentFloor.metersPerPixel})}
-                      className={`w-full ${isMobile ? 'px-3 py-2.5 text-sm' : 'px-3 py-2.5'} bg-gray-600/80 border border-gray-500/50 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                      className={`w-full ${isMobile ? 'px-4 py-3 text-base' : 'px-4 py-3'} bg-white border border-gray-300 rounded-2xl text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 font-medium`}
                     />
                   </div>
                   <div>
-                    <label className={`block ${isMobile ? 'text-sm' : 'text-sm'} font-semibold text-gray-300 ${isMobile ? 'mb-2' : 'mb-2'}`}>
+                    <label className={`block ${isMobile ? 'text-base' : 'text-base'} font-bold text-gray-700 ${isMobile ? 'mb-2' : 'mb-2'}`}>
                       Height (m)
                     </label>
                     <input
@@ -365,32 +365,32 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                       step="0.1"
                       value={editData.height ? (editData.height * currentFloor.metersPerPixel).toFixed(1) : ''}
                       onChange={(e) => setEditData({...editData, height: Number(e.target.value) / currentFloor.metersPerPixel})}
-                      className={`w-full ${isMobile ? 'px-3 py-2.5 text-sm' : 'px-3 py-2.5'} bg-gray-600/80 border border-gray-500/50 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                      className={`w-full ${isMobile ? 'px-4 py-3 text-base' : 'px-4 py-3'} bg-white border border-gray-300 rounded-2xl text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 font-medium`}
                     />
                   </div>
                 </div>
               </div>
             ) : (
-              <div className={`${isMobile ? 'space-y-3' : 'space-y-3'} ${isMobile ? 'text-sm' : 'text-sm'}`}>
-                <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-gray-600/30 rounded-md`}>
-                  <span className="text-gray-400">Name:</span>
-                  <span className="font-medium text-white">{selectedSectionData.name}</span>
+              <div className={`${isMobile ? 'space-y-3' : 'space-y-3'} ${isMobile ? 'text-base' : 'text-base'}`}>
+                <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-white rounded-2xl border border-gray-200`}>
+                  <span className="text-gray-600 font-medium">Name:</span>
+                  <span className="font-bold text-gray-900">{selectedSectionData.name}</span>
                 </div>
-                <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-gray-600/30 rounded-md`}>
-                  <span className="text-gray-400">Type:</span>
-                  <span className="capitalize font-medium text-white">{selectedSectionData.type}</span>
+                <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-white rounded-2xl border border-gray-200`}>
+                  <span className="text-gray-600 font-medium">Type:</span>
+                  <span className="capitalize font-bold text-gray-900">{selectedSectionData.type}</span>
                 </div>
-                <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-gray-600/30 rounded-md`}>
-                  <span className="text-gray-400">Coordinates:</span>
-                  <span className={`${isMobile ? 'text-xs' : 'text-xs'} font-mono text-blue-400`}>{formatCoordinates(selectedSectionData.coordinates)}</span>
+                <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-white rounded-2xl border border-gray-200`}>
+                  <span className="text-gray-600 font-medium">Coordinates:</span>
+                  <span className={`${isMobile ? 'text-sm' : 'text-sm'} font-mono text-purple-600 font-bold`}>{formatCoordinates(selectedSectionData.coordinates)}</span>
                 </div>
-                <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-gray-600/30 rounded-md`}>
-                  <span className="text-gray-400">Size:</span>
-                  <span className="font-medium text-white">{(selectedSectionData.width * currentFloor.metersPerPixel).toFixed(1)}m × {(selectedSectionData.height * currentFloor.metersPerPixel).toFixed(1)}m</span>
+                <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-white rounded-2xl border border-gray-200`}>
+                  <span className="text-gray-600 font-medium">Size:</span>
+                  <span className="font-bold text-gray-900">{(selectedSectionData.width * currentFloor.metersPerPixel).toFixed(1)}m × {(selectedSectionData.height * currentFloor.metersPerPixel).toFixed(1)}m</span>
                 </div>
-                <div className={`flex justify-between items-center ${isMobile ? 'p-2.5' : 'p-2'} bg-emerald-500/10 border border-emerald-500/20 rounded-md`}>
-                  <span className="text-gray-400">Area:</span>
-                  <span className="font-bold text-emerald-400">{((selectedSectionData.width * selectedSectionData.height * currentFloor.metersPerPixel * currentFloor.metersPerPixel)).toFixed(1)} m²</span>
+                <div className={`flex justify-between items-center ${isMobile ? 'p-3' : 'p-3'} bg-teal-100 border border-teal-200 rounded-2xl`}>
+                  <span className="text-gray-600 font-medium">Area:</span>
+                  <span className="font-black text-teal-600 text-lg">{((selectedSectionData.width * selectedSectionData.height * currentFloor.metersPerPixel * currentFloor.metersPerPixel)).toFixed(1)} m²</span>
                 </div>
               </div>
             )}
@@ -398,9 +398,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         )}
 
         {/* Instructions */}
-        <div className={`bg-gradient-to-br from-gray-700/80 to-gray-700/60 backdrop-blur-sm rounded-lg ${isMobile ? 'p-4' : 'p-4'} border border-gray-600/30 shadow-lg`}>
-          <h3 className={`${isMobile ? 'text-base' : 'text-base lg:text-lg'} font-bold ${isMobile ? 'mb-3' : 'mb-3'}`}>Instructions</h3>
-          <div className={`${isMobile ? 'text-sm' : 'text-sm'} text-gray-300 ${isMobile ? 'space-y-2' : 'space-y-2.5'}`}>
+        <div className={`bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl ${isMobile ? 'p-5' : 'p-5'} border border-gray-200 shadow-sm`}>
+          <h3 className={`${isMobile ? 'text-lg' : 'text-lg lg:text-xl'} font-black ${isMobile ? 'mb-4' : 'mb-4'} text-gray-900`} style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>Instructions</h3>
+          <div className={`${isMobile ? 'text-base' : 'text-base'} text-gray-700 ${isMobile ? 'space-y-2' : 'space-y-3'} font-medium`}>
             <p>• Tap map to set navigation points</p>
             <p>• {isMobile ? 'Use floating zoom buttons' : 'Use zoom controls to adjust view'}</p>
             <p>• Use + button to add new rooms</p>
@@ -419,14 +419,14 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
 const getSectionTypeColor = (type: OfficeSection['type']) => {
   const colors = {
-    office: '#3B82F6',
-    meeting: '#8B5CF6',
-    reception: '#10B981',
-    cafeteria: '#F59E0B',
-    storage: '#6B7280',
-    department: '#EF4444',
-    executive: '#F97316',
-    lounge: '#06B6D4'
+    office: '#8B5CF6',      // Purple
+    meeting: '#FDB913',     // Warm Yellow
+    reception: '#00B29E',   // Aqua Teal
+    cafeteria: '#FA5A5A',   // Coral Red
+    storage: '#D7C8F6',     // Light Lavender
+    department: '#3B82F6',  // Blue
+    executive: '#F97316',   // Orange
+    lounge: '#06B6D4'       // Cyan
   };
   return colors[type];
 };

@@ -125,26 +125,27 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
         width={section.width}
         height={section.height}
         fill={color}
-        fillOpacity={isSelected ? 0.95 : 0.85}
+        fillOpacity={isSelected ? 0.9 : 0.8}
         stroke={isSelected ? '#FFFFFF' : '#FFFFFF'}
-        strokeWidth={(isSelected ? 4 : 2) / zoomLevel}
-        strokeOpacity={isSelected ? 1 : 0.6}
-        rx={8 / zoomLevel}
-        ry={8 / zoomLevel}
+        strokeWidth={(isSelected ? 6 : 3) / zoomLevel}
+        strokeOpacity={isSelected ? 1 : 0.8}
+        rx={12 / zoomLevel}
+        ry={12 / zoomLevel}
         className="transition-all duration-300"
-        filter={isSelected ? "drop-shadow(0 8px 16px rgba(0,0,0,0.3))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.1))"}
+        filter={isSelected ? "drop-shadow(0 8px 16px rgba(0,0,0,0.2))" : "drop-shadow(0 4px 8px rgba(0,0,0,0.1))"}
       />
       
       <text
         x={section.x + section.width / 2}
         y={section.y + section.height / 2}
         fill="white"
-        fontSize={Math.min(('ontouchstart' in window) ? 18 : 16, section.width / 6, section.height / 3) / zoomLevel}
-        fontWeight="600"
+        fontSize={Math.min(('ontouchstart' in window) ? 20 : 18, section.width / 5, section.height / 2.5) / zoomLevel}
+        fontWeight="900"
         textAnchor="middle"
         dominantBaseline="middle"
         pointerEvents="none"
         className="select-none drop-shadow-sm"
+        style={{ fontFamily: '"Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif' }}
       >
         {section.width < 100 ? section.name.split(' ')[0] : section.name}
       </text>
@@ -152,10 +153,10 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
       {section.type && (
         <text
           x={section.x + section.width / 2}
-          y={section.y + section.height / 2 + 18 / zoomLevel}
+          y={section.y + section.height / 2 + 22 / zoomLevel}
           fill="rgba(255,255,255,0.8)"
-          fontSize={Math.min(('ontouchstart' in window) ? 15 : 13, section.width / 8, section.height / 5) / zoomLevel}
-          fontWeight="400"
+          fontSize={Math.min(('ontouchstart' in window) ? 16 : 14, section.width / 7, section.height / 4) / zoomLevel}
+          fontWeight="600"
           textAnchor="middle"
           dominantBaseline="middle"
           pointerEvents="none"
@@ -171,10 +172,10 @@ const OfficeSpace: React.FC<OfficeSpaceProps> = ({
           <circle
             cx={section.x + section.width}
             cy={section.y + section.height}
-            r={(('ontouchstart' in window) ? 10 : 8) / zoomLevel}
+            r={(('ontouchstart' in window) ? 12 : 10) / zoomLevel}
             fill="#FFFFFF"
             stroke={color}
-            strokeWidth={(('ontouchstart' in window) ? 3 : 2) / zoomLevel}
+            strokeWidth={(('ontouchstart' in window) ? 4 : 3) / zoomLevel}
             className="cursor-se-resize"
             onMouseDown={(e) => {
               e.stopPropagation();
