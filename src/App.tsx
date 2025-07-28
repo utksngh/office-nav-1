@@ -456,6 +456,7 @@ function App() {
           isNavigating={isNavigating}
           onStartNavigation={startNavigation}
           onStopNavigation={stopNavigation}
+          onSectionSelect={setSelectedSection}
         />
         
         <main className={`flex-1 ${isMobile ? 'p-3' : 'p-3 md:p-4 lg:p-6'}`}>
