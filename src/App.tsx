@@ -111,6 +111,7 @@ function App() {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [mapTransform, setMapTransform] = useState({ x: 0, y: 0 });
   const [highlightedSection, setHighlightedSection] = useState<string | null>(null);
+  const [isMobileSearchActive, setIsMobileSearchActive] = useState(false);
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -377,43 +378,46 @@ function App() {
           
           {/* Search Bar */}
           <div className={`flex-1 ${isMobile ? 'mx-3' : 'mx-6'} ${isMobile ? 'max-w-none' : 'max-w-md'} relative`}>
-            <SearchBar
-              sections={floorData[currentFloor].sections}
-              onSectionSelect={(sectionId) => {
-                setSelectedSection(sectionId);
-                setHighlightedSection(null);
-              }}
-              onSectionHighlight={setHighlightedSection}
-              selectedSection={selectedSection}
-              isMobile={isMobile}
-              onAutoScroll={(sectionId) => {
-                // Auto-scroll to section with enhanced mobile support
-                if (mapContainerRef) {
-                  const section = floorData[currentFloor].sections.find(s => s.id === sectionId);
-                  if (section) {
-                    const containerRect = mapContainerRef.getBoundingClientRect();
-                    const sectionCenterX = (section.x + section.width / 2) * zoomLevel;
-                    const sectionCenterY = (section.y + section.height / 2) * zoomLevel;
-                    
-                    // Calculate optimal scroll position with padding
-                    const padding = isMobile ? 100 : 50;
-                    const newScrollLeft = Math.max(0, sectionCenterX - containerRect.width / 2);
-                    const newScrollTop = Math.max(0, sectionCenterY - containerRect.height / 2);
-                    
-                    mapContainerRef.scrollTo({
-                      left: newScrollLeft,
-                      top: newScrollTop,
-                      behavior: 'smooth'
-                    });
-                    
-                    // Show notification for mobile users
-                    if (isMobile) {
-                      showSaveNotification(`Navigated to ${section.name}`);
+            {isMobile ? (
+              <button
+                onClick={() => setIsMobileSearchActive(true)}
+                className="p-2.5 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg"
+                title="Search"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+            ) : (
+              <SearchBar
+                sections={floorData[currentFloor].sections}
+                onSectionSelect={(sectionId) => {
+                  setSelectedSection(sectionId);
+                  setHighlightedSection(null);
+                }}
+                onSectionHighlight={setHighlightedSection}
+                selectedSection={selectedSection}
+                isMobile={isMobile}
+                onAutoScroll={(sectionId) => {
+                  if (mapContainerRef) {
+                    const section = floorData[currentFloor].sections.find(s => s.id === sectionId);
+                    if (section) {
+                      const containerRect = mapContainerRef.getBoundingClientRect();
+                      const sectionCenterX = (section.x + section.width / 2) * zoomLevel;
+                      const sectionCenterY = (section.y + section.height / 2) * zoomLevel;
+                      
+                      const padding = 50;
+                      const newScrollLeft = Math.max(0, sectionCenterX - containerRect.width / 2);
+                      const newScrollTop = Math.max(0, sectionCenterY - containerRect.height / 2);
+                      
+                      mapContainerRef.scrollTo({
+                        left: newScrollLeft,
+                        top: newScrollTop,
+                        behavior: 'smooth'
+                      });
                     }
                   }
-                }
-              }}
-            />
+                }}
+              />
+            )}
           </div>
           
           <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-4'}`}>
@@ -492,6 +496,47 @@ function App() {
           </div>
         </div>
       </header>
+
+      {/* Mobile Search Section */}
+      {isMobile && isMobileSearchActive && (
+        <div className="bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 px-4 py-3 z-40">
+          <SearchBar
+            sections={floorData[currentFloor].sections}
+            onSectionSelect={(sectionId) => {
+              setSelectedSection(sectionId);
+              setHighlightedSection(null);
+              setIsMobileSearchActive(false);
+            }}
+            onSectionHighlight={setHighlightedSection}
+            selectedSection={selectedSection}
+            isMobile={isMobile}
+            isMobileSearchActive={isMobileSearchActive}
+            onMobileSearchClose={() => setIsMobileSearchActive(false)}
+            onAutoScroll={(sectionId) => {
+              if (mapContainerRef) {
+                const section = floorData[currentFloor].sections.find(s => s.id === sectionId);
+                if (section) {
+                  const containerRect = mapContainerRef.getBoundingClientRect();
+                  const sectionCenterX = (section.x + section.width / 2) * zoomLevel;
+                  const sectionCenterY = (section.y + section.height / 2) * zoomLevel;
+                  
+                  const padding = 100;
+                  const newScrollLeft = Math.max(0, sectionCenterX - containerRect.width / 2);
+                  const newScrollTop = Math.max(0, sectionCenterY - containerRect.height / 2);
+                  
+                  mapContainerRef.scrollTo({
+                    left: newScrollLeft,
+                    top: newScrollTop,
+                    behavior: 'smooth'
+                  });
+                  
+                  showSaveNotification(`Navigated to ${section.name}`);
+                }
+              }
+            }}
+          />
+        </div>
+      )}
 
       <div className={`flex flex-col lg:flex-row ${isMobile ? 'h-[calc(100vh-73px)]' : 'h-[calc(100vh-80px)] md:h-[calc(100vh-120px)]'}`}>
         <ControlPanel

@@ -9,6 +9,8 @@ interface SearchBarProps {
   selectedSection: string | null;
   isMobile: boolean;
   onAutoScroll?: (sectionId: string) => void;
+  isMobileSearchActive?: boolean;
+  onMobileSearchClose?: () => void;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
@@ -17,13 +19,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onSectionHighlight,
   selectedSection,
   isMobile,
-  onAutoScroll
+  onAutoScroll,
+  isMobileSearchActive = false,
+  onMobileSearchClose
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [filteredSections, setFilteredSections] = useState<OfficeSection[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [isMobileSearchActive, setIsMobileSearchActive] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -109,29 +112,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
     setIsOpen(false);
     setHighlightedIndex(-1);
     onSectionHighlight(null);
-    if (isMobile) {
-      setIsMobileSearchActive(false);
-    }
     inputRef.current?.focus();
   };
 
-  const activateMobileSearch = () => {
-    if (isMobile) {
-      setIsMobileSearchActive(true);
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-    }
-  };
-
-  const deactivateMobileSearch = () => {
-    if (isMobile) {
-      setIsMobileSearchActive(false);
-      setSearchTerm('');
-      setIsOpen(false);
-      setHighlightedIndex(-1);
-      onSectionHighlight(null);
-    }
+  const closeMobileSearch = () => {
+    setSearchTerm('');
+    setIsOpen(false);
+    setHighlightedIndex(-1);
+    onSectionHighlight(null);
+    onMobileSearchClose?.();
   };
 
   const getSectionTypeColor = (type: OfficeSection['type']) => {
@@ -150,18 +139,21 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <>
-      {/* Mobile Search Overlay */}
-      {isMobile && isMobileSearchActive && (
-        <div className="fixed inset-0 bg-gray-900/95 backdrop-blur-sm z-[70] flex flex-col">
-          {/* Mobile Search Header */}
-          <div className="flex items-center gap-3 p-4 border-b border-gray-700/50">
+      {/* Mobile Search Section */}
+      {isMobile && isMobileSearchActive ? (
+        <div className="w-full">
+          {/* Mobile Search Input */}
+          <div className="flex items-center gap-3 mb-3">
             <button
-              onClick={deactivateMobileSearch}
-              className="p-2 text-gray-400 hover:text-white transition-colors duration-200"
+              onClick={closeMobileSearch}
+              className="p-2 text-gray-400 hover:text-white transition-colors duration-200 flex-shrink-0"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex-1 relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="w-4 h-4 text-gray-400" />
+              </div>
               <input
                 ref={inputRef}
                 type="text"
@@ -169,7 +161,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search rooms and areas..."
-                className="w-full pl-4 pr-10 py-3 text-base bg-gray-700/80 backdrop-blur-sm border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                className="w-full pl-9 pr-10 py-3 text-base bg-gray-700/80 backdrop-blur-sm border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                autoFocus
               />
               {searchTerm && (
                 <button
@@ -183,7 +176,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           </div>
           
           {/* Mobile Search Results */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="max-h-64 overflow-y-auto">
             {filteredSections.length > 0 ? (
               <div className="space-y-3">
                 {filteredSections.map((section, index) => (
@@ -191,7 +184,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                     key={section.id}
                     onClick={() => {
                       handleSectionSelect(section);
-                      deactivateMobileSearch();
+                      closeMobileSearch();
                     }}
                     className={`w-full p-4 text-left bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-200 rounded-xl border border-gray-700/30 ${
                       index === highlightedIndex ? 'bg-blue-500/20 border-blue-400/30' : ''
@@ -228,13 +221,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 ))}
               </div>
             ) : searchTerm ? (
-              <div className="text-center py-12">
+              <div className="text-center py-8">
                 <Search className="w-12 h-12 mx-auto mb-4 text-gray-500" />
                 <p className="text-gray-400 text-lg">No rooms found</p>
                 <p className="text-gray-500 text-sm mt-2">Try a different search term</p>
               </div>
             ) : (
-              <div className="text-center py-12">
+              <div className="text-center py-8">
                 <Search className="w-12 h-12 mx-auto mb-4 text-gray-500" />
                 <p className="text-gray-400 text-lg">Start typing to search</p>
                 <p className="text-gray-500 text-sm mt-2">Find rooms, offices, and areas</p>
@@ -242,21 +235,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
             )}
           </div>
         </div>
-      )}
 
-      {/* Desktop Search or Mobile Search Icon */}
-      <div ref={searchRef} className={`relative ${isMobile ? 'w-auto' : 'w-full max-w-md'} z-10`}>
-        {isMobile && !isMobileSearchActive ? (
-          /* Mobile Search Icon */
-          <button
-            onClick={activateMobileSearch}
-            className="p-2.5 bg-gray-700/80 backdrop-blur-sm text-gray-300 rounded-xl hover:bg-gray-600 hover:text-white transition-all duration-300 shadow-lg"
-            title="Search"
-          >
-            <Search className="w-5 h-5" />
-          </button>
-        ) : !isMobile ? (
-          /* Desktop Search Bar */
+      ) : !isMobile ? (
           <>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -342,8 +322,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         </div>
       )}
           </>
-        ) : null}
-      </div>
+      )}
     </>
   );
 };
