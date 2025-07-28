@@ -154,7 +154,7 @@ const MobileQuickNavigation: React.FC<MobileQuickNavigationProps> = ({
         
         {/* Search Results Dropdown */}
         {showSearchResults && searchQuery && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800/98 backdrop-blur-md border border-gray-600/50 rounded-lg shadow-2xl max-h-48 overflow-y-auto custom-scrollbar" style={{ zIndex: 99999 }}>
+          <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600/50 rounded-lg shadow-2xl max-h-48 overflow-y-auto custom-scrollbar" style={{ zIndex: 99999 }}>
             {filteredSections.length > 0 ? (
               filteredSections.map((section) => (
                 <button
